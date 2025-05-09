@@ -1,8 +1,9 @@
-
 import { 
   Student, 
   Company, 
   Admin, 
+  Management,
+  SuperAdmin,
   Job, 
   JobApplication, 
   PlacementStats,
@@ -148,6 +149,43 @@ export const mockAdmins: Admin[] = [
     avatar: 'https://i.pravatar.cc/150?img=10',
     department: 'College Administration',
     position: 'Dean of Placements'
+  }
+];
+
+// Generate mock management users
+export const mockManagement: Management[] = [
+  {
+    id: '1',
+    name: 'David Morgan',
+    email: 'david.morgan@college.edu',
+    role: 'management',
+    avatar: 'https://i.pravatar.cc/150?img=15',
+    department: 'College Management',
+    position: 'Director of Operations',
+    managementLevel: 'executive'
+  },
+  {
+    id: '2',
+    name: 'Laura Chen',
+    email: 'laura.chen@college.edu',
+    role: 'management',
+    avatar: 'https://i.pravatar.cc/150?img=16',
+    department: 'Finance Department',
+    position: 'Financial Controller',
+    managementLevel: 'senior'
+  }
+];
+
+// Generate mock superadmin
+export const mockSuperAdmin: SuperAdmin[] = [
+  {
+    id: '1',
+    name: 'System Administrator',
+    email: 'sysadmin@college.edu',
+    role: 'superadmin',
+    avatar: 'https://i.pravatar.cc/150?img=20',
+    accessLevel: 'full',
+    lastLogin: '2025-05-08T10:30:00'
   }
 ];
 
@@ -343,4 +381,10 @@ export const mockNotifications: Notification[] = [
 ];
 
 // Export all users combined for auth purposes
-export const allUsers = [...mockStudents, ...mockCompanies, ...mockAdmins];
+export const allUsers = [
+  ...mockStudents, 
+  ...mockCompanies, 
+  ...mockAdmins,
+  ...mockManagement,
+  ...mockSuperAdmin
+];

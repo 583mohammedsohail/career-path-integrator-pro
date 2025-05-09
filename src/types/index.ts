@@ -1,9 +1,8 @@
-
 export interface User {
   id: string;
   name: string;
   email: string;
-  role: 'student' | 'company' | 'admin';
+  role: 'student' | 'company' | 'admin' | 'management' | 'superadmin';
   avatar?: string;
 }
 
@@ -33,6 +32,19 @@ export interface Admin extends User {
   role: 'admin';
   department: string;
   position: string;
+}
+
+export interface Management extends User {
+  role: 'management';
+  department: string;
+  position: string;
+  managementLevel: 'junior' | 'senior' | 'executive';
+}
+
+export interface SuperAdmin extends User {
+  role: 'superadmin';
+  accessLevel: 'full';
+  lastLogin: string;
 }
 
 export interface Job {

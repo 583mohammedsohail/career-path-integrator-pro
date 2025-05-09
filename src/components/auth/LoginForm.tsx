@@ -7,10 +7,21 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+type UserRole = 'student' | 'company' | 'admin' | 'management' | 'superadmin';
 
 const LoginForm: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [role, setRole] = useState<UserRole>('student');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -20,7 +31,7 @@ const LoginForm: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      await login(email, password);
+      await login(email, password, role);
       navigate('/');
     } catch (error) {
       console.error('Login error:', error);
@@ -40,6 +51,21 @@ const LoginForm: React.FC = () => {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label>User Type</Label>
+            <Select defaultValue={role} onValueChange={(value) => setRole(value as UserRole)}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select your role" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="student">Student</SelectItem>
+                <SelectItem value="company">Company</SelectItem>
+                <SelectItem value="admin">Administrator</SelectItem>
+                <SelectItem value="management">Management</SelectItem>
+                <SelectItem value="superadmin">Super Admin</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input 
@@ -86,6 +112,8 @@ const LoginForm: React.FC = () => {
           <p>Student: alex.johnson@college.edu</p>
           <p>Company: hr@techcorp.com</p>
           <p>Admin: robert.clark@college.edu</p>
+          <p>Management: david.morgan@college.edu</p>
+          <p>Super Admin: sysadmin@college.edu</p>
           <p className="text-muted-foreground mt-1">Password: any value works in this demo</p>
         </div>
       </CardFooter>
