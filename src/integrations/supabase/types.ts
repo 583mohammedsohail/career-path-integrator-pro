@@ -9,7 +9,236 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      companies: {
+        Row: {
+          company_name: string
+          description: string | null
+          id: string
+          industry: string | null
+          location: string | null
+          website: string | null
+        }
+        Insert: {
+          company_name: string
+          description?: string | null
+          id: string
+          industry?: string | null
+          location?: string | null
+          website?: string | null
+        }
+        Update: {
+          company_name?: string
+          description?: string | null
+          id?: string
+          industry?: string | null
+          location?: string | null
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "companies_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_applications: {
+        Row: {
+          applied_at: string | null
+          id: string
+          job_id: string
+          resume_url: string | null
+          status: string | null
+          student_id: string
+        }
+        Insert: {
+          applied_at?: string | null
+          id?: string
+          job_id: string
+          resume_url?: string | null
+          status?: string | null
+          student_id: string
+        }
+        Update: {
+          applied_at?: string | null
+          id?: string
+          job_id?: string
+          resume_url?: string | null
+          status?: string | null
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_applications_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_applications_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      jobs: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          deadline: string
+          description: string
+          id: string
+          location: string | null
+          positions: number | null
+          requirements: string[] | null
+          salary: string | null
+          status: string | null
+          title: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          deadline: string
+          description: string
+          id?: string
+          location?: string | null
+          positions?: number | null
+          requirements?: string[] | null
+          salary?: string | null
+          status?: string | null
+          title: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          deadline?: string
+          description?: string
+          id?: string
+          location?: string | null
+          positions?: number | null
+          requirements?: string[] | null
+          salary?: string | null
+          status?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "jobs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          message: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          email: string | null
+          id: string
+          name: string | null
+          role: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          email?: string | null
+          id: string
+          name?: string | null
+          role?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          name?: string | null
+          role?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      students: {
+        Row: {
+          cgpa: number
+          course: string
+          department: string
+          id: string
+          resume_url: string | null
+          roll_number: string
+          skills: string[] | null
+          year: number
+        }
+        Insert: {
+          cgpa: number
+          course: string
+          department: string
+          id: string
+          resume_url?: string | null
+          roll_number: string
+          skills?: string[] | null
+          year: number
+        }
+        Update: {
+          cgpa?: number
+          course?: string
+          department?: string
+          id?: string
+          resume_url?: string | null
+          roll_number?: string
+          skills?: string[] | null
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "students_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
