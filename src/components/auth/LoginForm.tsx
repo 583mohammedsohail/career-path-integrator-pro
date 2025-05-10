@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -6,10 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ChevronDown } from "lucide-react";
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
   const { login, isLoading } = useAuth();
   const navigate = useNavigate();
 
@@ -28,6 +30,11 @@ const LoginForm = () => {
       // Error is handled in the login function
       console.error('Login failed:', error);
     }
+  };
+
+  const handleTestLogin = (testEmail: string) => {
+    setEmail(testEmail);
+    setPassword('test123'); // Default test password
   };
 
   return (
@@ -75,6 +82,61 @@ const LoginForm = () => {
             {isLoading ? "Logging in..." : "Login"}
           </Button>
         </form>
+
+        {/* Test Credentials Section */}
+        <div className="mt-6 border-t pt-4">
+          <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+            <CollapsibleTrigger className="flex items-center justify-between w-full text-sm font-medium text-gray-500 hover:text-gray-700">
+              Test Credentials (Click to expand)
+              <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? 'transform rotate-180' : ''}`} />
+            </CollapsibleTrigger>
+            <CollapsibleContent className="mt-2 space-y-2">
+              <div className="text-sm font-medium text-gray-700 mb-2">Students:</div>
+              <div className="space-y-1">
+                <Button variant="outline" size="sm" className="w-full justify-start" onClick={() => handleTestLogin('alex.johnson@college.edu')}>
+                  Alex Johnson (Student)
+                </Button>
+                <Button variant="outline" size="sm" className="w-full justify-start" onClick={() => handleTestLogin('sarah.williams@college.edu')}>
+                  Sarah Williams (Student)
+                </Button>
+              </div>
+
+              <div className="text-sm font-medium text-gray-700 mt-3 mb-2">Companies:</div>
+              <div className="space-y-1">
+                <Button variant="outline" size="sm" className="w-full justify-start" onClick={() => handleTestLogin('hr@tcs.com')}>
+                  TCS (Company)
+                </Button>
+                <Button variant="outline" size="sm" className="w-full justify-start" onClick={() => handleTestLogin('hr@infosys.com')}>
+                  Infosys (Company)
+                </Button>
+              </div>
+
+              <div className="text-sm font-medium text-gray-700 mt-3 mb-2">Admins:</div>
+              <div className="space-y-1">
+                <Button variant="outline" size="sm" className="w-full justify-start" onClick={() => handleTestLogin('robert.clark@college.edu')}>
+                  Prof. Robert Clark (Admin)
+                </Button>
+                <Button variant="outline" size="sm" className="w-full justify-start" onClick={() => handleTestLogin('jennifer.lee@college.edu')}>
+                  Dr. Jennifer Lee (Admin)
+                </Button>
+              </div>
+
+              <div className="text-sm font-medium text-gray-700 mt-3 mb-2">Management:</div>
+              <div className="space-y-1">
+                <Button variant="outline" size="sm" className="w-full justify-start" onClick={() => handleTestLogin('david.morgan@college.edu')}>
+                  David Morgan (Management)
+                </Button>
+              </div>
+
+              <div className="text-sm font-medium text-gray-700 mt-3 mb-2">Super Admin:</div>
+              <div className="space-y-1">
+                <Button variant="outline" size="sm" className="w-full justify-start" onClick={() => handleTestLogin('sysadmin@college.edu')}>
+                  System Administrator (Super Admin)
+                </Button>
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+        </div>
       </CardContent>
       <CardFooter className="flex justify-center">
         <div className="text-sm text-gray-500">

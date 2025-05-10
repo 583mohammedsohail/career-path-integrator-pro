@@ -981,30 +981,15 @@ export const mockJobs: Job[] = [
 ];
 
 // Update company postedJobs
-mockCompanies[0].postedJobs = [mockJobs[0], mockJobs[8], mockJobs[16]];
-mockCompanies[1].postedJobs = [mockJobs[1], mockJobs[9], mockJobs[17]];
-mockCompanies[2].postedJobs = [mockJobs[2], mockJobs[10], mockJobs[18]];
-mockCompanies[3].postedJobs = [mockJobs[3], mockJobs[11], mockJobs[19]];
-mockCompanies[4].postedJobs = [mockJobs[4], mockJobs[12]];
-mockCompanies[5].postedJobs = [mockJobs[5], mockJobs[13]];
-mockCompanies[6].postedJobs = [mockJobs[6], mockJobs[14]];
-mockCompanies[7].postedJobs = [mockJobs[7], mockJobs[15]];
-mockCompanies[8].postedJobs = [mockJobs[20], mockJobs[21], mockJobs[22]];
-mockCompanies[9].postedJobs = [mockJobs[23]];
-mockCompanies[10].postedJobs = [mockJobs[24]];
-mockCompanies[11].postedJobs = [];
-mockCompanies[12].postedJobs = [];
-mockCompanies[13].postedJobs = [];
-mockCompanies[14].postedJobs = [];
-mockCompanies[15].postedJobs = [];
-mockCompanies[16].postedJobs = [];
-mockCompanies[17].postedJobs = [];
-mockCompanies[18].postedJobs = [];
-mockCompanies[19].postedJobs = [];
-mockCompanies[20].postedJobs = [];
-mockCompanies[21].postedJobs = [];
-mockCompanies[22].postedJobs = [];
-mockCompanies[23].postedJobs = [];
+mockCompanies[0].postedJobs = [mockJobs[0], mockJobs[1]];
+mockCompanies[1].postedJobs = [mockJobs[2], mockJobs[3]];
+mockCompanies[2].postedJobs = [mockJobs[4], mockJobs[5]];
+mockCompanies[3].postedJobs = [mockJobs[6], mockJobs[7]];
+mockCompanies[4].postedJobs = [mockJobs[8], mockJobs[9]];
+mockCompanies[5].postedJobs = [mockJobs[10], mockJobs[11]];
+mockCompanies[6].postedJobs = [mockJobs[12], mockJobs[13]];
+mockCompanies[7].postedJobs = [mockJobs[14], mockJobs[15]];
+mockCompanies[8].postedJobs = [mockJobs[16], mockJobs[17]];
 
 // Generate mock job applications
 export const mockJobApplications: JobApplication[] = [

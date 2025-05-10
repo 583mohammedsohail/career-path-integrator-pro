@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
@@ -8,17 +7,31 @@ import RecentJobs from '../components/dashboard/RecentJobs';
 import StudentPerformance from '../components/dashboard/StudentPerformance';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Briefcase, Users, Building2, Award, Book, ArrowRight } from 'lucide-react';
+import { 
+  Briefcase, 
+  Users, 
+  Building2, 
+  Award, 
+  Book, 
+  ArrowRight,
+  Calendar,
+  FileText,
+  Bell,
+  TrendingUp,
+  CheckCircle,
+  Clock
+} from 'lucide-react';
 import { mockPlacementStats, mockJobs, mockStudents } from '../data/mockData';
 import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
-import { Card, CardContent } from "@/components/ui/card";
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { motion } from "framer-motion";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
 
 const FloatingImage = ({ src, alt, className }) => {
   return (
@@ -259,132 +272,203 @@ const Index = () => {
     );
   }
   
-  // Dashboard for logged in users
+  // Dashboard for logged-in users
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <h1 className="text-2xl font-bold">Welcome, {currentUser.name}!</h1>
-          <p className="text-gray-600 mt-1">Here's what's happening with placements</p>
-        </motion.div>
-
-        {/* Stats Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.1 }}
-          >
-            <StatCard 
-              title="Total Students" 
-              value={mockPlacementStats.totalStudents} 
-              icon={Users}
-              change={{ value: 12, positive: true }}
-            />
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.2 }}
-          >
-            <StatCard 
-              title="Companies" 
-              value={mockPlacementStats.totalCompanies} 
-              icon={Building2}
-              change={{ value: 8, positive: true }}
-            />
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.3 }}
-          >
-            <StatCard 
-              title="Job Openings" 
-              value={mockPlacementStats.totalJobs} 
-              icon={Briefcase}
-              change={{ value: 5, positive: true }}
-            />
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.4 }}
-          >
-            <StatCard 
-              title="Placements" 
-              value={mockPlacementStats.totalPlacements} 
-              icon={Award}
-              description={`Avg. Salary: $${mockPlacementStats.averageSalary.toLocaleString()}`}
-              change={{ value: 15, positive: true }}
-            />
-          </motion.div>
+        {/* Welcome Section */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">
+            Welcome back, {currentUser.name}!
+          </h1>
+          <p className="text-gray-600 mt-2">
+            Here's what's happening with your placement activities
+          </p>
         </div>
 
-        {/* Floating Images Section */}
-        <div className="relative mt-8 mb-8 py-6 overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-blue-50 to-purple-50 opacity-50 rounded-xl"></div>
-          
-          <div className="relative z-10 flex justify-center">
-            <div className="grid grid-cols-3 gap-4 max-w-4xl">
-              <FloatingImage 
-                src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
-                alt="Students collaborating"
-                className="col-span-1"
-              />
-              <FloatingImage 
-                src="https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
-                alt="Business meeting"
-                className="col-span-2"
-              />
-              <FloatingImage 
-                src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
-                alt="Corporate workspace"
-                className="col-span-2"
-              />
-              <FloatingImage 
-                src="https://images.unsplash.com/photo-1507537297725-24a1c029d3ca?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
-                alt="Student interview"
-                className="col-span-1"
-              />
-            </div>
+        {/* Quick Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Applications</CardTitle>
+              <FileText className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{mockPlacementStats.totalApplications}</div>
+              <Progress value={75} className="mt-2" />
+              <p className="text-xs text-muted-foreground mt-2">
+                +20% from last month
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Active Jobs</CardTitle>
+              <Briefcase className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{mockPlacementStats.totalJobs}</div>
+              <Progress value={60} className="mt-2" />
+              <p className="text-xs text-muted-foreground mt-2">
+                {mockJobs.filter(job => job.status === 'open').length} open positions
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Placement Rate</CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {Math.round((mockPlacementStats.totalPlacements / mockPlacementStats.totalStudents) * 100)}%
+              </div>
+              <Progress value={72} className="mt-2" />
+              <p className="text-xs text-muted-foreground mt-2">
+                {mockPlacementStats.totalPlacements} students placed
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Average Salary</CardTitle>
+              <Award className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">₹{mockPlacementStats.averageSalary}K</div>
+              <Progress value={85} className="mt-2" />
+              <p className="text-xs text-muted-foreground mt-2">
+                +15% from last year
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Main Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column - Charts and Stats */}
+          <div className="lg:col-span-2 space-y-8">
+            <Card>
+              <CardHeader>
+                <CardTitle>Placement Trends</CardTitle>
+                <CardDescription>Monthly placement statistics and trends</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <PlacementChart />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent Job Postings</CardTitle>
+                <CardDescription>Latest opportunities from top companies</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <RecentJobs />
+              </CardContent>
+            </Card>
           </div>
-        </div>
 
-        {/* Charts & Tables */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="col-span-3"
-          >
-            <PlacementChart />
-          </motion.div>
+          {/* Right Column - Activity Feed and Quick Actions */}
+          <div className="space-y-8">
+            <Card>
+              <CardHeader>
+                <CardTitle>Quick Actions</CardTitle>
+                <CardDescription>Common tasks and shortcuts</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Button className="w-full justify-start" variant="outline" onClick={() => navigate('/jobs')}>
+                  <Briefcase className="mr-2 h-4 w-4" />
+                  Browse Jobs
+                </Button>
+                <Button className="w-full justify-start" variant="outline" onClick={() => navigate('/companies')}>
+                  <Building2 className="mr-2 h-4 w-4" />
+                  View Companies
+                </Button>
+                <Button className="w-full justify-start" variant="outline" onClick={() => navigate('/students')}>
+                  <Users className="mr-2 h-4 w-4" />
+                  Student Directory
+                </Button>
+                <Button className="w-full justify-start" variant="outline" onClick={() => navigate('/profile')}>
+                  <FileText className="mr-2 h-4 w-4" />
+                  Update Profile
+                </Button>
+              </CardContent>
+            </Card>
 
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="col-span-3"
-          >
-            <RecentJobs jobs={mockJobs} />
-          </motion.div>
-        </div>
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent Activity</CardTitle>
+                <CardDescription>Latest updates and notifications</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {[
+                  {
+                    icon: <CheckCircle className="h-4 w-4 text-green-500" />,
+                    text: "New placement recorded for Sarah Williams",
+                    time: "2 hours ago"
+                  },
+                  {
+                    icon: <Bell className="h-4 w-4 text-blue-500" />,
+                    text: "TCS posted 3 new job openings",
+                    time: "4 hours ago"
+                  },
+                  {
+                    icon: <Clock className="h-4 w-4 text-orange-500" />,
+                    text: "Upcoming placement drive: Infosys",
+                    time: "1 day ago"
+                  }
+                ].map((activity, index) => (
+                  <div key={index} className="flex items-start space-x-4">
+                    <div className="mt-1">{activity.icon}</div>
+                    <div>
+                      <p className="text-sm font-medium">{activity.text}</p>
+                      <p className="text-xs text-muted-foreground">{activity.time}</p>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
 
-        {/* Student Performance */}
-        <div className="mt-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-          >
-            <StudentPerformance students={mockStudents} />
-          </motion.div>
+            <Card>
+              <CardHeader>
+                <CardTitle>Upcoming Events</CardTitle>
+                <CardDescription>Important dates and deadlines</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {[
+                  {
+                    date: "June 15, 2024",
+                    event: "TCS Campus Drive",
+                    type: "Placement"
+                  },
+                  {
+                    date: "June 20, 2024",
+                    event: "Infosys Interview Preparation",
+                    type: "Workshop"
+                  },
+                  {
+                    date: "June 25, 2024",
+                    event: "Resume Submission Deadline",
+                    type: "Deadline"
+                  }
+                ].map((event, index) => (
+                  <div key={index} className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium">{event.event}</p>
+                      <p className="text-xs text-muted-foreground">{event.date}</p>
+                    </div>
+                    <span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-800">
+                      {event.type}
+                    </span>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </Layout>
