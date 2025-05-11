@@ -1,50 +1,75 @@
+import React from 'react';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import Index from '@/pages/Index';
+import Login from '@/pages/Login';
+import Register from '@/pages/Register';
+import Jobs from '@/pages/Jobs';
+import JobDetails from '@/pages/JobDetails';
+import Companies from '@/pages/Companies';
+import CompanyProfile from '@/pages/CompanyProfile';
+import Students from '@/pages/Students';
+import StudentProfile from '@/pages/StudentProfile';
+import Profile from '@/pages/Profile';
+import NotFound from '@/pages/NotFound';
+import SuperAdminDashboard from './pages/SuperAdminDashboard';
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "./contexts/AuthContext";
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Index />,
+  },
+  {
+    path: "/login",
+    element: <Login />,
+  },
+  {
+    path: "/register",
+    element: <Register />,
+  },
+  {
+    path: "/jobs",
+    element: <Jobs />,
+  },
+  {
+    path: "/jobs/:id",
+    element: <JobDetails />,
+  },
+  {
+    path: "/companies",
+    element: <Companies />,
+  },
+  {
+    path: "/companies/:id",
+    element: <CompanyProfile />,
+  },
+  {
+    path: "/students",
+    element: <Students />,
+  },
+  {
+    path: "/students/:id",
+    element: <StudentProfile />,
+  },
+  {
+    path: "/profile",
+    element: <Profile />,
+  },
+  {
+    path: "/admin",
+    element: <SuperAdminDashboard />,
+  },
+  {
+    path: "*",
+    element: <NotFound />,
+  },
+]);
 
-import Index from "./pages/Index";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Jobs from "./pages/Jobs";
-import JobDetails from "./pages/JobDetails";
-import Companies from "./pages/Companies";
-import CompanyProfile from "./pages/CompanyProfile";
-import Students from "./pages/Students";
-import StudentProfile from "./pages/StudentProfile";
-import Profile from "./pages/Profile";
-import NotFound from "./pages/NotFound";
-
-const queryClient = new QueryClient();
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <AuthProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/jobs" element={<Jobs />} />
-            <Route path="/jobs/:id" element={<JobDetails />} />
-            <Route path="/companies" element={<Companies />} />
-            <Route path="/companies/:id" element={<CompanyProfile />} />
-            <Route path="/students" element={<Students />} />
-            <Route path="/students/:id" element={<StudentProfile />} />
-            <Route path="/profile" element={<Profile />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </AuthProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const App: React.FC = () => {
+  return (
+    <React.StrictMode>
+      <RouterProvider router={router} />
+    </React.StrictMode>
+  );
+};
 
 export default App;

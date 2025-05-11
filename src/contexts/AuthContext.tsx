@@ -54,6 +54,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           
           // Find the mock user based on email
           if (email) {
+            // Fix the SuperAdmin type issue - mockSuperAdmin is a single object, not an array
             mockUser = mockStudents.find(student => student.email === email) || 
                       mockCompanies.find(company => company.email === email) || 
                       mockAdmins.find(admin => admin.email === email) || 
@@ -91,6 +92,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         let mockUser = null;
         
         if (email) {
+          // Fix the SuperAdmin type issue - mockSuperAdmin is a single object, not an array
           mockUser = mockStudents.find(student => student.email === email) || 
                     mockCompanies.find(company => company.email === email) || 
                     mockAdmins.find(admin => admin.email === email) || 

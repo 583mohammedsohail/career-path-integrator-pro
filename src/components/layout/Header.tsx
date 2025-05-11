@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/contexts/AuthContext';
-import { LogOut, User, Bell } from 'lucide-react';
+import { LogOut, User, Bell, Shield } from 'lucide-react';
 import { mockNotifications } from '@/data/mockData';
 
 const Header: React.FC = () => {
@@ -54,6 +54,11 @@ const Header: React.FC = () => {
           <Link to="/students" className="text-gray-600 hover:text-primary transition-colors">
             Students
           </Link>
+          {currentUser && currentUser.role === 'superadmin' && (
+            <Link to="/admin" className="text-gray-600 hover:text-primary transition-colors flex items-center">
+              <Shield className="mr-1 h-4 w-4" /> Admin
+            </Link>
+          )}
         </nav>
         
         <div className="flex items-center space-x-4">
@@ -120,6 +125,14 @@ const Header: React.FC = () => {
                       <span>Profile</span>
                     </Link>
                   </DropdownMenuItem>
+                  {currentUser.role === 'superadmin' && (
+                    <DropdownMenuItem>
+                      <Link to="/admin" className="flex items-center w-full">
+                        <Shield className="mr-2 h-4 w-4" />
+                        <span>Admin Dashboard</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={logout}>
                     <LogOut className="mr-2 h-4 w-4" />
