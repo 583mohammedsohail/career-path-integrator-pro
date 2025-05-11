@@ -1,3 +1,4 @@
+
 import { 
   Student, 
   Company, 
@@ -720,4 +721,37 @@ export const mockJobs: Job[] = [
       'Knowledge of database optimization and security',
       'Minimum CGPA of 7.5'
     ],
-    location:
+    location: 'Noida, Uttar Pradesh',
+    salary: '₹12,00,000 - ₹18,00,000 per annum',
+    positions: 3,
+    deadline: '2024-08-10',
+    status: 'open',
+    createdAt: '2024-05-28',
+    applications: []
+  }
+];
+
+// Generate mock placement stats
+export const mockPlacementStats: PlacementStats = {
+  totalStudents: 120,
+  totalCompanies: 25,
+  totalJobs: 48,
+  totalApplications: 346,
+  totalPlacements: 88,
+  averageSalary: 850,
+  highestSalary: 2400,
+  placementRate: 73.33
+};
+
+// For job applications
+for (const job of mockJobs) {
+  // Make sure company exists before assigning
+  const companyIndex = mockCompanies.findIndex(c => c.id === job.company.id);
+  if (companyIndex >= 0 && companyIndex < mockCompanies.length) {
+    if (!mockCompanies[companyIndex].postedJobs) {
+      mockCompanies[companyIndex].postedJobs = [];
+    }
+    mockCompanies[companyIndex].postedJobs.push(job);
+  }
+}
+
