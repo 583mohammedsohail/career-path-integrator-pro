@@ -18,11 +18,18 @@ import { mockNotifications } from '@/data/mockData';
 const Header: React.FC = () => {
   const { currentUser, logout } = useAuth();
   
+  // Safely check if currentUser exists before filtering notifications
   const userNotifications = currentUser 
     ? mockNotifications.filter(n => n.user.id === currentUser.id) 
     : [];
   
   const unreadCount = userNotifications.filter(n => !n.isRead).length;
+
+  // Safe fallback for avatar/name initials
+  const getNameInitial = () => {
+    if (!currentUser || !currentUser.name) return 'U';
+    return currentUser.name.charAt(0).toUpperCase();
+  };
 
   return (
     <header className="bg-white shadow-sm border-b">
@@ -89,15 +96,15 @@ const Header: React.FC = () => {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={currentUser.avatar} alt={currentUser.name} />
-                      <AvatarFallback>{currentUser.name[0]}</AvatarFallback>
+                      <AvatarImage src={currentUser.avatar} alt={currentUser.name || 'User'} />
+                      <AvatarFallback>{getNameInitial()}</AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56" align="end" forceMount>
                   <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">{currentUser.name}</p>
+                      <p className="text-sm font-medium leading-none">{currentUser.name || 'User'}</p>
                       <p className="text-xs leading-none text-muted-foreground">
                         {currentUser.email}
                       </p>

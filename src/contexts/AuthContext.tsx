@@ -50,7 +50,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           // In a real app, we would fetch the user profile from Supabase
           // For this demo, use mock data
           const email = session.user.email;
-          let mockUser;
+          let mockUser = null;
           
           // Find the mock user based on email
           if (email) {
@@ -88,7 +88,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (session?.user) {
         // Same logic as above for setting currentUser
         const email = session.user.email;
-        let mockUser;
+        let mockUser = null;
         
         if (email) {
           mockUser = mockStudents.find(student => student.email === email) || 
