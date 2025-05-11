@@ -5,6 +5,7 @@ import StatCard from '../components/dashboard/StatCard';
 import PlacementChart from '../components/dashboard/PlacementChart';
 import RecentJobs from '../components/dashboard/RecentJobs';
 import StudentPerformance from '../components/dashboard/StudentPerformance';
+import DeveloperCredits from '../components/layout/DeveloperCredits';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { 
@@ -275,6 +276,9 @@ const Index = () => {
             </motion.div>
           </div>
         </section>
+
+        {/* Developer Credits */}
+        <DeveloperCredits />
       </Layout>
     );
   }
