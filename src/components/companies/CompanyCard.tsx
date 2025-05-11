@@ -7,6 +7,13 @@ import { Badge } from '@/components/ui/badge';
 import { Company } from '@/types';
 import { MapPin, Globe, Briefcase } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { 
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious
+} from "@/components/ui/carousel";
 
 interface CompanyCardProps {
   company: Company;
