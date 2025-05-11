@@ -12,7 +12,7 @@ import { ChevronDown } from "lucide-react";
 const LoginForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true); // Changed to default open
   const { login, isLoading } = useAuth();
   const navigate = useNavigate();
 
@@ -85,15 +85,15 @@ const LoginForm = () => {
           </Button>
         </form>
 
-        {/* Test Credentials Section */}
+        {/* Test Credentials Section - Expanded by default */}
         <div className="mt-6 border-t pt-4">
           <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-            <CollapsibleTrigger className="flex items-center justify-between w-full text-sm font-medium text-gray-500 hover:text-gray-700">
-              Test Credentials (Click to expand)
+            <CollapsibleTrigger className="flex items-center justify-between w-full text-sm font-medium text-gray-700 hover:text-primary mb-2">
+              Test Credentials (All use password: test123)
               <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? 'transform rotate-180' : ''}`} />
             </CollapsibleTrigger>
             <CollapsibleContent className="mt-2 space-y-2">
-              <div className="text-sm text-gray-500 mb-2">All test accounts use the same password: <span className="font-medium">test123</span></div>
+              <div className="text-sm text-gray-500 mb-2 font-bold">All test accounts use password: <span className="text-primary">test123</span></div>
               
               <div className="text-sm font-medium text-gray-700 mb-2">Students:</div>
               <div className="space-y-1">

@@ -1,19 +1,38 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User } from '../types';
 import { supabase } from '../integrations/supabase/client';
 import { toast } from 'sonner';
 import { Session } from '@supabase/supabase-js';
-import { mockStudents } from '../data/mockData';
+import { mockStudents, mockCompanies, mockAdmins, mockManagement, mockSuperAdmin } from '../data/mockData';
 
 interface AuthContextType {
   currentUser: User | null;
   login: (email: string, password: string, role?: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   isLoading: boolean;
   session: Session | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// Helper function to clean up auth state
+const cleanupAuthState = () => {
+  // Remove standard auth tokens
+  localStorage.removeItem('supabase.auth.token');
+  // Remove all Supabase auth keys from localStorage
+  Object.keys(localStorage).forEach((key) => {
+    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+      localStorage.removeItem(key);
+    }
+  });
+  // Remove from sessionStorage if in use
+  Object.keys(sessionStorage || {}).forEach((key) => {
+    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+      sessionStorage.removeItem(key);
+    }
+  });
+};
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -21,26 +40,147 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    // For development, set a mock user
-    const mockUser = mockStudents[0];
-    setCurrentUser(mockUser);
-    setIsLoading(false);
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        console.log('Auth state changed:', event, session);
+        setSession(session);
+        
+        if (session?.user) {
+          // In a real app, we would fetch the user profile from Supabase
+          // For this demo, use mock data
+          const email = session.user.email;
+          let mockUser;
+          
+          // Find the mock user based on email
+          if (email) {
+            mockUser = mockStudents.find(student => student.email === email) || 
+                      mockCompanies.find(company => company.email === email) || 
+                      mockAdmins.find(admin => admin.email === email) || 
+                      mockManagement.find(manager => manager.email === email) || 
+                      (email === 'sysadmin@college.edu' ? mockSuperAdmin : null);
+          }
+          
+          if (mockUser) {
+            setCurrentUser(mockUser);
+          } else {
+            // If no mock user found but we have session, create minimal user
+            setCurrentUser({
+              id: session.user.id,
+              name: session.user.user_metadata?.name || 'User',
+              email: email || '',
+              role: session.user.user_metadata?.role || 'student',
+              avatar: session.user.user_metadata?.avatar_url || ''
+            });
+          }
+          toast.success('Successfully authenticated!');
+        } else {
+          setCurrentUser(null);
+        }
+      }
+    );
+
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Got existing session:', session);
+      setSession(session);
+      
+      if (session?.user) {
+        // Same logic as above for setting currentUser
+        const email = session.user.email;
+        let mockUser;
+        
+        if (email) {
+          mockUser = mockStudents.find(student => student.email === email) || 
+                    mockCompanies.find(company => company.email === email) || 
+                    mockAdmins.find(admin => admin.email === email) || 
+                    mockManagement.find(manager => manager.email === email) || 
+                    (email === 'sysadmin@college.edu' ? mockSuperAdmin : null);
+        }
+        
+        if (mockUser) {
+          setCurrentUser(mockUser);
+        } else {
+          // If no mock user found but we have session, create minimal user
+          setCurrentUser({
+            id: session.user.id,
+            name: session.user.user_metadata?.name || 'User',
+            email: email || '',
+            role: session.user.user_metadata?.role || 'student',
+            avatar: session.user.user_metadata?.avatar_url || ''
+          });
+        }
+      }
+      
+      setIsLoading(false);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const login = async (email: string, password: string, role?: string) => {
     setIsLoading(true);
     try {
-      // For development, use mock login
-      const mockUser = mockStudents.find(student => student.email === email);
-      if (mockUser) {
-        setCurrentUser(mockUser);
-        toast.success('Login successful!');
+      // Clean up any existing auth state
+      cleanupAuthState();
+      
+      // Attempt global sign out before logging in
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (err) {
+        // Continue even if this fails
+        console.log('Signout before login failed:', err);
+      }
+
+      // Try mock login first for test credentials
+      const mockUser = mockStudents.find(student => student.email === email) || 
+                      mockCompanies.find(company => company.email === email) || 
+                      mockAdmins.find(admin => admin.email === email) || 
+                      mockManagement.find(manager => manager.email === email) || 
+                      (email === 'sysadmin@college.edu' ? mockSuperAdmin : null);
+
+      if (mockUser && password === 'test123') {
+        // For test credentials, use Supabase email/password auth but with known credentials
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        
+        if (error) {
+          // If error from Supabase (likely because test account doesn't exist in Supabase)
+          // Just set the mock user directly
+          console.log('Supabase auth error with test account, using mock data:', error);
+          setCurrentUser(mockUser);
+          setSession(null); // No real session for mock users
+          toast.success('Login successful with test account!');
+        } else if (data.user) {
+          // If test account exists in Supabase, we'll get a session
+          setSession(data.session);
+          setCurrentUser(mockUser);
+          toast.success('Login successful!');
+        }
       } else {
-        toast.error('Invalid email or password');
-        throw new Error('Invalid email or password');
+        // Real Supabase authentication for non-test accounts
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        
+        if (error) {
+          toast.error(error.message);
+          throw error;
+        }
+        
+        if (data.user) {
+          // Session will be set by the onAuthStateChange listener
+          toast.success('Login successful!');
+        }
       }
     } catch (error) {
       console.error('Login error:', error);
+      toast.error('Login failed. Please check your credentials.');
       throw error;
     } finally {
       setIsLoading(false);
@@ -48,9 +188,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = async () => {
-    setCurrentUser(null);
-    setSession(null);
-    toast.success('Logged out successfully');
+    try {
+      // Clean up auth state
+      cleanupAuthState();
+      
+      // Attempt global sign out
+      await supabase.auth.signOut({ scope: 'global' });
+      
+      setCurrentUser(null);
+      setSession(null);
+      toast.success('Logged out successfully');
+      
+      // Force page reload for a clean state
+      window.location.href = '/login';
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast.error('Logout failed');
+    }
   };
 
   const value = {
