@@ -4,6 +4,7 @@ import { Navigate } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
 import LoginForm from '../components/auth/LoginForm';
 import { useAuth } from '../contexts/AuthContext';
+import DeveloperCredits from '../components/layout/DeveloperCredits';
 
 const Login = () => {
   const { currentUser, isLoading } = useAuth();
@@ -15,8 +16,13 @@ const Login = () => {
 
   return (
     <Layout>
-      <div className="flex items-center justify-center min-h-[calc(100vh-16rem)] px-4 py-12">
-        <LoginForm />
+      <div className="flex flex-col min-h-[calc(100vh-16rem)]">
+        <div className="flex items-center justify-center flex-1 px-4 py-12">
+          <LoginForm />
+        </div>
+        
+        {/* Use the DeveloperCredits component */}
+        <DeveloperCredits />
       </div>
     </Layout>
   );

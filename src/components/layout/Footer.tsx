@@ -1,6 +1,8 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { ExternalLink } from 'lucide-react';
+import DeveloperCredits from './DeveloperCredits';
 
 const Footer: React.FC = () => {
   return (
@@ -49,24 +51,48 @@ const Footer: React.FC = () => {
             <h3 className="font-semibold text-gray-900 mb-4">Resources</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link to="/resources" className="text-gray-600 hover:text-primary transition-colors">
+                <a 
+                  href="https://resume.io/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-gray-600 hover:text-primary transition-colors flex items-center"
+                >
                   Resume Templates
-                </Link>
+                  <ExternalLink size={12} className="ml-1" />
+                </a>
               </li>
               <li>
-                <Link to="/resources" className="text-gray-600 hover:text-primary transition-colors">
+                <a 
+                  href="https://youtu.be/0siE31sqz0Q?si=k0oxgiNdkGL7-fxu" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-gray-600 hover:text-primary transition-colors flex items-center"
+                >
                   Interview Tips
-                </Link>
+                  <ExternalLink size={12} className="ml-1" />
+                </a>
               </li>
               <li>
-                <Link to="/resources" className="text-gray-600 hover:text-primary transition-colors">
+                <a 
+                  href="https://youtu.be/O3m14PVOq_g?si=pFiKSKlRAXe6fKBX" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-gray-600 hover:text-primary transition-colors flex items-center"
+                >
                   Career Guidance
-                </Link>
+                  <ExternalLink size={12} className="ml-1" />
+                </a>
               </li>
               <li>
-                <Link to="/resources" className="text-gray-600 hover:text-primary transition-colors">
+                <a 
+                  href="https://youtu.be/NTxBP4bFrBA?si=1LmEQXZzEm-XzTkV" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-gray-600 hover:text-primary transition-colors flex items-center"
+                >
                   Skill Development
-                </Link>
+                  <ExternalLink size={12} className="ml-1" />
+                </a>
               </li>
             </ul>
           </div>
@@ -75,22 +101,48 @@ const Footer: React.FC = () => {
             <h3 className="font-semibold text-gray-900 mb-4">Contact</h3>
             <ul className="space-y-2 text-sm">
               <li className="text-gray-600">
-                Email: support@placementpro.edu
+                Email: <a href="mailto:583mohammedsohail@gmail.com" className="hover:text-primary">583mohammedsohail@gmail.com</a>
               </li>
               <li className="text-gray-600">
-                Phone: +1 (123) 456-7890
+                Email: <a href="mailto:sanapa230603@gmail.com" className="hover:text-primary">sanapa230603@gmail.com</a>
               </li>
               <li className="text-gray-600">
-                Address: 123 Campus Drive, University City
+                Phone: +91 6300535921, +91 7471157668‬
+              </li>
+              <li className="text-gray-600">
+                Address: Hyderabad & Chhattisgarh
               </li>
             </ul>
           </div>
         </div>
         
         <div className="border-t mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-sm text-gray-600">
-            © {new Date().getFullYear()} PlacementPro. All rights reserved.
-          </p>
+          <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0">
+            <p className="text-sm text-gray-600">
+              © {new Date().getFullYear()} PlacementPro. All rights reserved.
+            </p>
+            <span className="hidden md:block md:mx-2">•</span>
+            <p className="text-sm text-gray-600">
+              Developed by 
+              <a 
+                href="https://www.linkedin.com/in/sana-parveen-93b29b294/" 
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary hover:underline mx-1"
+              >
+                Sana Parveen
+              </a>
+              &
+              <a 
+                href="https://www.linkedin.com/in/mohammed-sohail-82176825b/" 
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary hover:underline ml-1"
+              >
+                Mohammed Sohail
+              </a>
+            </p>
+          </div>
           <div className="flex space-x-4 mt-4 md:mt-0">
             <a href="#" className="text-gray-600 hover:text-primary transition-colors">
               Privacy Policy

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -35,6 +36,7 @@ const LoginForm = () => {
   const handleTestLogin = (testEmail: string) => {
     setEmail(testEmail);
     setPassword('test123'); // Default test password
+    toast.info('Test credentials applied. Click Login to continue.');
   };
 
   return (
@@ -91,6 +93,8 @@ const LoginForm = () => {
               <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? 'transform rotate-180' : ''}`} />
             </CollapsibleTrigger>
             <CollapsibleContent className="mt-2 space-y-2">
+              <div className="text-sm text-gray-500 mb-2">All test accounts use the same password: <span className="font-medium">test123</span></div>
+              
               <div className="text-sm font-medium text-gray-700 mb-2">Students:</div>
               <div className="space-y-1">
                 <Button variant="outline" size="sm" className="w-full justify-start" onClick={() => handleTestLogin('alex.johnson@college.edu')}>
