@@ -1,4 +1,3 @@
-
 import { 
   Student, 
   Company, 
@@ -731,6 +730,45 @@ export const mockJobs: Job[] = [
   }
 ];
 
+// Generate mock notifications
+export const mockNotifications: Notification[] = [
+  {
+    id: '1',
+    user: { id: '1', name: 'Alex Johnson' },
+    message: 'You have been shortlisted for TCS interview.',
+    isRead: false,
+    createdAt: '2024-05-10T09:30:00'
+  },
+  {
+    id: '2',
+    user: { id: '1', name: 'Alex Johnson' },
+    message: 'New job posting from Google matches your profile.',
+    isRead: true,
+    createdAt: '2024-05-09T14:20:00'
+  },
+  {
+    id: '3',
+    user: { id: '2', name: 'Sarah Williams' },
+    message: 'Your application for Software Engineer at TCS has been received.',
+    isRead: false,
+    createdAt: '2024-05-08T11:45:00'
+  },
+  {
+    id: '4',
+    user: { id: '3', name: 'Michael Brown' },
+    message: 'Upcoming placement drive by Infosys on June 20, 2024.',
+    isRead: true,
+    createdAt: '2024-05-07T16:30:00'
+  },
+  {
+    id: '5',
+    user: { id: '4', name: 'Emily Davis' },
+    message: 'Resume submission deadline for Amazon is approaching.',
+    isRead: false,
+    createdAt: '2024-05-06T10:15:00'
+  }
+];
+
 // Generate mock placement stats
 export const mockPlacementStats: PlacementStats = {
   totalStudents: 120,
@@ -754,4 +792,3 @@ for (const job of mockJobs) {
     mockCompanies[companyIndex].postedJobs.push(job);
   }
 }
-

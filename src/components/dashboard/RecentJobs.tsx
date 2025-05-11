@@ -6,12 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Job } from '@/types';
 import { Link } from 'react-router-dom';
 import { ArrowRight, MapPin, Calendar, Users } from 'lucide-react';
+import { mockJobs } from '@/data/mockData';
 
 interface RecentJobsProps {
-  jobs: Job[];
+  jobs?: Job[];
 }
 
-const RecentJobs: React.FC<RecentJobsProps> = ({ jobs }) => {
+const RecentJobs: React.FC<RecentJobsProps> = ({ jobs = mockJobs }) => {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between pb-2">

@@ -78,11 +78,16 @@ export interface PlacementStats {
   totalApplications: number;
   totalPlacements: number;
   averageSalary: number;
+  highestSalary: number;
+  placementRate: number;
 }
 
 export interface Notification {
   id: string;
-  user: User;
+  user: {
+    id: string;
+    name: string;
+  };
   message: string;
   isRead: boolean;
   createdAt: string;

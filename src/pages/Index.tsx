@@ -374,7 +374,7 @@ const Index = () => {
                 <CardDescription>Latest opportunities from top companies</CardDescription>
               </CardHeader>
               <CardContent>
-                <RecentJobs />
+                <RecentJobs jobs={mockJobs} />
               </CardContent>
             </Card>
           </div>
