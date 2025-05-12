@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
 import { 
   Dialog,
   DialogContent,
@@ -45,6 +46,7 @@ const JobApplicationModal: React.FC<JobApplicationModalProps> = ({
   const { currentUser } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { register, handleSubmit, formState: { errors }, reset } = useForm<FormData>();
+  const navigate = useNavigate();
 
   const onSubmit = async (data: FormData) => {
     if (!currentUser) {
@@ -106,12 +108,18 @@ const JobApplicationModal: React.FC<JobApplicationModalProps> = ({
         });
       
       reset();
-      onSuccess();
+      toast.success("Application submitted successfully!");
+      
+      // Redirect to student dashboard to track applications
+      setTimeout(() => {
+        navigate('/student-dashboard');
+      }, 1000);
     } catch (error: any) {
       console.error('Error submitting application:', error);
       toast.error(error.message || "Failed to submit application");
     } finally {
       setIsSubmitting(false);
+      onClose();
     }
   };
 
@@ -132,6 +140,7 @@ const JobApplicationModal: React.FC<JobApplicationModalProps> = ({
               id="name"
               {...register("name", { required: "Name is required" })}
               placeholder="Enter your full name"
+              defaultValue={currentUser?.name || ''}
             />
             {errors.name && <p className="text-sm text-red-500">{errors.name.message}</p>}
           </div>
@@ -143,6 +152,7 @@ const JobApplicationModal: React.FC<JobApplicationModalProps> = ({
               type="email"
               {...register("email", { required: "Email is required" })}
               placeholder="Enter your email"
+              defaultValue={currentUser?.email || ''}
             />
             {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
           </div>

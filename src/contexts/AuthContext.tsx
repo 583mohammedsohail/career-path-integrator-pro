@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User } from '../types';
 import { supabase } from '../integrations/supabase/client';
@@ -62,7 +63,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
           
           if (mockUser) {
-            setCurrentUser(mockUser);
+            setCurrentUser(mockUser as User);
           } else {
             // If no mock user found but we have session, create minimal user
             setCurrentUser({
@@ -95,11 +96,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           mockUser = mockStudents.find(student => student.email === email) || 
                     mockCompanies.find(company => company.email === email) || 
                     mockAdmins.find(admin => admin.email === email) || 
+                    mockManagement.find(manager => manager.email === email) || 
                     (email === 'sysadmin@college.edu' ? mockSuperAdmin : null);
         }
         
         if (mockUser) {
-          setCurrentUser(mockUser);
+          setCurrentUser(mockUser as User);
         } else if (email) {
           // If no mock user found but we have session, create minimal user
           setCurrentUser({
@@ -152,13 +154,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           // If error from Supabase (likely because test account doesn't exist in Supabase)
           // Just set the mock user directly
           console.log('Supabase auth error with test account, using mock data:', error);
-          setCurrentUser(mockUser);
+          setCurrentUser(mockUser as User);
           setSession(null); // No real session for mock users
           toast.success('Login successful with test account!');
         } else if (data.user) {
           // If test account exists in Supabase, we'll get a session
           setSession(data.session);
-          setCurrentUser(mockUser);
+          setCurrentUser(mockUser as User);
           toast.success('Login successful!');
         }
       } else {
