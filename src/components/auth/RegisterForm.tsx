@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -100,9 +99,7 @@ const RegisterForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [avatar, setAvatar] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
-  const [showVerificationDialog, setShowVerificationDialog] = useState(false);
-  const [verificationMethod, setVerificationMethod] = useState<'email' | 'phone'>('email');
-  const [verificationCode, setVerificationCode] = useState('');
+  const [showVerificationModal, setShowVerificationModal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   
@@ -149,8 +146,12 @@ const RegisterForm = () => {
       if (error) {
         toast.error(error.message);
       }
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to sign in with Google');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error('Failed to sign in with Google');
+      }
     }
   };
 
@@ -166,30 +167,19 @@ const RegisterForm = () => {
       if (error) {
         toast.error(error.message);
       }
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to sign in with LinkedIn');
-    }
-  };
-
-  const verifyCode = () => {
-    // In a real app, we would verify the code with an API call
-    // For this demo, we'll just accept any 6-digit code
-    if (verificationCode.length === 6) {
-      toast.success('Verification successful!');
-      setShowVerificationDialog(false);
-      
-      if (form.formState.isSubmitted) {
-        // Navigate after successful verification
-        navigate('/login');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error('Failed to sign in with LinkedIn');
       }
-    } else {
-      toast.error('Invalid verification code');
     }
   };
 
   const onSubmit = async (data: FormData) => {
     setIsLoading(true);
     try {
+      // Sign up with email/password
       const { data: authData, error } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
@@ -230,69 +220,64 @@ const RegisterForm = () => {
             avatarUrl = urlData?.publicUrl;
           }
         }
-        
-        // Insert the profile data based on role
+
+        // Insert user profile based on role
         if (data.role === 'student') {
-          // For students, extract additional fields
-          const { role, department, course, year, cgpa, skills, phone, address, ...rest } = data;
-          
-          const { error: profileError } = await supabase
+          const { error: studentError } = await supabase
             .from('students')
             .insert({
               id: authData.user.id,
-              roll_number: `S${Math.floor(100000 + Math.random() * 900000)}`, // Generate a random roll number
-              department: department,
-              course: course,
-              year: year,
-              cgpa: cgpa,
-              skills: typeof skills === 'string' 
-                ? skills.split(',').map(s => s.trim()).filter(Boolean) 
-                : skills,
-              phone: phone,
-              address: address
+              department: data.department,
+              course: data.course,
+              year: data.year,
+              cgpa: data.cgpa,
+              skills: data.skills.split(',').map(s => s.trim()),
+              roll_number: `STU${Date.now()}`,
             });
-            
-          if (profileError) {
-            toast.error(`Error creating student profile: ${profileError.message}`);
-          }
-          
-          // Update avatar URL in the profiles table
-          if (avatarUrl) {
-            const { error: avatarError } = await supabase
-              .from('profiles')
-              .update({ avatar_url: avatarUrl })
-              .eq('id', authData.user.id);
-              
-            if (avatarError) {
-              toast.error(`Error updating profile avatar: ${avatarError.message}`);
-            }
+
+          if (studentError) {
+            toast.error(`Error creating student profile: ${studentError.message}`);
+            return;
           }
         } else if (data.role === 'company') {
-          const { error: profileError } = await supabase
+          const { error: companyError } = await supabase
             .from('companies')
             .insert({
               id: authData.user.id,
               company_name: data.name,
-              phone: data.phone,
-              address: data.address
+              description: '',
+              industry: '',
+              location: data.address || '',
+              website: '',
             });
-            
-          if (profileError) {
-            toast.error(`Error creating company profile: ${profileError.message}`);
+
+          if (companyError) {
+            toast.error(`Error creating company profile: ${companyError.message}`);
+            return;
           }
         }
-        
-        // Show verification dialog
-        setShowVerificationDialog(true);
-        setVerificationMethod('email');
-        
-        // In a real app, the verification would be handled by Supabase
-        // and we would redirect after email confirmation
-        toast.success("Registration successful! Please verify your email.");
+
+        // Update profile with avatar if uploaded
+        if (avatarUrl) {
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .update({ avatar_url: avatarUrl })
+            .eq('id', authData.user.id);
+
+          if (profileError) {
+            toast.error(`Error updating profile: ${profileError.message}`);
+          }
+        }
+
+        // Show verification modal
+        setShowVerificationModal(true);
       }
-    } catch (err) {
-      toast.error("Registration failed. Please try again.");
-      console.error(err);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error('An unexpected error occurred');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -610,60 +595,32 @@ const RegisterForm = () => {
           </div>
         </CardFooter>
       </Card>
-      
-      {/* Email/Phone Verification Dialog */}
-      <Dialog open={showVerificationDialog} onOpenChange={setShowVerificationDialog}>
+
+      {/* Verification Modal */}
+      <Dialog open={showVerificationModal} onOpenChange={setShowVerificationModal}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Verify your account</DialogTitle>
-            <DialogDescription>
-              We've sent a verification code to your {verificationMethod}.
+            <DialogTitle className="text-xl font-semibold text-center">Registration Successful!</DialogTitle>
+            <DialogDescription className="text-center space-y-4">
+              <p className="text-base">
+                Please check your email and click the confirmation link to verify your account.
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Once you've verified your email, you can log in using your credentials.
+              </p>
+              <div className="flex justify-center pt-4">
+                <Button 
+                  onClick={() => {
+                    setShowVerificationModal(false);
+                    navigate('/login');
+                  }}
+                  className="w-full max-w-[200px]"
+                >
+                  Go to Login
+                </Button>
+              </div>
             </DialogDescription>
           </DialogHeader>
-          
-          <div className="flex flex-col items-center gap-4 py-4">
-            <div className="flex items-center space-x-2">
-              <Button 
-                variant={verificationMethod === 'email' ? "default" : "outline"} 
-                className="text-xs"
-                onClick={() => setVerificationMethod('email')}
-              >
-                <Mail className="h-4 w-4 mr-2" />
-                Email
-              </Button>
-              <Button 
-                variant={verificationMethod === 'phone' ? "default" : "outline"}
-                className="text-xs"
-                onClick={() => setVerificationMethod('phone')}
-              >
-                <Phone className="h-4 w-4 mr-2" />
-                Phone
-              </Button>
-            </div>
-            
-            <div className="flex flex-col items-center gap-2">
-              <p className="text-sm text-center">
-                Enter the 6-digit code sent to your {verificationMethod === 'email' ? 'email' : 'phone'}
-              </p>
-              <InputOTP 
-                maxLength={6} 
-                value={verificationCode}
-                onChange={setVerificationCode}
-                render={({ slots }) => (
-                  <InputOTPGroup>
-                    {slots.map((slot, index) => (
-                      <InputOTPSlot key={index} {...slot} index={index} />
-                    ))}
-                  </InputOTPGroup>
-                )}
-              />
-              <Button className="mt-4" onClick={verifyCode}>Verify</Button>
-            </div>
-            
-            <div className="text-center text-sm text-gray-500">
-              <p>Didn't receive the code? <Button variant="link" className="p-0">Resend</Button></p>
-            </div>
-          </div>
         </DialogContent>
       </Dialog>
     </>

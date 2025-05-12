@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import { Card, CardContent } from '@/components/ui/card';
@@ -25,35 +24,37 @@ const DevelopersTeam = () => {
     {
       name: "Mohammed Sohail",
       role: "Team Leader & Developer",
-      image: "/team/mohammed-sohail.jpg",
+      image: "https://res.cloudinary.com/dbt3gghme/image/upload/v1747058047/Mohammed_sohail_vzb8ac.heic",
       bio: "Lead developer responsible for the core architecture and functionality of the application.",
       linkedin: "https://www.linkedin.com/in/mohammed-sohail-82176825b/",
       github: "https://github.com/mohd-sohail",
-      email: "msohail@cothonsolutions.com"
+      email: "583mohammedsohail@gmail.com"
     },
     {
       name: "Sana Parveen",
       role: "Associate Support Role in Development",
-      image: "/team/sana-parveen.jpg",
+      image: "https://res.cloudinary.com/dbt3gghme/image/upload/v1747058047/Sana_Parveen_mgl1sr.jpg",
       bio: "Developer focused on frontend components and user experience of the application.",
       linkedin: "https://www.linkedin.com/in/sana-parveen-93b29b294/",
       github: "https://github.com/sana-parveen",
-      email: "sparveen@cothonsolutions.com"
+      email: "sanapa230603@gmail.com"
     },
     {
       name: "Mohammed Awais",
       role: "Tester & Planner",
-      image: "/team/mohammed-awais.jpg",
+      image: "https://res.cloudinary.com/dbt3gghme/image/upload/v1747058755/PHOTO-2025-05-12-19-34-39_u4tl81.jpg",
       bio: "Responsible for quality assurance, testing, and planning project milestones.",
-      email: "mawais@cothonsolutions.com"
+      github: "https://github.com/mohdawais",
+      email: "mohdawaisawais92@gmail.com",
+      linkedin: "https://www.linkedin.com/in/mohammed-awais-27116322a/"
     },
     {
       name: "Syed Nehal Ali",
       role: "Mentor & Senior Developer, HR",
-      image: "/team/syed-nehal.jpg",
+      image: "https://res.cloudinary.com/dbt3gghme/image/upload/v1747058953/PHOTO-2025-05-12-19-38-44_yoyrmn.jpg",
       bio: "Senior mentor providing guidance on development practices and HR processes.",
       linkedin: "https://www.linkedin.com/in/syed-nehal-ali/",
-      email: "snehal@cothonsolutions.com"
+      email: "hr@cothonsolutions.com"
     }
   ];
 
@@ -74,38 +75,13 @@ const DevelopersTeam = () => {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 py-16">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">Our Development Team</h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Meet the talented individuals behind this placement management system, working under the 
-            guidance of <span className="text-primary font-medium">CoThon Solutions</span>.
+            guidance of <span className="text-primary font-medium">Cothon Solutions</span>.
           </p>
-          <Button 
-            variant="outline" 
-            className="mt-4"
-            onClick={() => setShowAcknowledgment(true)}
-          >
-            View Project Acknowledgment
-          </Button>
-        </div>
-
-        <div className="flex justify-center mb-12">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <img 
-              src="/cothon-banner.jpg"
-              alt="CoThon Solutions"
-              className="rounded-lg shadow-lg max-h-72 w-auto"
-              onError={(e) => {
-                e.currentTarget.src = "https://placehold.co/800x300?text=CoThon+Solutions";
-                e.currentTarget.onerror = null;
-              }}
-            />
-          </motion.div>
         </div>
 
         <motion.div 

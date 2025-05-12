@@ -15,6 +15,9 @@ const InputOTP = React.forwardRef<
       containerClassName
     )}
     className={cn("disabled:cursor-not-allowed", className)}
+    inputMode="numeric"
+    pattern="[0-9]*"
+    autoComplete="one-time-code"
     {...props}
   />
 ))
@@ -24,7 +27,7 @@ const InputOTPGroup = React.forwardRef<
   React.ElementRef<"div">,
   React.ComponentPropsWithoutRef<"div">
 >(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("flex items-center", className)} {...props} />
+  <div ref={ref} className={cn("flex items-center gap-2", className)} {...props} />
 ))
 InputOTPGroup.displayName = "InputOTPGroup"
 
@@ -33,7 +36,11 @@ const InputOTPSlot = React.forwardRef<
   React.ComponentPropsWithoutRef<"div"> & { index: number }
 >(({ index, className, ...props }, ref) => {
   const inputOTPContext = React.useContext(OTPInputContext)
-  const { char, hasFakeCaret, isActive } = inputOTPContext.slots[index]
+  const { char, hasFakeCaret, isActive } = inputOTPContext?.slots?.[index] || {
+    char: '',
+    hasFakeCaret: false,
+    isActive: false
+  }
 
   return (
     <div

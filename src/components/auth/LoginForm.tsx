@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -64,8 +63,9 @@ const LoginForm = () => {
       if (error) {
         toast.error(error.message);
       }
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to sign in with Google');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to sign in with Google';
+      toast.error(errorMessage);
     }
   };
 
@@ -81,50 +81,64 @@ const LoginForm = () => {
       if (error) {
         toast.error(error.message);
       }
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to sign in with LinkedIn');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to sign in with LinkedIn';
+      toast.error(errorMessage);
     }
   };
 
-  const handlePhoneLogin = () => {
+  const handlePhoneLogin = async () => {
     if (!phoneNumber || phoneNumber.length < 10) {
       toast.error('Please enter a valid phone number');
       return;
     }
 
-    // In a real app, we would send an OTP to the phone number
-    // For this demo, we'll just show the verification dialog
-    setShowVerificationDialog(true);
-    toast.success(`Verification code sent to ${phoneNumber}`);
+    try {
+      const { data, error } = await supabase.auth.signInWithOtp({
+        phone: phoneNumber,
+      });
+
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+
+      setShowVerificationDialog(true);
+      toast.success(`Verification code sent to ${phoneNumber}`);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to send verification code';
+      toast.error(errorMessage);
+    }
   };
 
-  const verifyPhoneCode = () => {
+  const verifyPhoneCode = async () => {
     try {
-      // In a real app, we would verify the code with an API call
-      // For this demo, we'll just accept any 6-digit code
-      if (verificationCode && verificationCode.length === 6) {
+      if (!verificationCode || verificationCode.length !== 6) {
+        toast.error('Please enter a valid 6-digit code');
+        return;
+      }
+
+      const { data, error } = await supabase.auth.verifyOtp({
+        phone: phoneNumber,
+        token: verificationCode,
+        type: 'sms'
+      });
+
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+
+      if (data.user) {
         setShowVerificationDialog(false);
         toast.success('Phone verification successful!');
         
-        // Mock a successful login by simulating a student user
-        const mockUser = {
-          id: 'phone-auth-user',
-          name: 'Phone User',
-          email: `${phoneNumber}@example.com`,
-          role: 'student',
-          avatar: '',
-        };
-        
-        localStorage.setItem('currentUser', JSON.stringify(mockUser));
-        window.dispatchEvent(new Event('storage')); // Trigger storage event for AuthContext to pick up
-        
-        navigate('/student-dashboard');
-      } else {
-        toast.error('Invalid verification code');
+        // The session will be handled by the AuthContext's onAuthStateChange
+        navigate('/');
       }
-    } catch (error) {
-      console.error('Phone verification error:', error);
-      toast.error('Failed to verify phone number');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to verify phone number';
+      toast.error(errorMessage);
     }
   };
 
@@ -327,23 +341,28 @@ const LoginForm = () => {
               <p className="text-sm text-center">
                 Enter the 6-digit code sent to {phoneNumber}
               </p>
-              <InputOTP 
-                maxLength={6} 
-                value={verificationCode}
-                onChange={(value) => setVerificationCode(value || '')}
-                render={({ slots }) => (
-                  <InputOTPGroup>
-                    {slots.map((slot, index) => (
-                      <InputOTPSlot key={index} {...slot} />
-                    ))}
-                  </InputOTPGroup>
-                )}
-              />
+              <div className="w-full max-w-[300px]">
+                <InputOTP 
+                  maxLength={6} 
+                  value={verificationCode}
+                  onChange={(value) => {
+                    setVerificationCode(value);
+                  }}
+                  containerClassName="gap-2"
+                  render={({ slots }) => (
+                    <InputOTPGroup>
+                      {slots.map((slot, index) => (
+                        <InputOTPSlot key={index} {...slot} index={index} />
+                      ))}
+                    </InputOTPGroup>
+                  )}
+                />
+              </div>
               <Button className="mt-4" onClick={verifyPhoneCode}>Verify</Button>
             </div>
             
             <div className="text-center text-sm text-gray-500">
-              <p>Didn't receive the code? <Button variant="link" className="p-0">Resend</Button></p>
+              <p>Didn't receive the code? <Button variant="link" className="p-0" onClick={handlePhoneLogin}>Resend</Button></p>
             </div>
           </div>
         </DialogContent>
