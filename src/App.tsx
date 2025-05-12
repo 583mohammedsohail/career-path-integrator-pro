@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
@@ -13,6 +14,8 @@ import StudentProfile from '@/pages/StudentProfile';
 import Profile from '@/pages/Profile';
 import NotFound from '@/pages/NotFound';
 import SuperAdminDashboard from './pages/SuperAdminDashboard';
+import StudentDashboard from './pages/StudentDashboard';
+import CompanyDashboard from './pages/CompanyDashboard';
 
 const router = createBrowserRouter([
   {
@@ -58,6 +61,14 @@ const router = createBrowserRouter([
   {
     path: "/admin",
     element: <SuperAdminDashboard />,
+  },
+  {
+    path: "/student-dashboard",
+    element: <StudentDashboard />,
+  },
+  {
+    path: "/company-dashboard",
+    element: <CompanyDashboard />,
   },
   {
     path: "*",

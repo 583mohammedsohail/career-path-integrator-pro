@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User } from '../types';
 import { supabase } from '../integrations/supabase/client';
@@ -96,18 +95,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           mockUser = mockStudents.find(student => student.email === email) || 
                     mockCompanies.find(company => company.email === email) || 
                     mockAdmins.find(admin => admin.email === email) || 
-                    mockManagement.find(manager => manager.email === email) || 
                     (email === 'sysadmin@college.edu' ? mockSuperAdmin : null);
         }
         
         if (mockUser) {
           setCurrentUser(mockUser);
-        } else {
+        } else if (email) {
           // If no mock user found but we have session, create minimal user
           setCurrentUser({
             id: session.user.id,
             name: session.user.user_metadata?.name || 'User',
-            email: email || '',
+            email: email,
             role: session.user.user_metadata?.role || 'student',
             avatar: session.user.user_metadata?.avatar_url || ''
           });

@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/contexts/AuthContext';
-import { LogOut, User, Bell, Shield } from 'lucide-react';
+import { LogOut, User, Bell, Shield, LayoutDashboard } from 'lucide-react';
 import { mockNotifications } from '@/data/mockData';
 
 const Header: React.FC = () => {
@@ -31,6 +31,24 @@ const Header: React.FC = () => {
     return currentUser.name.charAt(0).toUpperCase();
   };
 
+  // Get the appropriate dashboard path based on user role
+  const getDashboardPath = () => {
+    if (!currentUser) return '/';
+    
+    switch (currentUser.role) {
+      case 'student':
+        return '/student-dashboard';
+      case 'company':
+        return '/company-dashboard';
+      case 'superadmin':
+        return '/admin';
+      default:
+        return '/';
+    }
+  };
+
+  const dashboardPath = getDashboardPath();
+
   return (
     <header className="bg-white shadow-sm border-b">
       <div className="container mx-auto px-4 flex h-16 items-center justify-between">
@@ -42,8 +60,15 @@ const Header: React.FC = () => {
         </Link>
         
         <nav className="hidden md:flex items-center space-x-6">
+          {currentUser && (
+            <Link to={dashboardPath} className="text-gray-600 hover:text-primary transition-colors">
+              <div className="flex items-center">
+                <LayoutDashboard className="mr-1 h-4 w-4" /> Dashboard
+              </div>
+            </Link>
+          )}
           <Link to="/" className="text-gray-600 hover:text-primary transition-colors">
-            Dashboard
+            Home
           </Link>
           <Link to="/jobs" className="text-gray-600 hover:text-primary transition-colors">
             Jobs
@@ -123,6 +148,12 @@ const Header: React.FC = () => {
                     <Link to="/profile" className="flex items-center w-full">
                       <User className="mr-2 h-4 w-4" />
                       <span>Profile</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Link to={dashboardPath} className="flex items-center w-full">
+                      <LayoutDashboard className="mr-2 h-4 w-4" />
+                      <span>Dashboard</span>
                     </Link>
                   </DropdownMenuItem>
                   {currentUser.role === 'superadmin' && (
