@@ -4,7 +4,7 @@ import { ExternalLink } from 'lucide-react';
 
 const DeveloperCredits: React.FC = () => {
   return (
-    <div className="text-center py-6 text-muted-foreground">
+    <div className="text-center py-8 text-muted-foreground">
       <p className="text-lg font-medium mb-2">Developed by</p>
       <div className="flex items-center justify-center gap-6 mt-1">
         <a 
@@ -28,7 +28,7 @@ const DeveloperCredits: React.FC = () => {
         </a>
       </div>
       
-      <div className="mt-4">
+      <div className="mt-6">
         <p className="text-md">
           Powered by 
           <a 
@@ -40,6 +40,10 @@ const DeveloperCredits: React.FC = () => {
             Cothon Solutions
           </a>
         </p>
+      </div>
+      
+      <div className="mt-4 text-sm">
+        © 2025 PlacementPro. All rights reserved.
       </div>
     </div>
   );

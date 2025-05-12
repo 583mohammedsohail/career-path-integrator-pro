@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import Layout from '../components/layout/Layout';
 import { useAuth } from '../contexts/AuthContext';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ApplicationTracker from '@/components/student/ApplicationTracker';
 import CareerGoals from '@/components/career/CareerGoals';
@@ -14,7 +14,9 @@ import { toast } from 'sonner';
 
 const StudentDashboard = () => {
   const { currentUser, isLoading } = useAuth();
-  const [activeTab, setActiveTab] = useState('applications');
+  const location = useLocation();
+  const defaultTab = location.state?.activeTab || 'applications';
+  const [activeTab, setActiveTab] = useState(defaultTab);
   const [loading, setLoading] = useState(true);
   const [applications, setApplications] = useState([]);
 
@@ -115,7 +117,7 @@ const StudentDashboard = () => {
           </div>
         </div>
 
-        <Tabs defaultValue={activeTab} className="space-y-4" onValueChange={setActiveTab}>
+        <Tabs value={activeTab} className="space-y-4" onValueChange={setActiveTab}>
           <TabsList className="grid grid-cols-4 w-full max-w-2xl">
             <TabsTrigger value="applications">Applications</TabsTrigger>
             <TabsTrigger value="recommended">Recommended Jobs</TabsTrigger>

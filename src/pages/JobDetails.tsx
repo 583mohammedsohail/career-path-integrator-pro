@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
 import { Button } from '@/components/ui/button';
@@ -10,38 +10,76 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/contexts/AuthContext';
 import JobApplicationModal from '@/components/jobs/JobApplicationModal';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 const JobDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { currentUser } = useAuth();
   const [showApplicationModal, setShowApplicationModal] = useState(false);
+  const [job, setJob] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Mock job data to avoid fetch errors
-  const job = {
-    id: id || 'job-1',
-    title: 'Software Developer',
-    status: 'open',
-    location: 'Remote / San Francisco, CA',
-    deadline: '2025-12-31',
-    positions: 3,
-    description: 'We are looking for a skilled software developer to join our team. The ideal candidate will have experience with React, TypeScript, and modern web development practices.',
-    salary: '$80,000 - $120,000',
-    requirements: [
-      'Bachelor\'s degree in Computer Science or related field',
-      '2+ years experience with React',
-      'Proficiency in TypeScript and JavaScript',
-      'Strong problem-solving skills'
-    ],
-    company: {
-      id: 'company-1',
-      company_name: 'Tech Innovations Inc.',
-      description: 'A leading software development company specializing in web and mobile applications.',
-      website: 'https://techinnovations.example.com',
-      location: 'San Francisco, CA',
-      industry: 'Software Development'
-    }
-  };
+  useEffect(() => {
+    const fetchJob = async () => {
+      if (!id) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('jobs')
+          .select(`
+            *,
+            company:company_id (
+              id,
+              company_name,
+              description,
+              website,
+              location,
+              industry
+            )
+          `)
+          .eq('id', id)
+          .single();
+          
+        if (error) {
+          throw error;
+        }
+        
+        setJob(data);
+      } catch (error) {
+        console.error('Error loading job details:', error);
+        toast.error('Failed to load job details');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchJob();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="container mx-auto px-4 py-8">
+          <div className="animate-pulse space-y-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <div className="h-8 bg-gray-200 rounded-md w-3/4 mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded-md w-1/2 mb-2"></div>
+                <div className="flex flex-wrap gap-3 mt-3">
+                  <div className="h-6 bg-gray-200 rounded-md w-20"></div>
+                  <div className="h-6 bg-gray-200 rounded-md w-32"></div>
+                  <div className="h-6 bg-gray-200 rounded-md w-36"></div>
+                </div>
+              </div>
+              <div className="h-10 bg-gray-200 rounded-md w-32"></div>
+            </div>
+            <div className="h-96 bg-gray-200 rounded-md"></div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   if (!job) {
     return (
@@ -150,7 +188,9 @@ const JobDetails = () => {
             companyName={job.company.company_name}
             onSuccess={() => {
               toast.success("Application submitted successfully!");
-              navigate('/jobs');
+              navigate('/student-dashboard', { 
+                state: { activeTab: 'applications' } 
+              });
             }}
           />
         )}
