@@ -16,6 +16,7 @@ import NotFound from '@/pages/NotFound';
 import SuperAdminDashboard from './pages/SuperAdminDashboard';
 import StudentDashboard from './pages/StudentDashboard';
 import CompanyDashboard from './pages/CompanyDashboard';
+import DevelopersTeam from './pages/DevelopersTeam';
 
 const router = createBrowserRouter([
   {
@@ -69,6 +70,10 @@ const router = createBrowserRouter([
   {
     path: "/company-dashboard",
     element: <CompanyDashboard />,
+  },
+  {
+    path: "/developers-team",
+    element: <DevelopersTeam />,
   },
   {
     path: "*",

@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/contexts/AuthContext';
-import { LogOut, User, Bell, Shield, LayoutDashboard } from 'lucide-react';
+import { LogOut, User, Bell, Shield, LayoutDashboard, Users } from 'lucide-react';
 import { mockNotifications } from '@/data/mockData';
 
 const Header: React.FC = () => {
@@ -78,6 +78,11 @@ const Header: React.FC = () => {
           </Link>
           <Link to="/students" className="text-gray-600 hover:text-primary transition-colors">
             Students
+          </Link>
+          <Link to="/developers-team" className="text-gray-600 hover:text-primary transition-colors">
+            <div className="flex items-center">
+              <Users className="mr-1 h-4 w-4" /> Developer's Team
+            </div>
           </Link>
           {currentUser && currentUser.role === 'superadmin' && (
             <Link to="/admin" className="text-gray-600 hover:text-primary transition-colors flex items-center">

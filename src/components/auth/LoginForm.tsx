@@ -99,14 +99,32 @@ const LoginForm = () => {
   };
 
   const verifyPhoneCode = () => {
-    // In a real app, we would verify the code with an API call
-    // For this demo, we'll just accept any 6-digit code
-    if (verificationCode.length === 6) {
-      setShowVerificationDialog(false);
-      toast.success('Phone verification successful!');
-      navigate('/');
-    } else {
-      toast.error('Invalid verification code');
+    try {
+      // In a real app, we would verify the code with an API call
+      // For this demo, we'll just accept any 6-digit code
+      if (verificationCode && verificationCode.length === 6) {
+        setShowVerificationDialog(false);
+        toast.success('Phone verification successful!');
+        
+        // Mock a successful login by simulating a student user
+        const mockUser = {
+          id: 'phone-auth-user',
+          name: 'Phone User',
+          email: `${phoneNumber}@example.com`,
+          role: 'student',
+          avatar: '',
+        };
+        
+        localStorage.setItem('currentUser', JSON.stringify(mockUser));
+        window.dispatchEvent(new Event('storage')); // Trigger storage event for AuthContext to pick up
+        
+        navigate('/student-dashboard');
+      } else {
+        toast.error('Invalid verification code');
+      }
+    } catch (error) {
+      console.error('Phone verification error:', error);
+      toast.error('Failed to verify phone number');
     }
   };
 
@@ -312,11 +330,11 @@ const LoginForm = () => {
               <InputOTP 
                 maxLength={6} 
                 value={verificationCode}
-                onChange={setVerificationCode}
+                onChange={(value) => setVerificationCode(value || '')}
                 render={({ slots }) => (
                   <InputOTPGroup>
                     {slots.map((slot, index) => (
-                      <InputOTPSlot key={index} {...slot} index={index} />
+                      <InputOTPSlot key={index} {...slot} />
                     ))}
                   </InputOTPGroup>
                 )}
