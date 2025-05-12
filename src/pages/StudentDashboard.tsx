@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Layout from '../components/layout/Layout';
 import { useAuth } from '../contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
@@ -9,9 +9,55 @@ import CareerGoals from '@/components/career/CareerGoals';
 import CareerAssistant from '@/components/career/CareerAssistant';
 import { mockJobs } from '@/data/mockData';
 import JobCard from '@/components/jobs/JobCard';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 const StudentDashboard = () => {
   const { currentUser, isLoading } = useAuth();
+  const [activeTab, setActiveTab] = useState('applications');
+  const [loading, setLoading] = useState(true);
+  const [applications, setApplications] = useState([]);
+
+  // Fetch application data when the dashboard loads
+  useEffect(() => {
+    const fetchApplications = async () => {
+      if (!currentUser) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('job_applications')
+          .select(`
+            *,
+            job:job_id (
+              id,
+              title,
+              company_id,
+              deadline,
+              status,
+              company:company_id (
+                id,
+                company_name
+              )
+            )
+          `)
+          .eq('student_id', currentUser.id)
+          .order('applied_at', { ascending: false });
+          
+        if (error) {
+          throw error;
+        }
+        
+        setApplications(data || []);
+      } catch (error) {
+        console.error('Error loading applications:', error);
+        toast.error('Failed to load your applications');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchApplications();
+  }, [currentUser]);
 
   if (isLoading) {
     return (
@@ -69,7 +115,7 @@ const StudentDashboard = () => {
           </div>
         </div>
 
-        <Tabs defaultValue="applications" className="space-y-4">
+        <Tabs defaultValue={activeTab} className="space-y-4" onValueChange={setActiveTab}>
           <TabsList className="grid grid-cols-4 w-full max-w-2xl">
             <TabsTrigger value="applications">Applications</TabsTrigger>
             <TabsTrigger value="recommended">Recommended Jobs</TabsTrigger>
@@ -78,7 +124,7 @@ const StudentDashboard = () => {
           </TabsList>
           
           <TabsContent value="applications" className="space-y-4">
-            <ApplicationTracker />
+            <ApplicationTracker applications={applications} loading={loading} />
           </TabsContent>
           
           <TabsContent value="recommended" className="space-y-4">

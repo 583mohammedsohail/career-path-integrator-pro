@@ -1,14 +1,11 @@
 
-import React, { useEffect, useState } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Calendar, FileText, Building, AlertCircle } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 
 interface JobApplication {
   id: string;
@@ -30,114 +27,13 @@ interface JobApplication {
   };
 }
 
-const ApplicationTracker: React.FC = () => {
-  const { currentUser } = useAuth();
-  const [applications, setApplications] = useState<JobApplication[]>([]);
-  const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+interface ApplicationTrackerProps {
+  applications: JobApplication[];
+  loading: boolean;
+}
 
-  useEffect(() => {
-    const fetchApplications = async () => {
-      if (!currentUser) return;
-      
-      try {
-        const { data, error } = await supabase
-          .from('job_applications')
-          .select(`
-            *,
-            job:job_id (
-              id,
-              title,
-              company_id,
-              deadline,
-              status,
-              company:company_id (
-                id,
-                company_name
-              )
-            )
-          `)
-          .eq('student_id', currentUser.id)
-          .order('applied_at', { ascending: false });
-          
-        if (error) {
-          throw error;
-        }
-        
-        // For demo purposes, use mock data if no applications found
-        if (data && data.length > 0) {
-          setApplications(data as unknown as JobApplication[]);
-        } else {
-          // Mock data for demonstration
-          setApplications([
-            {
-              id: '1',
-              job_id: 'job-1',
-              student_id: currentUser.id,
-              applied_at: new Date().toISOString(),
-              resume_url: null,
-              status: 'shortlisted',
-              job: {
-                id: 'job-1',
-                title: 'Software Developer',
-                company_id: 'company-1',
-                deadline: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
-                status: 'open',
-                company: {
-                  id: 'company-1',
-                  company_name: 'Tech Innovations Inc.'
-                }
-              }
-            },
-            {
-              id: '2',
-              job_id: 'job-2',
-              student_id: currentUser.id,
-              applied_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-              resume_url: null,
-              status: 'interviewed',
-              job: {
-                id: 'job-2',
-                title: 'Frontend Developer',
-                company_id: 'company-2',
-                deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-                status: 'open',
-                company: {
-                  id: 'company-2',
-                  company_name: 'Web Solutions Ltd'
-                }
-              }
-            },
-            {
-              id: '3',
-              job_id: 'job-3',
-              student_id: currentUser.id,
-              applied_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-              resume_url: null,
-              status: 'accepted',
-              job: {
-                id: 'job-3',
-                title: 'UX Designer',
-                company_id: 'company-3',
-                deadline: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
-                status: 'closed',
-                company: {
-                  id: 'company-3',
-                  company_name: 'Design Masters Co.'
-                }
-              }
-            }
-          ]);
-        }
-      } catch (error: any) {
-        toast.error('Error loading applications: ' + error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchApplications();
-  }, [currentUser]);
+const ApplicationTracker: React.FC<ApplicationTrackerProps> = ({ applications, loading }) => {
+  const navigate = useNavigate();
   
   const getStatusBadge = (status: string) => {
     switch(status) {
@@ -248,6 +144,15 @@ const ApplicationTracker: React.FC = () => {
                   </Button>
                 </div>
               </div>
+              
+              {application.status === 'pending' && (
+                <div className="bg-gray-50 px-4 py-2 border-t">
+                  <p className="text-sm text-gray-700 flex items-center">
+                    <AlertCircle className="h-4 w-4 mr-2" />
+                    Your application is under review. You will be notified of any updates.
+                  </p>
+                </div>
+              )}
               
               {application.status === 'shortlisted' && (
                 <div className="bg-blue-50 px-4 py-2 border-t">

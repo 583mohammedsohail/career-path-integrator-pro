@@ -152,6 +152,21 @@ const Footer: React.FC = () => {
             </a>
           </div>
         </div>
+        
+        {/* Add Cothon Solutions with spacing */}
+        <div className="text-center mt-6 pt-4">
+          <p className="text-sm text-gray-600">
+            Powered by 
+            <a 
+              href="https://www.cothonsolutions.com/" 
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline mx-1"
+            >
+              Cothon Solutions
+            </a>
+          </p>
+        </div>
       </div>
     </footer>
   );

@@ -27,6 +27,20 @@ const DeveloperCredits: React.FC = () => {
           <ExternalLink size={16} />
         </a>
       </div>
+      
+      <div className="mt-4">
+        <p className="text-md">
+          Powered by 
+          <a 
+            href="https://www.cothonsolutions.com/" 
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary hover:underline mx-1"
+          >
+            Cothon Solutions
+          </a>
+        </p>
+      </div>
     </div>
   );
 };

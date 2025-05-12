@@ -92,7 +92,7 @@ const JobApplicationModal: React.FC<JobApplicationModalProps> = ({
           job_id: jobId,
           student_id: currentUser.id,
           resume_url: resumeUrl || null,
-          // Additional metadata could be stored in a separate table if needed
+          status: 'pending'
         });
 
       if (error) {
@@ -109,17 +109,16 @@ const JobApplicationModal: React.FC<JobApplicationModalProps> = ({
       
       reset();
       toast.success("Application submitted successfully!");
+      onClose();
+      onSuccess();
       
-      // Redirect to student dashboard to track applications
-      setTimeout(() => {
-        navigate('/student-dashboard');
-      }, 1000);
+      // Redirect to student dashboard with the applications tab active
+      navigate('/student-dashboard', { state: { activeTab: 'applications' } });
     } catch (error: any) {
       console.error('Error submitting application:', error);
       toast.error(error.message || "Failed to submit application");
     } finally {
       setIsSubmitting(false);
-      onClose();
     }
   };
 
