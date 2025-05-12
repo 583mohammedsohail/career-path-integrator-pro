@@ -63,21 +63,6 @@ const DeveloperCredits: React.FC = () => {
           </a>
         </p>
       </div>
-      
-      <div className="text-center text-sm text-gray-500">
-        <p>© 2024 Career Path Integrator Pro. All rights reserved.</p>
-        <p className="mt-1">
-          Developed by{" "}
-          <a
-            href="https://cothonsolutions.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-primary hover:underline"
-          >
-            Cothon Solutions
-          </a>
-        </p>
-      </div>
 
       <Dialog open={showProjectInfo} onOpenChange={setShowProjectInfo}>
         <DialogContent className="max-w-3xl">
