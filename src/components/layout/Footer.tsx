@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ExternalLink } from 'lucide-react';
@@ -19,19 +18,6 @@ const Footer: React.FC = () => {
             <p className="mt-4 text-sm text-gray-600">
               Connecting students with the best career opportunities
             </p>
-            <div className="mt-3">
-              <p className="text-sm text-gray-600">
-                Powered by{" "}
-                <a 
-                  href="https://www.cothonsolutions.com/" 
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary hover:underline font-medium"
-                >
-                  CoThon Solutions
-                </a>
-              </p>
-            </div>
           </div>
           
           <div>
@@ -141,7 +127,7 @@ const Footer: React.FC = () => {
             </p>
             <span className="hidden md:block md:mx-2">•</span>
             <p className="text-sm text-gray-600">
-              Developed by{" "}
+              Developed by 
               <a 
                 href="https://www.linkedin.com/in/sana-parveen-93b29b294/" 
                 target="_blank"
@@ -150,7 +136,7 @@ const Footer: React.FC = () => {
               >
                 Sana Parveen
               </a>
-              {" "}&{" "}
+              &
               <a 
                 href="https://www.linkedin.com/in/mohammed-sohail-82176825b/" 
                 target="_blank"

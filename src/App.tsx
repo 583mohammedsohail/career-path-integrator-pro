@@ -2,7 +2,6 @@
 import React from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
-import ProtectedRoute from './components/auth/ProtectedRoute';
 import Index from '@/pages/Index';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
@@ -33,54 +32,48 @@ const router = createBrowserRouter([
     element: <Register />,
   },
   {
+    path: "/jobs",
+    element: <Jobs />,
+  },
+  {
+    path: "/jobs/:id",
+    element: <JobDetails />,
+  },
+  {
+    path: "/companies",
+    element: <Companies />,
+  },
+  {
+    path: "/companies/:id",
+    element: <CompanyProfile />,
+  },
+  {
+    path: "/students",
+    element: <Students />,
+  },
+  {
+    path: "/students/:id",
+    element: <StudentProfile />,
+  },
+  {
+    path: "/profile",
+    element: <Profile />,
+  },
+  {
+    path: "/admin",
+    element: <SuperAdminDashboard />,
+  },
+  {
+    path: "/student-dashboard",
+    element: <StudentDashboard />,
+  },
+  {
+    path: "/company-dashboard",
+    element: <CompanyDashboard />,
+  },
+  {
     path: "/developers-team",
     element: <DevelopersTeam />,
-  },
-  // Protected routes
-  {
-    element: <ProtectedRoute />,
-    children: [
-      {
-        path: "/jobs",
-        element: <Jobs />,
-      },
-      {
-        path: "/jobs/:id",
-        element: <JobDetails />,
-      },
-      {
-        path: "/companies",
-        element: <Companies />,
-      },
-      {
-        path: "/companies/:id",
-        element: <CompanyProfile />,
-      },
-      {
-        path: "/students",
-        element: <Students />,
-      },
-      {
-        path: "/students/:id",
-        element: <StudentProfile />,
-      },
-      {
-        path: "/profile",
-        element: <Profile />,
-      },
-      {
-        path: "/admin",
-        element: <SuperAdminDashboard />,
-      },
-      {
-        path: "/student-dashboard",
-        element: <StudentDashboard />,
-      },
-      {
-        path: "/company-dashboard",
-        element: <CompanyDashboard />,
-      },
-    ]
   },
   {
     path: "*",

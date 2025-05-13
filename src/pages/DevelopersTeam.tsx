@@ -1,93 +1,221 @@
+import React, { useState } from 'react';
+import Layout from '@/components/layout/Layout';
+import { Card, CardContent } from '@/components/ui/card';
+import { ExternalLink, Linkedin, Mail, Github } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
-import React from 'react';
-import Layout from '../components/layout/Layout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Github, Linkedin } from 'lucide-react';
+interface TeamMember {
+  name: string;
+  role: string;
+  image: string;
+  bio: string;
+  linkedin?: string;
+  email?: string;
+  github?: string;
+}
 
-const teamMembers = [
-  {
-    name: "Sana Parveen",
-    role: "Frontend Developer",
-    linkedin: "https://www.linkedin.com/in/sana-parveen-93b29b294/",
-    github: "https://github.com/SanaParveen",
-    image: "https://avatars.githubusercontent.com/u/72487474?v=4",
-  },
-  {
-    name: "Mohammed Sohail",
-    role: "Backend Developer",
-    linkedin: "https://www.linkedin.com/in/mohammed-sohail-82176825b/",
-    github: "https://github.com/MohammedSohail583",
-    image: "https://i.imgur.com/OKGX6EQ.jpeg",
-  },
-  {
-    name: "Mohammed Awais",
-    role: "Tester & Planner",
-    linkedin: "https://www.linkedin.com/in/mohammed-awais/",
-    github: "https://github.com/MohammedAwais",
-    image: "https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=2080&auto=format&fit=crop",
-  },
-  {
-    name: "Syed Nehal Ali",
-    role: "Mentor & Senior Developer, HR",
-    linkedin: "https://www.linkedin.com/in/syed-nehal-ali/",
-    github: "https://github.com/SyedNehalAli",
-    image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=2149&auto=format&fit=crop",
-  },
-];
+const DevelopersTeam = () => {
+  const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
+  const [showAcknowledgment, setShowAcknowledgment] = useState(false);
+  
+  const teamMembers: TeamMember[] = [
+    {
+      name: "Mohammed Sohail",
+      role: "Team Leader & Developer",
+      image: "https://res.cloudinary.com/dbt3gghme/image/upload/v1747067185/IMG_3042_zqxlfe_uhmiva.jpg",
+      bio: "Lead developer responsible for the core architecture and functionality of the application.",
+      linkedin: "https://www.linkedin.com/in/mohammed-sohail-82176825b/",
+      github: "https://github.com/mohd-sohail",
+      email: "583mohammedsohail@gmail.com"
+    },
+    {
+      name: "Sana Parveen",
+      role: "Associate Support Role in Development",
+      image: "https://res.cloudinary.com/dbt3gghme/image/upload/v1747058047/Sana_Parveen_mgl1sr.jpg",
+      bio: "Developer focused on frontend components and user experience of the application.",
+      linkedin: "https://www.linkedin.com/in/sana-parveen-93b29b294/",
+      github: "https://github.com/sana-parveen",
+      email: "sanapa230603@gmail.com"
+    },
+    {
+      name: "Mohammed Awais",
+      role: "Tester & Planner",
+      image: "https://res.cloudinary.com/dbt3gghme/image/upload/v1747058755/PHOTO-2025-05-12-19-34-39_u4tl81.jpg",
+      bio: "Responsible for quality assurance, testing, and planning project milestones.",
+      github: "https://github.com/mohdawais",
+      email: "mohdawaisawais92@gmail.com",
+      linkedin: "https://www.linkedin.com/in/mohammed-awais-27116322a/"
+    },
+    {
+      name: "Syed Nehal Ali",
+      role: "Mentor & Senior Developer, HR",
+      image: "https://res.cloudinary.com/dbt3gghme/image/upload/v1747058953/PHOTO-2025-05-12-19-38-44_yoyrmn.jpg",
+      bio: "Senior mentor providing guidance on development practices and HR processes.",
+      linkedin: "https://www.linkedin.com/in/syed-nehal-ali/",
+      email: "hr@cothonsolutions.com"
+    }
+  ];
 
-const DevelopersTeam: React.FC = () => {
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2
+      }
+    }
+  };
+
+  const item = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0 }
+  };
+
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto text-center mb-12">
-          <h1 className="text-3xl md:text-4xl font-bold mb-4">Our Development Team</h1>
-          <p className="text-lg text-muted-foreground">
-            Meet the talented individuals behind the CareerPath Pro platform
+      <div className="container mx-auto px-4 py-16">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold mb-4">Our Development Team</h1>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Meet the talented individuals behind this placement management system, working under the 
+            guidance of <span className="text-primary font-medium">Cothon Solutions</span>.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          {teamMembers.map((member, index) => (
-            <Card key={index} className="overflow-hidden transition-all hover:shadow-lg">
-              <CardHeader className="pb-2">
-                <CardTitle>{member.name}</CardTitle>
-                <CardDescription>{member.role}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center gap-4">
-                  <Avatar className="h-16 w-16 border-2 border-primary/20">
-                    <AvatarImage src={member.image} alt={member.name} />
-                    <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex flex-col gap-2">
-                    <div className="flex gap-3">
-                      <a 
-                        href={member.linkedin} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1 text-primary hover:text-primary/80 transition-colors"
-                      >
-                        <Linkedin className="h-5 w-5" />
-                        <span>LinkedIn</span>
-                      </a>
-                      <a 
-                        href={member.github} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1 text-primary hover:text-primary/80 transition-colors"
-                      >
-                        <Github className="h-5 w-5" />
-                        <span>GitHub</span>
-                      </a>
-                    </div>
+        <motion.div 
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"
+          variants={container}
+          initial="hidden"
+          animate="show"
+        >
+          {teamMembers.map((member) => (
+            <motion.div key={member.name} variants={item}>
+              <Card className="overflow-hidden h-full transform transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                <CardContent className="p-0">
+                  <div className="relative aspect-square overflow-hidden">
+                    <img 
+                      src={member.image} 
+                      alt={member.name} 
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = "https://placehold.co/400x400?text=" + encodeURIComponent(member.name);
+                        e.currentTarget.onerror = null;
+                      }}
+                    />
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                  <div className="p-6">
+                    <h3 className="text-xl font-bold">{member.name}</h3>
+                    <p className="text-sm text-muted-foreground mb-3">{member.role}</p>
+                    
+                    <div className="flex gap-2">
+                      {member.linkedin && (
+                        <a href={member.linkedin} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800">
+                          <Linkedin size={18} />
+                        </a>
+                      )}
+                      {member.email && (
+                        <a href={`mailto:${member.email}`} className="text-red-500 hover:text-red-700">
+                          <Mail size={18} />
+                        </a>
+                      )}
+                      {member.github && (
+                        <a href={member.github} target="_blank" rel="noopener noreferrer" className="text-gray-800 hover:text-black">
+                          <Github size={18} />
+                        </a>
+                      )}
+                    </div>
+                    
+                    <Button 
+                      variant="link" 
+                      className="p-0 mt-2 text-primary" 
+                      onClick={() => setSelectedMember(member)}
+                    >
+                      View Profile
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
+
+      {/* Member Detail Dialog */}
+      <Dialog open={!!selectedMember} onOpenChange={() => setSelectedMember(null)}>
+        {selectedMember && (
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>{selectedMember.name}</DialogTitle>
+              <DialogDescription className="text-base">{selectedMember.role}</DialogDescription>
+            </DialogHeader>
+            <div className="flex flex-col sm:flex-row gap-4 items-center">
+              <div className="w-32 h-32 rounded-full overflow-hidden">
+                <img 
+                  src={selectedMember.image} 
+                  alt={selectedMember.name}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = "https://placehold.co/400x400?text=" + encodeURIComponent(selectedMember.name);
+                    e.currentTarget.onerror = null;
+                  }}
+                />
+              </div>
+              <div className="flex-1">
+                <p>{selectedMember.bio}</p>
+                
+                <div className="flex gap-4 mt-4">
+                  {selectedMember.linkedin && (
+                    <a href={selectedMember.linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center text-blue-600 hover:text-blue-800">
+                      <Linkedin size={18} className="mr-1" /> LinkedIn
+                    </a>
+                  )}
+                  {selectedMember.email && (
+                    <a href={`mailto:${selectedMember.email}`} className="flex items-center text-red-500 hover:text-red-700">
+                      <Mail size={18} className="mr-1" /> Email
+                    </a>
+                  )}
+                </div>
+              </div>
+            </div>
+          </DialogContent>
+        )}
+      </Dialog>
+
+      {/* Project Acknowledgment Dialog */}
+      <Dialog open={showAcknowledgment} onOpenChange={setShowAcknowledgment}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="text-2xl mb-4">Project Acknowledgment</DialogTitle>
+            <DialogDescription className="text-base text-foreground">
+              <p className="mb-4">
+                This project is developed under the expert guidance and mentorship of CoThon Solutions, a dynamic company located at T-Hub, Hyderabad. CoThon Solutions is renowned for creating prototype projects for various Multinational Corporations (MNCs) and our partnered MNCs. You can learn more about our past projects and collaborations by visiting our website at <a href="https://www.cothonsolutions.com/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">cothonsolutions.com</a>.
+              </p>
+              
+              <p className="mb-4">The credit for the successful execution and development of this project goes to the following dedicated team members:</p>
+              <ul className="list-disc pl-8 mb-4">
+                <li className="mb-2">Mohammed Sohail – Team Leader & Developer</li>
+                <li className="mb-2">Sana Parveen – Associate Support Role in Development</li>
+                <li className="mb-2">Mohammed Awais – Tester & Planner</li>
+              </ul>
+
+              <p className="mb-4">We would also like to acknowledge the invaluable contribution of our Star Mentor:</p>
+              <ul className="list-disc pl-8 mb-4">
+                <li>Syed Nehal Ali – Mentor & Senior Developer, HR</li>
+              </ul>
+
+              <p className="mb-4">
+                Our company, CoThon Solutions, specializes in training and nurturing interns, providing them with opportunities for hands-on learning, and offering Pre-Placement Offers (PPOs) under the mentorship of our experienced professionals. This initiative is carried out under the guidance and approval of AICTE, MSME, and Startup India.
+              </p>
+
+              <p>
+                We extend our heartfelt thanks to all the team members and mentors for their hard work, dedication, and contributions in making this project a reality.
+              </p>
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 };
