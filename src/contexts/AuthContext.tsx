@@ -54,7 +54,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           
           // Find the mock user based on email
           if (email) {
-            // Fix the SuperAdmin type issue - mockSuperAdmin is a single object, not an array
+            // Fix: mockSuperAdmin is a single object, not an array
             mockUser = mockStudents.find(student => student.email === email) || 
                       mockCompanies.find(company => company.email === email) || 
                       mockAdmins.find(admin => admin.email === email) || 
@@ -74,7 +74,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               avatar: session.user.user_metadata?.avatar_url || ''
             });
           }
-          toast.success('Successfully authenticated!');
+
+          // Show welcome message when user is authenticated
+          if (event === 'SIGNED_IN') {
+            const name = mockUser ? (mockUser as User).name : session.user.user_metadata?.name || 'User';
+            toast.success(`Welcome back, ${name}! 👋`);
+          }
         } else {
           setCurrentUser(null);
         }
@@ -92,7 +97,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         let mockUser = null;
         
         if (email) {
-          // Fix the SuperAdmin type issue - mockSuperAdmin is a single object, not an array
+          // Fix: mockSuperAdmin is a single object, not an array
           mockUser = mockStudents.find(student => student.email === email) || 
                     mockCompanies.find(company => company.email === email) || 
                     mockAdmins.find(admin => admin.email === email) || 
@@ -156,12 +161,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           console.log('Supabase auth error with test account, using mock data:', error);
           setCurrentUser(mockUser as User);
           setSession(null); // No real session for mock users
-          toast.success('Login successful with test account!');
+          toast.success(`Welcome back, ${(mockUser as User).name}! 👋`);
         } else if (data.user) {
           // If test account exists in Supabase, we'll get a session
           setSession(data.session);
           setCurrentUser(mockUser as User);
-          toast.success('Login successful!');
+          toast.success(`Welcome back, ${(mockUser as User).name}! 👋`);
         }
       } else {
         // Real Supabase authentication for non-test accounts
@@ -177,7 +182,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         if (data.user) {
           // Session will be set by the onAuthStateChange listener
-          toast.success('Login successful!');
+          toast.success(`Welcome back, ${data.user.user_metadata?.name || 'User'}! 👋`);
         }
       }
     } catch (error) {
@@ -194,12 +199,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Clean up auth state
       cleanupAuthState();
       
+      // Store user name for goodbye message
+      const userName = currentUser?.name || 'User';
+      
       // Attempt global sign out
       await supabase.auth.signOut({ scope: 'global' });
       
       setCurrentUser(null);
       setSession(null);
-      toast.success('Logged out successfully');
+      toast.success(`Goodbye, ${userName}! See you again soon!`);
       
       // Force page reload for a clean state
       window.location.href = '/login';

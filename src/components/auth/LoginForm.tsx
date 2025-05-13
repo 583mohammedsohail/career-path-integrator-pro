@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -6,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, Linkedin, Phone } from "lucide-react";
+import { ChevronDown, Linkedin, Phone, Facebook, Github, Apple } from "lucide-react";
 import { supabase } from '@/integrations/supabase/client';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import {
@@ -87,6 +88,60 @@ const LoginForm = () => {
     }
   };
 
+  const handleSignInWithFacebook = async () => {
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'facebook',
+        options: {
+          redirectTo: window.location.origin + '/login',
+        },
+      });
+      
+      if (error) {
+        toast.error(error.message);
+      }
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to sign in with Facebook';
+      toast.error(errorMessage);
+    }
+  };
+
+  const handleSignInWithGithub = async () => {
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'github',
+        options: {
+          redirectTo: window.location.origin + '/login',
+        },
+      });
+      
+      if (error) {
+        toast.error(error.message);
+      }
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to sign in with GitHub';
+      toast.error(errorMessage);
+    }
+  };
+
+  const handleSignInWithApple = async () => {
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'apple',
+        options: {
+          redirectTo: window.location.origin + '/login',
+        },
+      });
+      
+      if (error) {
+        toast.error(error.message);
+      }
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to sign in with Apple';
+      toast.error(errorMessage);
+    }
+  };
+
   const handlePhoneLogin = async () => {
     if (!phoneNumber || phoneNumber.length < 10) {
       toast.error('Please enter a valid phone number');
@@ -146,9 +201,9 @@ const LoginForm = () => {
     <>
       <Card className="w-full max-w-md mx-auto">
         <CardHeader>
-          <CardTitle className="text-2xl">Login</CardTitle>
+          <CardTitle className="text-2xl">Welcome Back!</CardTitle>
           <CardDescription>
-            Enter your credentials to access your account
+            Login to access your account and explore opportunities
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -162,8 +217,8 @@ const LoginForm = () => {
               <div className="flex flex-col gap-4 mb-4">
                 <div className="flex flex-col gap-2">
                   <div className="text-sm font-medium mb-1">Sign in with</div>
-                  <div className="flex gap-3">
-                    <Button variant="outline" onClick={handleSignInWithGoogle} type="button" className="flex-1">
+                  <div className="grid grid-cols-3 gap-3">
+                    <Button variant="outline" onClick={handleSignInWithGoogle} type="button">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 24 24">
                         <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
                         <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
@@ -172,9 +227,23 @@ const LoginForm = () => {
                       </svg>
                       Google
                     </Button>
-                    <Button variant="outline" onClick={handleSignInWithLinkedIn} type="button" className="flex-1">
+                    <Button variant="outline" onClick={handleSignInWithFacebook} type="button">
+                      <Facebook className="h-5 w-5 mr-2 text-[#1877F2]" />
+                      Facebook
+                    </Button>
+                    <Button variant="outline" onClick={handleSignInWithApple} type="button">
+                      <Apple className="h-5 w-5 mr-2" />
+                      Apple
+                    </Button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 mt-2">
+                    <Button variant="outline" onClick={handleSignInWithLinkedIn} type="button">
                       <Linkedin className="h-5 w-5 mr-2 text-[#0A66C2]" />
                       LinkedIn
+                    </Button>
+                    <Button variant="outline" onClick={handleSignInWithGithub} type="button">
+                      <Github className="h-5 w-5 mr-2" />
+                      GitHub
                     </Button>
                   </div>
                 </div>

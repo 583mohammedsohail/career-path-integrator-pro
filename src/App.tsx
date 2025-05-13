@@ -1,7 +1,7 @@
 
-import React from 'react';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
+import React, { useEffect } from 'react';
+import { createBrowserRouter, RouterProvider, Navigate, useNavigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Index from '@/pages/Index';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
@@ -17,6 +17,46 @@ import SuperAdminDashboard from './pages/SuperAdminDashboard';
 import StudentDashboard from './pages/StudentDashboard';
 import CompanyDashboard from './pages/CompanyDashboard';
 import DevelopersTeam from './pages/DevelopersTeam';
+import { Toaster } from 'sonner';
+
+// Protected route wrapper
+const ProtectedRoute = ({ element, allowedRoles = [] }: { element: React.ReactNode; allowedRoles?: string[] }) => {
+  const { currentUser, isLoading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // If not loading and no user, redirect to login
+    if (!isLoading && !currentUser) {
+      navigate('/login');
+    }
+    // If user exists but role is restricted
+    else if (!isLoading && currentUser && allowedRoles.length > 0 && !allowedRoles.includes(currentUser.role)) {
+      navigate('/');
+    }
+  }, [currentUser, isLoading, navigate, allowedRoles]);
+
+  if (isLoading) {
+    // Show loading state
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!currentUser) {
+    return null; // Will be redirected by useEffect
+  }
+
+  if (allowedRoles.length > 0 && !allowedRoles.includes(currentUser.role)) {
+    return null; // Will be redirected by useEffect
+  }
+
+  return <>{element}</>;
+};
 
 const router = createBrowserRouter([
   {
@@ -57,19 +97,19 @@ const router = createBrowserRouter([
   },
   {
     path: "/profile",
-    element: <Profile />,
+    element: <ProtectedRoute element={<Profile />} />,
   },
   {
     path: "/admin",
-    element: <SuperAdminDashboard />,
+    element: <ProtectedRoute element={<SuperAdminDashboard />} allowedRoles={['superadmin', 'admin']} />,
   },
   {
     path: "/student-dashboard",
-    element: <StudentDashboard />,
+    element: <ProtectedRoute element={<StudentDashboard />} allowedRoles={['student']} />,
   },
   {
     path: "/company-dashboard",
-    element: <CompanyDashboard />,
+    element: <ProtectedRoute element={<CompanyDashboard />} allowedRoles={['company']} />,
   },
   {
     path: "/developers-team",
@@ -86,6 +126,7 @@ const App: React.FC = () => {
     <React.StrictMode>
       <AuthProvider>
         <RouterProvider router={router} />
+        <Toaster position="top-right" richColors closeButton />
       </AuthProvider>
     </React.StrictMode>
   );

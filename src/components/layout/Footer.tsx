@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, Users } from 'lucide-react';
 import DeveloperCredits from './DeveloperCredits';
 
 const Footer: React.FC = () => {
@@ -44,7 +44,8 @@ const Footer: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/developers-team" className="text-gray-600 hover:text-primary transition-colors">
+                <Link to="/developers-team" className="text-gray-600 hover:text-primary transition-colors flex items-center">
+                  <Users className="mr-1 h-4 w-4" />
                   Developers Team
                 </Link>
               </li>
