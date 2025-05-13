@@ -57,12 +57,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           
           // Find the mock user based on email
           if (email) {
-            // Fix the SuperAdmin type issue - mockSuperAdmin is a single object, not an array
             mockUser = mockStudents.find(student => student.email === email) || 
                       mockCompanies.find(company => company.email === email) || 
                       mockAdmins.find(admin => admin.email === email) || 
-                      mockManagement.find(manager => manager.email === email) || 
-                      (email === 'sysadmin@college.edu' ? mockSuperAdmin : null);
+                      mockManagement.find(manager => manager.email === email);
+                     
+            // Handle super admin separately (it's an object not an array)
+            if (email === 'sysadmin@college.edu') {
+              mockUser = mockSuperAdmin;
+            }
           }
           
           if (mockUser) {
@@ -97,12 +100,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         let mockUser = null;
         
         if (email) {
-          // Fix the SuperAdmin type issue - mockSuperAdmin is a single object, not an array
           mockUser = mockStudents.find(student => student.email === email) || 
                     mockCompanies.find(company => company.email === email) || 
                     mockAdmins.find(admin => admin.email === email) || 
-                    mockManagement.find(manager => manager.email === email) || 
-                    (email === 'sysadmin@college.edu' ? mockSuperAdmin : null);
+                    mockManagement.find(manager => manager.email === email);
+                    
+          // Handle super admin separately (it's an object not an array)
+          if (email === 'sysadmin@college.edu') {
+            mockUser = mockSuperAdmin;
+          }
         }
         
         if (mockUser) {
@@ -147,18 +153,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const mockUser = mockStudents.find(student => student.email === email) || 
                       mockCompanies.find(company => company.email === email) || 
                       mockAdmins.find(admin => admin.email === email) || 
-                      mockManagement.find(manager => manager.email === email) || 
-                      (email === 'sysadmin@college.edu' ? mockSuperAdmin : null);
+                      mockManagement.find(manager => manager.email === email);
       
+      // Check for superadmin separately
+      const isSuperAdmin = email === 'sysadmin@college.edu';
+                  
       // If registering with a new role but email exists with different role
       if (role && mockUser && mockUser.role !== role) {
         toast.error(`This email is already registered as a ${mockUser.role}. Please use a different email.`);
         setIsLoading(false);
         throw new Error('Email already in use with a different role');
       }
+      
+      if (role && isSuperAdmin && role !== 'superadmin') {
+        toast.error(`This email is already registered as a superadmin. Please use a different email.`);
+        setIsLoading(false);
+        throw new Error('Email already in use with a different role');
+      }
 
       // Try mock login for test credentials
-      if (mockUser && password === 'test123') {
+      if ((mockUser && password === 'test123') || (isSuperAdmin && password === 'test123')) {
         // For test credentials, use Supabase email/password auth but with known credentials
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
@@ -169,14 +183,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           // If error from Supabase (likely because test account doesn't exist in Supabase)
           // Just set the mock user directly
           console.log('Supabase auth error with test account, using mock data:', error);
-          setCurrentUser(mockUser as User);
+          setCurrentUser(isSuperAdmin ? mockSuperAdmin as User : mockUser as User);
           setSession(null); // No real session for mock users
           setIsAuthenticated(true);
           toast.success('Login successful with test account!');
         } else if (data.user) {
           // If test account exists in Supabase, we'll get a session
           setSession(data.session);
-          setCurrentUser(mockUser as User);
+          setCurrentUser(isSuperAdmin ? mockSuperAdmin as User : mockUser as User);
           setIsAuthenticated(true);
           toast.success('Login successful!');
         }

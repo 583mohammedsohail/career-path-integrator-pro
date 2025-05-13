@@ -15,6 +15,7 @@ const AuthenticatedHeader: React.FC = () => {
       navigate('/login');
       return false;
     }
+    navigate(path);
     return true;
   };
   
