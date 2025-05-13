@@ -24,7 +24,7 @@ const DevelopersTeam = () => {
     {
       name: "Mohammed Sohail",
       role: "Team Leader & Developer",
-      image: "https://res.cloudinary.com/dbt3gghme/image/upload/v1747067185/IMG_3042_zqxlfe_uhmiva.jpg",
+      image: "https://res.cloudinary.com/dbt3gghme/image/upload/v1747108557/IMG_3460_xrszov.jpg",
       bio: "Lead developer responsible for the core architecture and functionality of the application.",
       linkedin: "https://www.linkedin.com/in/mohammed-sohail-82176825b/",
       github: "https://github.com/mohd-sohail",

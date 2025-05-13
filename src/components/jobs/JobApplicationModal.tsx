@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '@/contexts/AuthContext';
@@ -44,9 +43,14 @@ const JobApplicationModal: React.FC<JobApplicationModalProps> = ({
   onSuccess
 }) => {
   const { currentUser } = useAuth();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const { register, handleSubmit, formState: { errors }, reset } = useForm<FormData>();
   const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const {
+    register,
+    handleSubmit,
+    formState: { errors }
+  } = useForm<FormData>();
 
   const onSubmit = async (data: FormData) => {
     if (!currentUser) {
@@ -57,66 +61,59 @@ const JobApplicationModal: React.FC<JobApplicationModalProps> = ({
     setIsSubmitting(true);
     
     try {
-      let resumeUrl = '';
-      
-      // Handle file upload if provided
-      if (data.resume && data.resume[0]) {
-        const file = data.resume[0];
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${currentUser.id}-${Date.now()}.${fileExt}`;
-        const filePath = `resumes/${fileName}`;
-
-        // Upload resume to storage
-        const { error: uploadError } = await supabase
-          .storage
-          .from('students')
-          .upload(filePath, file);
-
-        if (uploadError) {
-          throw uploadError;
-        }
-        
-        // Get public URL
-        const { data: urlData } = supabase
-          .storage
-          .from('students')
-          .getPublicUrl(filePath);
-          
-        resumeUrl = urlData.publicUrl;
+      // Check if resume file exists
+      if (!data.resume?.[0]) {
+        throw new Error("Resume file is required");
       }
 
-      // Save application to database
-      const { error } = await supabase
+      // Upload resume
+      const resumeFile = data.resume[0];
+      const fileExt = resumeFile.name.split('.').pop();
+      const fileName = `${currentUser.id}_${Date.now()}.${fileExt}`;
+      
+      const { error: uploadError, data: uploadData } = await supabase.storage
+        .from('resumes')
+        .upload(`applications/${fileName}`, resumeFile);
+
+      if (uploadError) {
+        throw new Error(`Error uploading resume: ${uploadError.message}`);
+      }
+
+      // Get the public URL for the uploaded resume
+      const { data: urlData } = supabase.storage
+        .from('resumes')
+        .getPublicUrl(`applications/${fileName}`);
+        
+      const resumeUrl = urlData?.publicUrl;
+
+      if (!resumeUrl) {
+        throw new Error("Failed to get resume URL");
+      }
+
+      // Create the job application
+      const { error: applicationError } = await supabase
         .from('job_applications')
         .insert({
           job_id: jobId,
           student_id: currentUser.id,
-          resume_url: resumeUrl || null,
-          status: 'pending'
+          status: 'pending',
+          resume_url: resumeUrl,
+          cover_letter: data.coverletter || null,
+          applied_at: new Date().toISOString()
         });
 
-      if (error) {
-        throw error;
+      if (applicationError) {
+        throw new Error(`Error submitting application: ${applicationError.message}`);
       }
 
-      // Create notification for the applicant
-      await supabase
-        .from('notifications')
-        .insert({
-          user_id: currentUser.id,
-          message: `You have applied for the ${jobTitle} position at ${companyName}.`
-        });
-      
-      reset();
-      toast.success("Application submitted successfully!");
-      onClose();
+      toast.success('Application submitted successfully!');
       onSuccess();
       
       // Redirect to student dashboard with the applications tab active
       navigate('/student-dashboard', { state: { activeTab: 'applications' } });
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error submitting application:', error);
-      toast.error(error.message || "Failed to submit application");
+      toast.error(error instanceof Error ? error.message : "Failed to submit application");
     } finally {
       setIsSubmitting(false);
     }

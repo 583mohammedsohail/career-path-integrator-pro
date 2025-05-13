@@ -1,27 +1,47 @@
-
 import * as React from "react"
 import { OTPInput, OTPInputContext, SlotProps } from "input-otp"
-import { Dot } from "lucide-react"
-
 import { cn } from "@/lib/utils"
 
-const InputOTP = React.forwardRef<
-  React.ElementRef<typeof OTPInput>,
-  React.ComponentPropsWithoutRef<typeof OTPInput>
->(({ className, containerClassName, ...props }, ref) => (
-  <OTPInput
-    ref={ref}
-    containerClassName={cn(
-      "flex items-center gap-2 has-[:disabled]:opacity-50",
-      containerClassName
-    )}
-    className={cn("disabled:cursor-not-allowed", className)}
-    inputMode="numeric"
-    pattern="[0-9]*"
-    autoComplete="one-time-code"
-    {...props}
-  />
-))
+interface InputOTPProps {
+  value: string;
+  onChange: (value: string) => void;
+  maxLength?: number;
+}
+
+interface OTPSlot {
+  char?: string;
+  hasFakeCaret?: boolean;
+  isActive?: boolean;
+}
+
+const InputOTP = React.forwardRef<HTMLDivElement, InputOTPProps>(
+  ({ value, onChange, maxLength = 6 }, ref) => (
+    <OTPInput
+      maxLength={maxLength}
+      value={value}
+      onChange={onChange}
+      render={({ slots }) => (
+        <div ref={ref} className="flex gap-2">
+          {slots.map((slot: SlotProps, idx: number) => (
+            <div key={idx}>
+              <input
+                {...slot}
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                className={cn(
+                  "w-10 h-10 text-center text-lg border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary",
+                  "text-black dark:text-white bg-background"
+                )}
+              />
+            </div>
+          ))}
+        </div>
+      )}
+    />
+  )
+)
+
 InputOTP.displayName = "InputOTP"
 
 const InputOTPGroup = React.forwardRef<
@@ -37,28 +57,28 @@ const InputOTPSlot = React.forwardRef<
   React.ComponentPropsWithoutRef<"div"> & { index: number }
 >(({ index, className, ...props }, ref) => {
   const inputOTPContext = React.useContext(OTPInputContext)
-  const { char, hasFakeCaret, isActive } = inputOTPContext?.slots?.[index] || {
-    char: '',
-    hasFakeCaret: false,
-    isActive: false
-  }
+  const { char, hasFakeCaret, isActive } = inputOTPContext?.slots?.[index] || {}
 
   return (
     <div
       ref={ref}
       className={cn(
-        "relative flex h-10 w-10 items-center justify-center border-y border-r border-input text-sm transition-all first:rounded-l-md first:border-l last:rounded-r-md",
-        isActive && "z-10 ring-2 ring-ring ring-offset-background",
+        "relative h-9 w-9 rounded-md border",
+        isActive && "border-primary ring-2 ring-primary",
         className
       )}
       {...props}
     >
-      {char}
-      {hasFakeCaret && (
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <div className="h-4 w-px animate-caret-blink bg-foreground duration-1000" />
-        </div>
-      )}
+      <input
+        className={cn(
+          "absolute h-full w-full rounded-md p-0 text-center text-base",
+          "text-black dark:text-white bg-background"
+        )}
+        type="text"
+        inputMode="numeric"
+        autoComplete="one-time-code"
+        {...props}
+      />
     </div>
   )
 })
@@ -69,7 +89,7 @@ const InputOTPSeparator = React.forwardRef<
   React.ComponentPropsWithoutRef<"div">
 >(({ ...props }, ref) => (
   <div ref={ref} role="separator" {...props}>
-    <Dot />
+    <div className="h-4 w-4 text-muted-foreground">•</div>
   </div>
 ))
 InputOTPSeparator.displayName = "InputOTPSeparator"

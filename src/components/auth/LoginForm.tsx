@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -7,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, Linkedin, Phone, Facebook, Github, Apple } from "lucide-react";
+import { ChevronDown, Linkedin, Phone, Github, Twitter } from "lucide-react";
 import { supabase } from '@/integrations/supabase/client';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import {
@@ -88,24 +87,6 @@ const LoginForm = () => {
     }
   };
 
-  const handleSignInWithFacebook = async () => {
-    try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'facebook',
-        options: {
-          redirectTo: window.location.origin + '/login',
-        },
-      });
-      
-      if (error) {
-        toast.error(error.message);
-      }
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to sign in with Facebook';
-      toast.error(errorMessage);
-    }
-  };
-
   const handleSignInWithGithub = async () => {
     try {
       const { data, error } = await supabase.auth.signInWithOAuth({
@@ -124,10 +105,10 @@ const LoginForm = () => {
     }
   };
 
-  const handleSignInWithApple = async () => {
+  const handleSignInWithTwitter = async () => {
     try {
       const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'apple',
+        provider: 'twitter',
         options: {
           redirectTo: window.location.origin + '/login',
         },
@@ -137,7 +118,7 @@ const LoginForm = () => {
         toast.error(error.message);
       }
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to sign in with Apple';
+      const errorMessage = error instanceof Error ? error.message : 'Failed to sign in with Twitter';
       toast.error(errorMessage);
     }
   };
@@ -197,10 +178,10 @@ const LoginForm = () => {
     }
   };
 
-  // Handle OTP input change manually for each digit
   const handleOTPChange = (value: string) => {
-    setVerificationCode(value);
-    console.log("OTP changed:", value); // Debug log
+    // Only allow numbers and limit to 6 digits
+    const numericValue = value.replace(/[^0-9]/g, '').slice(0, 6);
+    setVerificationCode(numericValue);
   };
 
   return (
@@ -223,7 +204,7 @@ const LoginForm = () => {
               <div className="flex flex-col gap-4 mb-4">
                 <div className="flex flex-col gap-2">
                   <div className="text-sm font-medium mb-1">Sign in with</div>
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-2 gap-3">
                     <Button variant="outline" onClick={handleSignInWithGoogle} type="button">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 24 24">
                         <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -233,16 +214,6 @@ const LoginForm = () => {
                       </svg>
                       Google
                     </Button>
-                    <Button variant="outline" onClick={handleSignInWithFacebook} type="button">
-                      <Facebook className="h-5 w-5 mr-2 text-[#1877F2]" />
-                      Facebook
-                    </Button>
-                    <Button variant="outline" onClick={handleSignInWithApple} type="button">
-                      <Apple className="h-5 w-5 mr-2" />
-                      Apple
-                    </Button>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3 mt-2">
                     <Button variant="outline" onClick={handleSignInWithLinkedIn} type="button">
                       <Linkedin className="h-5 w-5 mr-2 text-[#0A66C2]" />
                       LinkedIn
@@ -250,6 +221,10 @@ const LoginForm = () => {
                     <Button variant="outline" onClick={handleSignInWithGithub} type="button">
                       <Github className="h-5 w-5 mr-2" />
                       GitHub
+                    </Button>
+                    <Button variant="outline" onClick={handleSignInWithTwitter} type="button">
+                      <Twitter className="h-5 w-5 mr-2 text-[#1DA1F2]" />
+                      Twitter
                     </Button>
                   </div>
                 </div>
@@ -416,23 +391,22 @@ const LoginForm = () => {
               <p className="text-sm text-center">
                 Enter the 6-digit code sent to {phoneNumber}
               </p>
-              <div className="w-full max-w-[300px]">
-                <InputOTP 
-                  maxLength={6} 
-                  value={verificationCode}
-                  onChange={handleOTPChange}
-                  inputMode="numeric"
-                  containerClassName="gap-2 justify-center"
-                  render={({ slots }) => (
-                    <InputOTPGroup>
-                      {slots.map((slot, index) => (
-                        <InputOTPSlot key={index} {...slot} index={index} />
-                      ))}
-                    </InputOTPGroup>
-                  )}
-                />
+              <div className="w-full max-w-[300px] mx-auto">
+                <div className="flex justify-center">
+                  <InputOTP
+                    value={verificationCode}
+                    onChange={handleOTPChange}
+                    maxLength={6}
+                  />
+                </div>
               </div>
-              <Button className="mt-4" onClick={verifyPhoneCode}>Verify</Button>
+              <Button 
+                className="mt-4 w-full" 
+                onClick={verifyPhoneCode}
+                disabled={!verificationCode || verificationCode.length !== 6}
+              >
+                {isLoading ? "Verifying..." : "Verify"}
+              </Button>
             </div>
             
             <div className="text-center text-sm text-gray-500">

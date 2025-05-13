@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Camera, Phone, MapPin, Linkedin, Mail } from "lucide-react";
+import { Camera, Phone, MapPin, Linkedin, Mail, Github, Twitter } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -39,6 +39,33 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
+// Available departments
+const departments = [
+  "Computer Science",
+  "Information Technology",
+  "Electronics & Communication",
+  "Electrical Engineering",
+  "Mechanical Engineering",
+  "Civil Engineering",
+  "Chemical Engineering",
+  "Biotechnology",
+  "Aerospace Engineering",
+  "Other"
+];
+
+// Available courses
+const courses = [
+  "B.Tech",
+  "M.Tech",
+  "BCA",
+  "MCA",
+  "BSc",
+  "MSc",
+  "BE",
+  "ME",
+  "Other"
+];
+
 // Core form schema for all user types
 const coreFormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -49,6 +76,8 @@ const coreFormSchema = z.object({
   }),
   phone: z.string().min(10, { message: "Please enter a valid phone number." }).optional(),
   address: z.string().optional(),
+  university: z.string().min(2, { message: "Please enter your university name." }),
+  avatar: z.instanceof(File, { message: "Profile image is required." }),
 });
 
 // Student-specific form schema
@@ -117,6 +146,7 @@ const RegisterForm = () => {
       skills: "",
       phone: "",
       address: "",
+      university: "",
     },
   });
 
@@ -139,7 +169,7 @@ const RegisterForm = () => {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.origin + '/login',
+          redirectTo: window.location.origin + '/register',
         },
       });
       
@@ -160,7 +190,7 @@ const RegisterForm = () => {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'linkedin_oidc',
         options: {
-          redirectTo: window.location.origin + '/login',
+          redirectTo: window.location.origin + '/register',
         },
       });
       
@@ -172,6 +202,48 @@ const RegisterForm = () => {
         toast.error(error.message);
       } else {
         toast.error('Failed to sign in with LinkedIn');
+      }
+    }
+  };
+
+  const handleSignInWithGithub = async () => {
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'github',
+        options: {
+          redirectTo: window.location.origin + '/register',
+        },
+      });
+      
+      if (error) {
+        toast.error(error.message);
+      }
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error('Failed to sign in with GitHub');
+      }
+    }
+  };
+
+  const handleSignInWithTwitter = async () => {
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'twitter',
+        options: {
+          redirectTo: window.location.origin + '/register',
+        },
+      });
+      
+      if (error) {
+        toast.error(error.message);
+      }
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error('Failed to sign in with Twitter');
       }
     }
   };
@@ -189,6 +261,7 @@ const RegisterForm = () => {
             role: data.role,
             phone: data.phone,
             address: data.address,
+            university: data.university,
           },
         }
       });
@@ -283,42 +356,21 @@ const RegisterForm = () => {
     }
   };
 
-  // Available departments and courses
-  const departments = [
-    "Computer Science",
-    "Electronics",
-    "Mechanical",
-    "Civil",
-    "Electrical",
-    "Information Technology",
-    "Chemical",
-    "Biotechnology"
-  ];
-  
-  const courses = [
-    "B.Tech",
-    "M.Tech",
-    "BCA",
-    "MCA",
-    "B.Sc",
-    "M.Sc",
-  ];
-
   return (
-    <>
+    <div className="container mx-auto px-4 py-8">
       <Card className="w-full max-w-md mx-auto">
         <CardHeader>
           <CardTitle className="text-2xl">Create an account</CardTitle>
           <CardDescription>
-            Enter your information to create an account
+            Sign up to access career opportunities and resources
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 mb-4">
             <div className="flex flex-col gap-2">
-              <div className="text-sm font-medium mb-1">Sign up with</div>
-              <div className="flex gap-3">
-                <Button variant="outline" onClick={handleSignInWithGoogle} type="button" className="flex-1">
+              <div className="text-sm font-medium mb-1">Sign in with</div>
+              <div className="grid grid-cols-2 gap-3">
+                <Button variant="outline" onClick={handleSignInWithGoogle} type="button">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 24 24">
                     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
                     <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
@@ -327,9 +379,17 @@ const RegisterForm = () => {
                   </svg>
                   Google
                 </Button>
-                <Button variant="outline" onClick={handleSignInWithLinkedIn} type="button" className="flex-1">
+                <Button variant="outline" onClick={handleSignInWithLinkedIn} type="button">
                   <Linkedin className="h-5 w-5 mr-2 text-[#0A66C2]" />
                   LinkedIn
+                </Button>
+                <Button variant="outline" onClick={handleSignInWithGithub} type="button">
+                  <Github className="h-5 w-5 mr-2" />
+                  GitHub
+                </Button>
+                <Button variant="outline" onClick={handleSignInWithTwitter} type="button">
+                  <Twitter className="h-5 w-5 mr-2 text-[#1DA1F2]" />
+                  Twitter
                 </Button>
               </div>
             </div>
@@ -345,33 +405,33 @@ const RegisterForm = () => {
             
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                {/* Avatar upload section for students */}
-                {selectedRole === "student" && (
-                  <div className="flex flex-col items-center justify-center mb-4">
-                    <div 
-                      onClick={triggerFileInput}
-                      className="relative cursor-pointer group mb-2"
-                    >
-                      <Avatar className="h-24 w-24 border-2 border-primary">
-                        <AvatarImage src={avatarPreview || ""} />
-                        <AvatarFallback className="bg-muted">
-                          <Camera className="h-8 w-8 text-muted-foreground" />
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                        <span className="text-white text-xs font-medium">Upload Photo</span>
-                      </div>
-                    </div>
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleFileChange}
-                    />
-                    <p className="text-xs text-muted-foreground">Upload your profile picture</p>
-                  </div>
-                )}
+                <div className="flex flex-col items-center gap-4">
+                  <Avatar className="h-24 w-24">
+                    <AvatarImage src={avatarPreview || undefined} />
+                    <AvatarFallback>
+                      <Camera className="h-8 w-8" />
+                    </AvatarFallback>
+                  </Avatar>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    accept="image/*"
+                    className="hidden"
+                    required
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={triggerFileInput}
+                    className="w-full"
+                  >
+                    Upload Profile Picture
+                  </Button>
+                  {!avatar && (
+                    <p className="text-sm text-red-500">Profile picture is required</p>
+                  )}
+                </div>
                 
                 <FormField
                   control={form.control}
@@ -396,6 +456,26 @@ const RegisterForm = () => {
                       <FormControl>
                         <Input type="email" placeholder="john@example.com" {...field} />
                       </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="university"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>University/College</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="Enter your university or college name" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Enter the full name of your educational institution
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -471,9 +551,8 @@ const RegisterForm = () => {
                   )}
                 />
                 
-                {/* Student-specific fields */}
                 {selectedRole === "student" && (
-                  <>
+                  <div className="space-y-4">
                     <Separator className="my-4" />
                     <h3 className="text-sm font-medium mb-2">Academic Information</h3>
                     
@@ -565,22 +644,26 @@ const RegisterForm = () => {
                           <FormLabel>Skills</FormLabel>
                           <FormControl>
                             <Textarea 
-                              placeholder="Java, Python, React, Machine Learning, etc. (Comma separated)" 
+                              placeholder="Enter your skills (comma-separated)" 
                               {...field} 
                             />
                           </FormControl>
                           <FormDescription>
-                            Enter your skills separated by commas
+                            Enter your skills separated by commas (e.g., JavaScript, React, Node.js)
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-                  </>
+                  </div>
                 )}
                 
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Creating Account..." : "Register"}
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Creating account..." : "Create Account"}
                 </Button>
               </form>
             </Form>
@@ -589,14 +672,13 @@ const RegisterForm = () => {
         <CardFooter className="flex justify-center">
           <div className="text-sm text-gray-500">
             Already have an account?{" "}
-            <Button variant="link" className="p-0" onClick={() => navigate("/login")}>
-              Log in
+            <Button variant="link" className="p-0" asChild>
+              <Link to="/login">Log in</Link>
             </Button>
           </div>
         </CardFooter>
       </Card>
 
-      {/* Verification Modal */}
       <Dialog open={showVerificationModal} onOpenChange={setShowVerificationModal}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -623,7 +705,7 @@ const RegisterForm = () => {
           </DialogHeader>
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   );
 };
 
