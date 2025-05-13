@@ -197,6 +197,12 @@ const LoginForm = () => {
     }
   };
 
+  // Handle OTP input change manually for each digit
+  const handleOTPChange = (value: string) => {
+    setVerificationCode(value);
+    console.log("OTP changed:", value); // Debug log
+  };
+
   return (
     <>
       <Card className="w-full max-w-md mx-auto">
@@ -414,10 +420,9 @@ const LoginForm = () => {
                 <InputOTP 
                   maxLength={6} 
                   value={verificationCode}
-                  onChange={(value) => {
-                    setVerificationCode(value);
-                  }}
-                  containerClassName="gap-2"
+                  onChange={handleOTPChange}
+                  inputMode="numeric"
+                  containerClassName="gap-2 justify-center"
                   render={({ slots }) => (
                     <InputOTPGroup>
                       {slots.map((slot, index) => (
@@ -441,3 +446,4 @@ const LoginForm = () => {
 };
 
 export default LoginForm;
+
