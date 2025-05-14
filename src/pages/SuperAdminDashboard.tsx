@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
@@ -16,7 +17,7 @@ import {
 import {
   Pencil, Trash2, UserPlus, Building, Briefcase, 
   Bell, BarChart2, Settings, MessageSquare, Eye, 
-  FileText, Users, ActivityLog
+  FileText, Users, Activity as ActivityIcon
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -177,7 +178,7 @@ const SuperAdminDashboard = () => {
               Applications
             </TabsTrigger>
             <TabsTrigger value="activity">
-              <ActivityLog className="mr-2 h-4 w-4" />
+              <ActivityIcon className="mr-2 h-4 w-4" />
               Activity Log
             </TabsTrigger>
             <TabsTrigger value="settings">
