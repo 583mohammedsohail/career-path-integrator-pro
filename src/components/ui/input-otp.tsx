@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import { OTPInput, OTPInputContext, SlotProps } from "input-otp"
 import { cn } from "@/lib/utils"
@@ -33,6 +34,11 @@ const InputOTP = React.forwardRef<HTMLDivElement, InputOTPProps>(
                   "w-10 h-10 text-center text-lg border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary",
                   "text-black dark:text-white bg-background"
                 )}
+                onInput={(e) => {
+                  // Ensure only numbers are entered
+                  const input = e.currentTarget;
+                  input.value = input.value.replace(/[^0-9]/g, '');
+                }}
               />
             </div>
           ))}
@@ -76,7 +82,9 @@ const InputOTPSlot = React.forwardRef<
         )}
         type="text"
         inputMode="numeric"
-        autoComplete="one-time-code"
+        pattern="[0-9]*"
+        value={char || ""}
+        readOnly={true}
         {...props}
       />
     </div>

@@ -25,6 +25,7 @@ const JobDetails = () => {
       if (!id) return;
       
       try {
+        // Fix: Add type conversion to prevent UUID error
         const { data, error } = await supabase
           .from('jobs')
           .select(`
@@ -36,6 +37,19 @@ const JobDetails = () => {
               website,
               location,
               industry
+            ),
+            applications:job_applications(
+              id,
+              applied_at,
+              status,
+              student:student_id(
+                id,
+                profiles:id(
+                  name,
+                  email,
+                  avatar_url
+                )
+              )
             )
           `)
           .eq('id', id)
@@ -94,6 +108,9 @@ const JobDetails = () => {
     );
   }
 
+  // Check if job.applications exists before access
+  const applications = job.applications || [];
+
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
@@ -103,7 +120,7 @@ const JobDetails = () => {
               <h1 className="text-3xl font-bold">{job.title}</h1>
               <div className="flex items-center gap-2 mt-2">
                 <Building className="h-4 w-4 text-gray-500" />
-                <span className="text-lg text-gray-700">{job.company.company_name}</span>
+                <span className="text-lg text-gray-700">{job.company?.company_name}</span>
               </div>
               <div className="flex flex-wrap gap-3 mt-3">
                 <Badge variant={job.status === 'open' ? 'default' : 'outline'} className={
@@ -151,7 +168,7 @@ const JobDetails = () => {
               <div className="space-y-6">
                 <div>
                   <h2 className="text-xl font-semibold mb-2">About the Company</h2>
-                  <p className="text-gray-700">{job.company.description}</p>
+                  <p className="text-gray-700">{job.company?.description || "No company description provided."}</p>
                 </div>
 
                 <div>
@@ -174,6 +191,38 @@ const JobDetails = () => {
                   <h2 className="text-xl font-semibold mb-2">Compensation</h2>
                   <p className="text-gray-700 font-medium">{job.salary || 'Not specified'}</p>
                 </div>
+
+                {currentUser && currentUser.role === 'company' && applications.length > 0 && (
+                  <div>
+                    <h2 className="text-xl font-semibold mb-2">Applications ({applications.length})</h2>
+                    <div className="space-y-4">
+                      {applications.map((application) => (
+                        <div key={application.id} className="border rounded-lg p-4">
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <p className="font-semibold">
+                                {application.student?.profiles?.name || "Unknown Applicant"}
+                              </p>
+                              <p className="text-sm text-gray-600">
+                                {application.student?.profiles?.email || "No email provided"}
+                              </p>
+                            </div>
+                            <Badge className={
+                              application.status === 'selected' ? 'bg-green-100 text-green-800' :
+                              application.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                              'bg-yellow-100 text-yellow-800'
+                            }>
+                              {application.status || 'pending'}
+                            </Badge>
+                          </div>
+                          <p className="text-xs text-gray-500 mt-2">
+                            Applied on: {new Date(application.applied_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -185,7 +234,7 @@ const JobDetails = () => {
             onClose={() => setShowApplicationModal(false)}
             jobId={job.id}
             jobTitle={job.title}
-            companyName={job.company.company_name}
+            companyName={job.company?.company_name || ""}
             onSuccess={() => {
               toast.success("Application submitted successfully!");
               navigate('/student-dashboard', { 
