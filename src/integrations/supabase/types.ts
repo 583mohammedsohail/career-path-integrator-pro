@@ -239,12 +239,89 @@ export type Database = {
           },
         ]
       }
+      system_audit: {
+        Row: {
+          action_type: string
+          created_at: string | null
+          details: Json | null
+          entity_id: string | null
+          entity_type: string
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          action_type: string
+          created_at?: string | null
+          details?: Json | null
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          action_type?: string
+          created_at?: string | null
+          details?: Json | null
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      system_settings: {
+        Row: {
+          allow_registration: boolean | null
+          application_deadline_buffer: number | null
+          auto_approve_companies: boolean | null
+          data_retention_days: number | null
+          email_notifications: boolean | null
+          id: string
+          maintenance_mode: boolean | null
+          max_applications_per_student: number | null
+          max_jobs_per_company: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          allow_registration?: boolean | null
+          application_deadline_buffer?: number | null
+          auto_approve_companies?: boolean | null
+          data_retention_days?: number | null
+          email_notifications?: boolean | null
+          id?: string
+          maintenance_mode?: boolean | null
+          max_applications_per_student?: number | null
+          max_jobs_per_company?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          allow_registration?: boolean | null
+          application_deadline_buffer?: number | null
+          auto_approve_companies?: boolean | null
+          data_retention_days?: number | null
+          email_notifications?: boolean | null
+          id?: string
+          maintenance_mode?: boolean | null
+          max_applications_per_student?: number | null
+          max_jobs_per_company?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_active_user_count: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          total_count: number
+          active_last_day: number
+          active_last_week: number
+          active_last_month: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
