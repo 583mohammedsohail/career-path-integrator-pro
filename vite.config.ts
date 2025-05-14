@@ -44,7 +44,17 @@ export default defineConfig(({ mode }) => ({
             "@/*": ["./src/*"]
           }
         },
-        include: ["src"]
+        include: ["src"],
+        references: [
+          {
+            path: "./tsconfig.node.json",
+            // Override the referenced project settings
+            compilerOptions: {
+              composite: true,
+              noEmit: false
+            }
+          }
+        ]
       }
     }
   }
