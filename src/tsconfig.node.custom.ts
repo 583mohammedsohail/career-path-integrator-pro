@@ -12,10 +12,9 @@ export const tsConfigNodeCustom = {
     module: "ESNext",
     moduleResolution: "Node",
     allowSyntheticDefaultImports: true
-  }
+  },
+  include: ["vite.env.d.ts"]
 };
 
-console.log('Custom TypeScript configuration loaded');
-
-// This exports an empty object just to make this a valid module
-export {};
+// Export the configuration to make this a valid module
+export default tsConfigNodeCustom;

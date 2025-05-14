@@ -16,6 +16,8 @@ import NotFound from '@/pages/NotFound';
 import SuperAdminDashboard from './pages/SuperAdminDashboard';
 import StudentDashboard from './pages/StudentDashboard';
 import CompanyDashboard from './pages/CompanyDashboard';
+import ManagementDashboard from './pages/ManagementDashboard';
+import AdminDashboard from './pages/AdminDashboard';
 import DevelopersTeam from './pages/DevelopersTeam';
 import { Toaster } from 'sonner';
 
@@ -56,6 +58,51 @@ const ProtectedRoute = ({ element, allowedRoles = [] }: { element: React.ReactNo
   }
 
   return <>{element}</>;
+};
+
+// Dashboard router - redirects to appropriate dashboard based on user role
+const DashboardRouter = () => {
+  const { currentUser, isLoading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isLoading) {
+      if (!currentUser) {
+        navigate('/login');
+      } else {
+        switch (currentUser.role) {
+          case 'student':
+            navigate('/student-dashboard');
+            break;
+          case 'company':
+            navigate('/company-dashboard');
+            break;
+          case 'admin':
+            navigate('/admin-dashboard');
+            break;
+          case 'management':
+            navigate('/management-dashboard');
+            break;
+          case 'superadmin':
+            navigate('/admin');
+            break;
+          default:
+            navigate('/');
+            break;
+        }
+      }
+    }
+  }, [currentUser, isLoading, navigate]);
+
+  // Show loading during the redirect
+  return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent mx-auto"></div>
+        <p className="mt-4 text-gray-600">Loading your dashboard...</p>
+      </div>
+    </div>
+  );
 };
 
 const router = createBrowserRouter([
@@ -100,8 +147,12 @@ const router = createBrowserRouter([
     element: <ProtectedRoute element={<Profile />} />,
   },
   {
+    path: "/dashboard",
+    element: <DashboardRouter />,
+  },
+  {
     path: "/admin",
-    element: <ProtectedRoute element={<SuperAdminDashboard />} allowedRoles={['superadmin', 'admin']} />,
+    element: <ProtectedRoute element={<SuperAdminDashboard />} allowedRoles={['superadmin']} />,
   },
   {
     path: "/student-dashboard",
@@ -110,6 +161,14 @@ const router = createBrowserRouter([
   {
     path: "/company-dashboard",
     element: <ProtectedRoute element={<CompanyDashboard />} allowedRoles={['company']} />,
+  },
+  {
+    path: "/admin-dashboard",
+    element: <ProtectedRoute element={<AdminDashboard />} allowedRoles={['admin']} />,
+  },
+  {
+    path: "/management-dashboard",
+    element: <ProtectedRoute element={<ManagementDashboard />} allowedRoles={['management']} />,
   },
   {
     path: "/developers-team",

@@ -1,61 +1,56 @@
-
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react-swc";
-import path from "path";
-import { componentTagger } from "lovable-tagger";
+import { defineConfig } from 'vite';
+import { fileURLToPath } from 'url';
+import { createHtmlPlugin } from 'vite-plugin-html';
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
-  server: {
-    host: "::",
-    port: 8080,
-  },
+export default defineConfig({
   plugins: [
-    react(),
-    mode === 'development' &&
-    componentTagger(),
-  ].filter(Boolean),
+    createHtmlPlugin({
+      minify: true,
+    }),
+  ],
+  
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
+      '@': fileURLToPath(new URL('./src', import.meta.url))
+    }
   },
-  // Override typescript options to avoid config issues
+  
+  server: {
+    port: 3000,
+    open: true,
+  },
+  
+  build: {
+    outDir: 'dist',
+    sourcemap: true,
+  },
+  
   optimizeDeps: {
-    esbuildOptions: {
-      tsconfigRaw: {
-        compilerOptions: {
-          target: "es2020",
-          useDefineForClassFields: true,
-          lib: ["ES2020", "DOM", "DOM.Iterable"],
-          module: "ESNext",
-          skipLibCheck: true,
-          moduleResolution: "bundler",
-          allowImportingTsExtensions: true,
-          resolveJsonModule: true,
-          isolatedModules: true,
-          noEmit: true,
-          jsx: "react-jsx",
-          strict: true,
-          noUnusedLocals: true,
-          noUnusedParameters: true,
-          noFallthroughCasesInSwitch: true,
-          paths: {
-            "@/*": ["./src/*"]
+    include: ['react', 'react-dom', 'react-router-dom'],
+  },
+  
+  // Add TypeScript configuration to fix the reference issue
+  esbuild: {
+    tsconfigRaw: {
+      compilerOptions: {
+        target: 'esnext',
+        module: 'esnext',
+        strict: true,
+        esModuleInterop: true,
+        skipLibCheck: true,
+        forceConsistentCasingInFileNames: true,
+      },
+      references: [
+        {
+          path: "./tsconfig.node.json",
+          // Override the referenced project settings
+          compilerOptions: {
+            composite: true,
+            noEmit: false
           }
-        },
-        include: ["src"],
-        references: [
-          {
-            path: "./tsconfig.node.json",
-            // Override the referenced project settings
-            compilerOptions: {
-              composite: true,
-              noEmit: false
-            }
-          }
-        ]
-      }
+        }
+      ]
     }
   }
-}));
+})
