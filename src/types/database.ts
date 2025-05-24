@@ -67,4 +67,29 @@ export interface SystemSettings {
   application_deadline_buffer: number;
   data_retention_days: number;
   updated_at: string;
-} 
+}
+
+export interface CampusDrive {
+  id: string;
+  title: string;
+  company_id: string;
+  location: string;
+  date: string;
+  description: string;
+  eligibility_criteria?: string | null;
+  positions: number;
+  status: 'upcoming' | 'ongoing' | 'completed';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CampusApplication {
+  id: string;
+  drive_id: string;
+  student_id: string;
+  status: 'pending' | 'shortlisted' | 'rejected' | 'interview' | 'selected';
+  note?: string | null;
+  resume_url?: string | null;
+  applied_at: string;
+  updated_at: string;
+}

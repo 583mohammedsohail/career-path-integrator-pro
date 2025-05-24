@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Camera, Phone, MapPin, Linkedin, Mail, Github, Twitter } from "lucide-react";
+import { Camera, Phone, MapPin, Linkedin, Mail, Github } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -227,26 +227,7 @@ const RegisterForm = () => {
     }
   };
 
-  const handleSignInWithTwitter = async () => {
-    try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'twitter',
-        options: {
-          redirectTo: window.location.origin + '/register',
-        },
-      });
-      
-      if (error) {
-        toast.error(error.message);
-      }
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        toast.error(error.message);
-      } else {
-        toast.error('Failed to sign in with Twitter');
-      }
-    }
-  };
+  // Twitter login removed as requested
 
   const onSubmit = async (data: FormData) => {
     setIsLoading(true);
@@ -387,10 +368,7 @@ const RegisterForm = () => {
                   <Github className="h-5 w-5 mr-2" />
                   GitHub
                 </Button>
-                <Button variant="outline" onClick={handleSignInWithTwitter} type="button">
-                  <Twitter className="h-5 w-5 mr-2 text-[#1DA1F2]" />
-                  Twitter
-                </Button>
+                {/* Twitter login button removed as requested */}
               </div>
             </div>
             

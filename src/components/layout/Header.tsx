@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/contexts/AuthContext';
-import { LogOut, User, Bell, Shield, LayoutDashboard, Users, Code, Briefcase, Building, GraduationCap } from 'lucide-react';
+import { LogOut, User, Bell, Shield, LayoutDashboard, Users, Code, Briefcase, Building, GraduationCap, Calendar } from 'lucide-react';
 import { mockNotifications } from '@/data/mockData';
 import { toast } from 'sonner';
 
@@ -86,6 +86,11 @@ const Header: React.FC = () => {
           <Link to="/students" className="text-gray-600 hover:text-primary transition-colors">
             <div className="flex items-center">
               <GraduationCap className="mr-1 h-4 w-4" /> Students
+            </div>
+          </Link>
+          <Link to="/campus-recruitment" className="text-gray-600 hover:text-primary transition-colors">
+            <div className="flex items-center">
+              <Calendar className="mr-1 h-4 w-4" /> Campus Recruitment
             </div>
           </Link>
           <Link to="/developers-team" className="text-gray-600 hover:text-primary transition-colors">

@@ -1,23 +1,70 @@
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Briefcase, MapPin, Calendar, Users, Building } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
+import { MapPin, Calendar, Users, Building } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import JobApplicationModal from '@/components/jobs/JobApplicationModal';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+
+// Define types for job and application data
+interface Profile {
+  name: string | null;
+  email: string | null;
+  avatar_url?: string | null;
+}
+
+interface Student {
+  id: string;
+  profiles: Profile;
+}
+
+interface Application {
+  id: string;
+  applied_at: string | null;
+  status: string | null;
+  resume_url?: string | null;
+  student: Student;
+}
+
+interface Company {
+  id: string;
+  company_name: string;
+  description?: string | null;
+  website?: string | null;
+  location?: string | null;
+  industry?: string | null;
+}
+
+interface Job {
+  id: string;
+  title: string;
+  description: string;
+  company_id: string;
+  location?: string | null;
+  salary?: string | null;
+  status?: string | null;
+  deadline: string;
+  positions?: number | null;
+  requirements?: string[] | null;
+  created_at?: string | null;
+  eligibility?: string | null;
+  min_qualification?: string | null;
+  min_experience?: number | null;
+  company?: Company | null;
+  applications: Application[];
+}
 
 const JobDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { currentUser } = useAuth();
   const [showApplicationModal, setShowApplicationModal] = useState(false);
-  const [job, setJob] = useState(null);
+  const [job, setJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -25,7 +72,7 @@ const JobDetails = () => {
       if (!id) return;
       
       try {
-        // Fix: Add type conversion to prevent UUID error
+        // Fetch job with company and applications data
         const { data, error } = await supabase
           .from('jobs')
           .select(`
@@ -42,6 +89,7 @@ const JobDetails = () => {
               id,
               applied_at,
               status,
+              resume_url,
               student:student_id(
                 id,
                 profiles:id(
@@ -56,9 +104,18 @@ const JobDetails = () => {
           .single();
           
         if (error) {
-          throw error;
+          console.error('Error fetching job:', error.message);
+          setLoading(false);
+          return;
         }
         
+        if (!data) {
+          console.log('No job found with ID:', id);
+          setLoading(false);
+          return;
+        }
+        
+        console.log('Job data loaded:', data);
         setJob(data);
       } catch (error) {
         console.error('Error loading job details:', error);
@@ -136,7 +193,7 @@ const JobDetails = () => {
                 </div>
                 <div className="flex items-center gap-1 text-sm">
                   <Calendar className="h-4 w-4 text-gray-500" />
-                  <span>Deadline: {new Date(job.deadline).toLocaleDateString()}</span>
+                  <span>Deadline: {job.deadline ? new Date(job.deadline).toLocaleDateString() : 'Not specified'}</span>
                 </div>
                 <div className="flex items-center gap-1 text-sm">
                   <Users className="h-4 w-4 text-gray-500" />
@@ -192,6 +249,27 @@ const JobDetails = () => {
                   <p className="text-gray-700 font-medium">{job.salary || 'Not specified'}</p>
                 </div>
 
+                <div>
+                  <h2 className="text-xl font-semibold mb-2">Eligibility</h2>
+                  <div className="space-y-2">
+                    {job.eligibility ? (
+                      <p className="text-gray-700 whitespace-pre-line">{job.eligibility}</p>
+                    ) : (
+                      <p className="text-gray-500 italic">No specific eligibility criteria provided.</p>
+                    )}
+                    {job.min_qualification && (
+                      <p className="text-gray-700">
+                        <span className="font-medium">Minimum Qualification:</span> {job.min_qualification}
+                      </p>
+                    )}
+                    {job.min_experience !== undefined && (
+                      <p className="text-gray-700">
+                        <span className="font-medium">Experience Required:</span> {job.min_experience} {job.min_experience === 1 ? 'year' : 'years'}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
                 {currentUser && currentUser.role === 'company' && applications.length > 0 && (
                   <div>
                     <h2 className="text-xl font-semibold mb-2">Applications ({applications.length})</h2>
@@ -207,17 +285,67 @@ const JobDetails = () => {
                                 {application.student?.profiles?.email || "No email provided"}
                               </p>
                             </div>
-                            <Badge className={
-                              application.status === 'selected' ? 'bg-green-100 text-green-800' :
-                              application.status === 'rejected' ? 'bg-red-100 text-red-800' :
-                              'bg-yellow-100 text-yellow-800'
-                            }>
-                              {application.status || 'pending'}
-                            </Badge>
+                            <div className="flex gap-2">
+                              <Badge className={
+                                application.status === 'selected' ? 'bg-green-100 text-green-800' :
+                                application.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                                application.status === 'interview' ? 'bg-blue-100 text-blue-800' :
+                                'bg-yellow-100 text-yellow-800'
+                              }>
+                                {application.status || 'pending'}
+                              </Badge>
+                            </div>
                           </div>
-                          <p className="text-xs text-gray-500 mt-2">
-                            Applied on: {new Date(application.applied_at).toLocaleDateString()}
-                          </p>
+                          <div className="flex justify-between items-center mt-3">
+                            <p className="text-xs text-gray-500">
+                              Applied on: {application.applied_at ? new Date(application.applied_at).toLocaleDateString() : 'Unknown date'}
+                            </p>
+                            <div className="flex gap-2">
+                              {application.resume_url && (
+                                <Button variant="outline" size="sm" onClick={() => window.open(application.resume_url as string, '_blank')}>
+                                  View Resume
+                                </Button>
+                              )}
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={async () => {
+                                  try {
+                                    await supabase
+                                      .from('job_applications')
+                                      .update({ status: 'selected' })
+                                      .eq('id', application.id);
+                                    toast.success('Candidate shortlisted');
+                                    // Refresh the page to update the status
+                                    window.location.reload();
+                                  } catch (error) {
+                                    toast.error('Failed to update status');
+                                  }
+                                }}
+                              >
+                                Shortlist
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={async () => {
+                                  try {
+                                    await supabase
+                                      .from('job_applications')
+                                      .update({ status: 'interview' })
+                                      .eq('id', application.id);
+                                    toast.success('Interview scheduled');
+                                    // Refresh the page to update the status
+                                    window.location.reload();
+                                  } catch (error) {
+                                    toast.error('Failed to update status');
+                                  }
+                                }}
+                              >
+                                Schedule Interview
+                              </Button>
+                            </div>
+                          </div>
                         </div>
                       ))}
                     </div>

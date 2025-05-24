@@ -6,9 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, Linkedin, Phone, Github, Twitter } from "lucide-react";
+import { ChevronDown, Linkedin, Phone, Github } from "lucide-react";
 import { supabase } from '@/integrations/supabase/client';
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+// OTP input replaced with regular text input
 import {
   Dialog,
   DialogContent,
@@ -101,24 +101,6 @@ const LoginForm = () => {
       }
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to sign in with GitHub';
-      toast.error(errorMessage);
-    }
-  };
-
-  const handleSignInWithTwitter = async () => {
-    try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'twitter',
-        options: {
-          redirectTo: window.location.origin + '/login',
-        },
-      });
-      
-      if (error) {
-        toast.error(error.message);
-      }
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to sign in with Twitter';
       toast.error(errorMessage);
     }
   };
@@ -222,10 +204,7 @@ const LoginForm = () => {
                       <Github className="h-5 w-5 mr-2" />
                       GitHub
                     </Button>
-                    <Button variant="outline" onClick={handleSignInWithTwitter} type="button">
-                      <Twitter className="h-5 w-5 mr-2 text-[#1DA1F2]" />
-                      Twitter
-                    </Button>
+                    {/* Twitter login button removed as requested */}
                   </div>
                 </div>
                 
@@ -393,10 +372,13 @@ const LoginForm = () => {
               </p>
               <div className="w-full max-w-[300px] mx-auto">
                 <div className="flex justify-center">
-                  <InputOTP
+                  <Input
+                    type="text"
                     value={verificationCode}
-                    onChange={handleOTPChange}
+                    onChange={(e) => handleOTPChange(e.target.value)}
                     maxLength={6}
+                    placeholder="Enter 6-digit code"
+                    className="text-center text-lg tracking-widest"
                   />
                 </div>
               </div>

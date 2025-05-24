@@ -19,6 +19,8 @@ import CompanyDashboard from './pages/CompanyDashboard';
 import ManagementDashboard from './pages/ManagementDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import DevelopersTeam from './pages/DevelopersTeam';
+import CampusRecruitment from './pages/CampusRecruitment';
+import CampusDriveDetails from './pages/CampusDriveDetails';
 import { Toaster } from 'sonner';
 
 // Protected route wrapper
@@ -173,6 +175,14 @@ const router = createBrowserRouter([
   {
     path: "/developers-team",
     element: <DevelopersTeam />,
+  },
+  {
+    path: "/campus-recruitment",
+    element: <CampusRecruitment />,
+  },
+  {
+    path: "/campus-drive/:id",
+    element: <CampusDriveDetails />,
   },
   {
     path: "*",

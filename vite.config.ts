@@ -1,10 +1,12 @@
 import { defineConfig } from 'vite';
 import { fileURLToPath } from 'url';
 import { createHtmlPlugin } from 'vite-plugin-html';
+import react from '@vitejs/plugin-react-swc';
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
+    react(),
     createHtmlPlugin({
       minify: true,
     }),
@@ -28,29 +30,5 @@ export default defineConfig({
   
   optimizeDeps: {
     include: ['react', 'react-dom', 'react-router-dom'],
-  },
-  
-  // Add TypeScript configuration to fix the reference issue
-  esbuild: {
-    tsconfigRaw: {
-      compilerOptions: {
-        target: 'esnext',
-        module: 'esnext',
-        strict: true,
-        esModuleInterop: true,
-        skipLibCheck: true,
-        forceConsistentCasingInFileNames: true,
-      },
-      references: [
-        {
-          path: "./tsconfig.node.json",
-          // Override the referenced project settings
-          compilerOptions: {
-            composite: true,
-            noEmit: false
-          }
-        }
-      ]
-    }
   }
 })
