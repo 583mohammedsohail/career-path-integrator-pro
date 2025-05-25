@@ -164,6 +164,17 @@ const LoginForm = () => {
     // Only allow numbers and limit to 6 digits
     const numericValue = value.replace(/[^0-9]/g, '').slice(0, 6);
     setVerificationCode(numericValue);
+    
+    // Auto-submit when 6 digits are entered
+    if (numericValue.length === 6) {
+      verifyPhoneCode();
+    }
+  };
+  
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace' && verificationCode.length > 0) {
+      setVerificationCode(prev => prev.slice(0, -1));
+    }
   };
 
   return (
@@ -371,16 +382,34 @@ const LoginForm = () => {
                 Enter the 6-digit code sent to {phoneNumber}
               </p>
               <div className="w-full max-w-[300px] mx-auto">
-                <div className="flex justify-center">
-                  <Input
-                    type="text"
-                    value={verificationCode}
-                    onChange={(e) => handleOTPChange(e.target.value)}
-                    maxLength={6}
-                    placeholder="Enter 6-digit code"
-                    className="text-center text-lg tracking-widest"
-                  />
+                <div className="flex justify-between space-x-2">
+                  {[...Array(6)].map((_, index) => (
+                    <div key={index} className="flex-1">
+                      <Input
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        value={verificationCode[index] || ''}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (value === '' || /^[0-9]$/.test(value)) {
+                            const newCode = verificationCode.split('');
+                            newCode[index] = value;
+                            handleOTPChange(newCode.join(''));
+                          }
+                        }}
+                        onKeyDown={handleKeyDown}
+                        onFocus={(e) => e.target.select()}
+                        className="text-center text-xl h-12 w-full"
+                        maxLength={1}
+                        autoFocus={index === 0}
+                      />
+                    </div>
+                  ))}
                 </div>
+                <p className="text-xs text-gray-500 mt-2 text-center">
+                  {verificationCode.length === 0 ? 'Enter the 6-digit code' : '✓ Code entered'}
+                </p>
               </div>
               <Button 
                 className="mt-4 w-full" 

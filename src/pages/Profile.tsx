@@ -1,21 +1,23 @@
 
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useApplications } from '../contexts/ApplicationContext';
 import Layout from '../components/layout/Layout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { GraduationCap, Mail, Phone, MapPin, Building2, User, Shield, Camera } from 'lucide-react';
+import { GraduationCap, Mail, Phone, MapPin, Building2, User, Shield, Camera, Briefcase, Calendar, Clock, ExternalLink } from 'lucide-react';
 import DeveloperCredits from '../components/layout/DeveloperCredits';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { format } from 'date-fns';
 
 // Define user profile data structure
 interface UserProfile {
@@ -33,6 +35,8 @@ interface UserProfile {
 
 const Profile = () => {
   const { currentUser, isLoading } = useAuth();
+  const { jobApplications, campusDriveApplications, isLoading: isLoadingApplications } = useApplications();
+  const navigate = useNavigate();
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [profileForm, setProfileForm] = useState({
     name: '',
@@ -42,6 +46,7 @@ const Profile = () => {
     avatar: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [activeTab, setActiveTab] = useState('personal');
 
   if (isLoading) {
     return (
@@ -162,14 +167,161 @@ const Profile = () => {
               </Card>
             </TabsContent>
             <TabsContent value="applications">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Job Applications</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-500">Your recent job applications will appear here.</p>
-                </CardContent>
-              </Card>
+              <div className="space-y-6">
+                {/* Job Applications */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Job Applications</CardTitle>
+                    <CardDescription>Your recent job applications</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {isLoadingApplications ? (
+                      <div className="py-6 flex items-center justify-center">
+                        <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full"></div>
+                      </div>
+                    ) : jobApplications.length > 0 ? (
+                      <div className="space-y-4">
+                        {jobApplications.map(application => (
+                          <div key={application.id} className="border rounded-lg p-4 shadow-sm">
+                            <div className="flex items-start justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                {application.company_logo ? (
+                                  <Avatar className="h-8 w-8">
+                                    <AvatarImage src={application.company_logo} alt={application.company_name} />
+                                    <AvatarFallback>{application.company_name[0]}</AvatarFallback>
+                                  </Avatar>
+                                ) : (
+                                  <Briefcase className="h-8 w-8 text-muted-foreground" />
+                                )}
+                                <div>
+                                  <h3 className="font-medium">{application.job_title}</h3>
+                                  <p className="text-sm text-muted-foreground">{application.company_name}</p>
+                                </div>
+                              </div>
+                              <Badge 
+                                className={`
+                                  ${application.status === 'accepted' ? 'bg-green-100 text-green-800' : ''}
+                                  ${application.status === 'rejected' ? 'bg-red-100 text-red-800' : ''}
+                                  ${application.status === 'shortlisted' ? 'bg-blue-100 text-blue-800' : ''}
+                                  ${application.status === 'reviewing' ? 'bg-yellow-100 text-yellow-800' : ''}
+                                  ${application.status === 'pending' ? 'bg-gray-100 text-gray-800' : ''}
+                                `}
+                              >
+                                {application.status === 'accepted' && 'Accepted'}
+                                {application.status === 'rejected' && 'Rejected'}
+                                {application.status === 'shortlisted' && 'Shortlisted'}
+                                {application.status === 'reviewing' && 'Under Review'}
+                                {application.status === 'pending' && 'Pending'}
+                              </Badge>
+                            </div>
+                            <div className="flex items-center text-sm text-muted-foreground mb-2">
+                              <Clock className="mr-1 h-3 w-3" />
+                              <span>Applied on {format(new Date(application.applied_at), 'MMM dd, yyyy')}</span>
+                            </div>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="w-full mt-2"
+                              onClick={() => navigate(`/jobs/${application.job_id}`)}
+                            >
+                              <ExternalLink className="mr-1 h-3 w-3" /> View Job
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="py-6 text-center">
+                        <Briefcase className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
+                        <p className="text-muted-foreground">You haven't applied to any jobs yet.</p>
+                        <Button 
+                          className="mt-4" 
+                          variant="outline" 
+                          onClick={() => navigate('/jobs')}
+                        >
+                          Browse Jobs
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Campus Drive Applications */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Campus Recruitment Applications</CardTitle>
+                    <CardDescription>Your campus recruitment drive applications</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {isLoadingApplications ? (
+                      <div className="py-6 flex items-center justify-center">
+                        <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full"></div>
+                      </div>
+                    ) : campusDriveApplications.length > 0 ? (
+                      <div className="space-y-4">
+                        {campusDriveApplications.map(application => (
+                          <div key={application.id} className="border rounded-lg p-4 shadow-sm">
+                            <div className="flex items-start justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                {application.company_logo ? (
+                                  <Avatar className="h-8 w-8">
+                                    <AvatarImage src={application.company_logo} alt={application.company_name} />
+                                    <AvatarFallback>{application.company_name[0]}</AvatarFallback>
+                                  </Avatar>
+                                ) : (
+                                  <Briefcase className="h-8 w-8 text-muted-foreground" />
+                                )}
+                                <div>
+                                  <h3 className="font-medium">{application.drive_title}</h3>
+                                  <p className="text-sm text-muted-foreground">{application.company_name}</p>
+                                </div>
+                              </div>
+                              <Badge 
+                                className={`
+                                  ${application.status === 'accepted' ? 'bg-green-100 text-green-800' : ''}
+                                  ${application.status === 'rejected' ? 'bg-red-100 text-red-800' : ''}
+                                  ${application.status === 'shortlisted' ? 'bg-blue-100 text-blue-800' : ''}
+                                  ${application.status === 'reviewing' ? 'bg-yellow-100 text-yellow-800' : ''}
+                                  ${application.status === 'pending' ? 'bg-gray-100 text-gray-800' : ''}
+                                `}
+                              >
+                                {application.status === 'accepted' && 'Accepted'}
+                                {application.status === 'rejected' && 'Rejected'}
+                                {application.status === 'shortlisted' && 'Shortlisted'}
+                                {application.status === 'reviewing' && 'Under Review'}
+                                {application.status === 'pending' && 'Pending'}
+                              </Badge>
+                            </div>
+                            <div className="flex items-center text-sm text-muted-foreground mb-2">
+                              <Clock className="mr-1 h-3 w-3" />
+                              <span>Applied on {format(new Date(application.applied_at), 'MMM dd, yyyy')}</span>
+                            </div>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="w-full mt-2"
+                              onClick={() => navigate('/campus-recruitment')}
+                            >
+                              <ExternalLink className="mr-1 h-3 w-3" /> View Drive
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="py-6 text-center">
+                        <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
+                        <p className="text-muted-foreground">You haven't applied to any campus drives yet.</p>
+                        <Button 
+                          className="mt-4" 
+                          variant="outline" 
+                          onClick={() => navigate('/campus-recruitment')}
+                        >
+                          Browse Campus Drives
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
             </TabsContent>
           </>
         );

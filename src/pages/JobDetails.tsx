@@ -69,8 +69,13 @@ const JobDetails = () => {
 
   useEffect(() => {
     const fetchJob = async () => {
-      if (!id) return;
+      if (!id) {
+        toast.error('No job ID provided');
+        setLoading(false);
+        return;
+      }
       
+      setLoading(true);
       try {
         // Fetch job with company and applications data
         const { data, error } = await supabase
@@ -102,17 +107,11 @@ const JobDetails = () => {
           `)
           .eq('id', id)
           .single();
-          
-        if (error) {
-          console.error('Error fetching job:', error.message);
-          setLoading(false);
-          return;
-        }
+
+        if (error) throw error;
         
         if (!data) {
-          console.log('No job found with ID:', id);
-          setLoading(false);
-          return;
+          throw new Error('Job not found');
         }
         
         console.log('Job data loaded:', data);

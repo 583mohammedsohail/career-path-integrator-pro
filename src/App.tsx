@@ -2,6 +2,7 @@
 import React, { useEffect } from 'react';
 import { createBrowserRouter, RouterProvider, Navigate, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { ApplicationProvider } from './contexts/ApplicationContext';
 import Index from '@/pages/Index';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
@@ -194,8 +195,10 @@ const App: React.FC = () => {
   return (
     <React.StrictMode>
       <AuthProvider>
-        <RouterProvider router={router} />
-        <Toaster position="top-right" richColors closeButton />
+        <ApplicationProvider>
+          <Toaster position="top-center" richColors closeButton />
+          <RouterProvider router={router} />
+        </ApplicationProvider>
       </AuthProvider>
     </React.StrictMode>
   );
