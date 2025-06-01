@@ -26,30 +26,50 @@ const StudentDashboard = () => {
       if (!currentUser) return;
       
       try {
-        const { data, error } = await supabase
-          .from('job_applications')
-          .select(`
-            *,
-            job:job_id (
-              id,
-              title,
-              company_id,
-              deadline,
-              status,
-              company:company_id (
-                id,
-                company_name
-              )
-            )
-          `)
-          .eq('student_id', currentUser.id)
-          .order('applied_at', { ascending: false });
-          
-        if (error) {
-          throw error;
-        }
+        // Mock applications with job details for now
+        const mockApplications = [
+          {
+            id: '1',
+            job_id: '1',
+            student_id: currentUser.id,
+            applied_at: new Date().toISOString(),
+            resume_url: null,
+            status: 'pending',
+            job: {
+              id: '1',
+              title: 'Software Engineer',
+              company_id: '1',
+              deadline: '2025-02-28',
+              status: 'open',
+              company: {
+                id: '1',
+                company_name: 'Tech Corp'
+              }
+            }
+          },
+          {
+            id: '2',
+            job_id: '2',
+            student_id: currentUser.id,
+            applied_at: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
+            resume_url: null,
+            status: 'shortlisted',
+            job: {
+              id: '2',
+              title: 'Frontend Developer',
+              company_id: '2',
+              deadline: '2025-03-15',
+              status: 'open',
+              company: {
+                id: '2',
+                company_name: 'Web Solutions'
+              }
+            }
+          }
+        ];
         
-        setApplications(data || []);
+        setApplications(mockApplications);
+        console.log('Loaded mock applications:', mockApplications);
       } catch (error) {
         console.error('Error loading applications:', error);
         toast.error('Failed to load your applications');
@@ -61,69 +81,23 @@ const StudentDashboard = () => {
     fetchApplications();
   }, [currentUser]);
 
-  // Set up real-time subscription for applications
+  // Set up real-time subscription for applications (using mock data for now)
   useEffect(() => {
     if (!currentUser) return;
 
-    const channel = supabase
-      .channel('student-applications')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'job_applications',
-          filter: `student_id=eq.${currentUser.id}`
-        },
-        (payload) => {
-          console.log('Real-time application update:', payload);
-          
-          if (payload.eventType === 'INSERT') {
-            // Fetch the full application data with job details
-            const fetchNewApplication = async () => {
-              const { data, error } = await supabase
-                .from('job_applications')
-                .select(`
-                  *,
-                  job:job_id (
-                    id,
-                    title,
-                    company_id,
-                    deadline,
-                    status,
-                    company:company_id (
-                      id,
-                      company_name
-                    )
-                  )
-                `)
-                .eq('id', payload.new.id)
-                .single();
+    // Mock real-time updates
+    const mockRealTimeUpdate = () => {
+      // Simulate new application or status update
+      console.log('Mock real-time update triggered');
+    };
 
-              if (data && !error) {
-                setApplications(prev => [data, ...prev]);
-                toast.success('New application submitted!');
-              }
-            };
-            fetchNewApplication();
-          } else if (payload.eventType === 'UPDATE') {
-            setApplications(prev => 
-              prev.map(app => 
-                app.id === payload.new.id 
-                  ? { ...app, ...payload.new }
-                  : app
-              )
-            );
-            toast.info('Application status updated');
-          } else if (payload.eventType === 'DELETE') {
-            setApplications(prev => prev.filter(app => app.id !== payload.old.id));
-          }
-        }
-      )
-      .subscribe();
+    // Set up a mock interval for demonstration (remove in production)
+    const interval = setInterval(() => {
+      mockRealTimeUpdate();
+    }, 30000); // Every 30 seconds
 
     return () => {
-      supabase.removeChannel(channel);
+      clearInterval(interval);
     };
   }, [currentUser]);
 

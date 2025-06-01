@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import { useState, useEffect } from 'react';
 import Layout from '../components/layout/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -240,7 +241,7 @@ const CampusRecruitment = () => {
                       <CardDescription>{drive.company.name}</CardDescription>
                     </div>
                   </div>
-                  {getStatusBadge(drive.status, drive.date)}
+                  {getStatusBadge(drive.date)}
                 </div>
               </CardHeader>
               <CardContent>

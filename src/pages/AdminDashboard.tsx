@@ -33,6 +33,18 @@ const AdminDashboard = () => {
     return <Navigate to="/login" replace />;
   }
 
+  // Mock applications data
+  const mockApplications = [
+    {
+      id: '1',
+      student_name: 'John Doe',
+      job_title: 'Software Engineer',
+      company_name: 'Tech Corp',
+      status: 'pending',
+      applied_date: '2025-01-01'
+    }
+  ];
+
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
@@ -74,6 +86,7 @@ const AdminDashboard = () => {
               </CardHeader>
               <CardContent>
                 <ApplicationsTable 
+                  applications={mockApplications}
                   onUpdateStatus={() => {}}
                   onViewDetails={() => {}}
                   onDownloadResume={() => {}}
