@@ -5,7 +5,6 @@ export interface User {
   email: string;
   role: 'student' | 'company' | 'admin' | 'management' | 'superadmin';
   avatar_url?: string;
-  avatar?: string;
   department?: string;
   course?: string;
   year?: number;
@@ -26,8 +25,6 @@ export interface Job {
   id: string;
   title: string;
   company_id: string;
-  company_name?: string;
-  company_logo?: string;
   location?: string;
   type?: 'full-time' | 'part-time' | 'internship' | 'contract';
   salary?: string;
@@ -42,13 +39,11 @@ export interface Job {
 export interface Company {
   id: string;
   company_name: string;
-  name?: string;
   industry?: string;
   location?: string;
   description?: string;
   website?: string;
   avatar_url?: string;
-  logo?: string;
   size?: string;
   founded?: string;
   employees?: string;
@@ -83,8 +78,6 @@ export interface Application {
   cover_letter?: string;
 }
 
-export interface JobApplication extends Application {}
-
 export interface SystemActivity {
   id: string;
   action_type: string;
@@ -101,11 +94,6 @@ export interface CampusDrive {
   company_id: string;
   company_name?: string;
   company_logo?: string;
-  company: {
-    id: string;
-    name: string;
-    logo?: string;
-  };
   location: string;
   date: string;
   registration_deadline: string;
@@ -118,42 +106,5 @@ export interface CampusDrive {
   requirements: string[];
   application_count?: number;
   registered_students?: string[];
-  created_at: string;
-}
-
-export interface CampusApplication {
-  id: string;
-  student_id: string;
-  drive_id: string;
-  status: 'pending' | 'shortlisted' | 'rejected' | 'interview' | 'selected';
-  applied_at: string;
-  note?: string;
-}
-
-export interface Admin extends User {
-  role: 'admin';
-}
-
-export interface Management extends User {
-  role: 'management';
-}
-
-export interface SuperAdmin extends User {
-  role: 'superadmin';
-}
-
-export interface PlacementStats {
-  totalStudents: number;
-  placedStudents: number;
-  averagePackage: number;
-  topPackage: number;
-}
-
-export interface Notification {
-  id: string;
-  user_id: string;
-  title: string;
-  message: string;
-  read: boolean;
   created_at: string;
 }

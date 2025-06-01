@@ -1,6 +1,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Calendar, MapPin, Users, TrendingUp } from 'lucide-react';
 import { format } from 'date-fns';
 import { mockJobs } from '@/data/mockData';

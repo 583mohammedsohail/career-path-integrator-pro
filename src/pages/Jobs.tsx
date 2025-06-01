@@ -11,7 +11,6 @@ import { Search, Filter, Plus, Briefcase } from 'lucide-react';
 import { mockJobs } from '@/data/mockData';
 import { useAuth } from '@/contexts/AuthContext';
 import { Job } from '@/types';
-import { toast } from 'sonner';
 
 const Jobs = () => {
   const { currentUser } = useAuth();
@@ -24,26 +23,17 @@ const Jobs = () => {
   // Filter jobs based on search and filters
   const filteredJobs = jobs.filter(job => {
     const matchesSearch = job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         job.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (job.company_name && job.company_name.toLowerCase().includes(searchTerm.toLowerCase()));
+                         job.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = filterType === 'all' || job.type === filterType;
     const matchesLocation = filterLocation === 'all' || job.location?.toLowerCase().includes(filterLocation.toLowerCase());
     return matchesSearch && matchesType && matchesLocation;
   });
 
-  const handleJobPosted = (newJob: any) => {
-    // Add the new job with real-time company logo
-    const jobWithLogo: Job = {
-      ...newJob,
-      id: Math.random().toString(36).substr(2, 9),
-      company_logo: `https://logo.clearbit.com/${newJob.company_name.toLowerCase().replace(/\s+/g, '')}.com`,
-      created_at: new Date().toISOString(),
-      status: 'active',
-    };
-    
-    setJobs(prev => [jobWithLogo, ...prev]);
+  const handleJobPosted = () => {
+    // Refresh the jobs list - in a real app, this would fetch from the database
+    console.log('Job posted successfully');
+    // For now, we'll just close the modal
     setIsPostJobModalOpen(false);
-    toast.success('Job posted successfully and is now visible to all users!');
   };
 
   const canPostJobs = currentUser && ['company', 'admin', 'management', 'superadmin'].includes(currentUser.role);
@@ -54,7 +44,7 @@ const Jobs = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
           <div>
             <h1 className="text-3xl font-bold mb-2">Job Opportunities</h1>
-            <p className="text-gray-600">Discover your next career move with {filteredJobs.length} available positions</p>
+            <p className="text-gray-600">Discover your next career move</p>
           </div>
           
           {canPostJobs && (
@@ -72,7 +62,7 @@ const Jobs = () => {
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <Input
-                  placeholder="Search jobs by title, description, or company..."
+                  placeholder="Search jobs by title or description..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,10 +9,13 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import {
   Shield,
+  Mail,
   Bell,
   Calendar,
+  Lock,
   Database,
   RefreshCw,
+  HardDrive
 } from 'lucide-react';
 
 interface SystemSettingsProps {
@@ -51,15 +53,9 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ settings, onUpdateSetti
   const handleSaveSettings = async () => {
     setIsLoading(true);
     try {
-      // Convert settings to the format expected by the database
-      const settingsArray = Object.entries(currentSettings).map(([key, value]) => ({
-        setting_key: key,
-        setting_value: String(value),
-      }));
-
       const { error } = await supabase
         .from('system_settings')
-        .upsert(settingsArray);
+        .upsert([currentSettings]);
 
       if (error) throw error;
       
@@ -178,7 +174,7 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ settings, onUpdateSetti
                       id={setting.key}
                       type="number"
                       className="w-24"
-                      value={String(currentSettings[setting.key as keyof typeof currentSettings])}
+                      value={currentSettings[setting.key as keyof typeof currentSettings]}
                       onChange={(e) => handleNumberChange(setting.key, e.target.value)}
                     />
                   )}
@@ -208,4 +204,4 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ settings, onUpdateSetti
   );
 };
 
-export default SystemSettings;
+export default SystemSettings; 

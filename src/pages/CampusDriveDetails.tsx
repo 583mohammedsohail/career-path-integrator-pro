@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
@@ -11,23 +10,42 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Briefcase, MapPin, Calendar, Users, Building, User, Clock, CheckCircle, XCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+
+// Import types
 import { CampusDrive, CampusApplication } from '@/types/index';
 import { mockCampusDrives } from '@/data/mockCampusDrives';
+
+// Extended campus drive interface with company info
+interface ExtendedCampusDrive extends CampusDrive {
+  company_name?: string;
+  company_logo?: string | null;
+}
+
+// Extended application interface with student info
+interface ExtendedApplication extends CampusApplication {
+  student?: {
+    name: string;
+    email: string;
+    avatar_url?: string | null;
+    user_metadata?: any;
+  };
+}
 
 const CampusDriveDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { currentUser } = useAuth();
-  const [drive, setDrive] = useState<CampusDrive | null>(null);
-  const [applications, setApplications] = useState<CampusApplication[]>([]);
+  const [drive, setDrive] = useState<ExtendedCampusDrive | null>(null);
+  const [applications, setApplications] = useState<ExtendedApplication[]>([]);
   const [loading, setLoading] = useState(true);
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
   const [applicationNote, setApplicationNote] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasApplied, setHasApplied] = useState(false);
-  const [userApplication, setUserApplication] = useState<CampusApplication | null>(null);
+  const [userApplication, setUserApplication] = useState<ExtendedApplication | null>(null);
 
   // Fetch campus drive details
   useEffect(() => {
@@ -46,18 +64,30 @@ const CampusDriveDetails = () => {
           return;
         }
         
-        setDrive(foundDrive);
+        // Set the drive data
+        setDrive({
+          ...foundDrive,
+          company_name: foundDrive.company.name,
+          company_logo: foundDrive.company.logo
+        });
         
         // Mock applications data for company users
         if (currentUser && currentUser.role === 'company') {
-          const mockApplications: CampusApplication[] = [
+          // Add some mock applications
+          const mockApplications = [
             {
               id: '1',
               student_id: '1',
               drive_id: id,
-              status: 'pending',
+              status: 'pending' as const,
               applied_at: new Date().toISOString(),
               note: 'Interested in this position',
+              student: {
+                name: 'John Doe',
+                email: 'john@example.com',
+                avatar_url: null,
+                user_metadata: {}
+              }
             }
           ];
           setApplications(mockApplications);
@@ -65,6 +95,7 @@ const CampusDriveDetails = () => {
         
         // Check if current user has applied (mock check)
         if (currentUser && currentUser.role === 'student') {
+          // For demo purposes, assume no application exists
           setHasApplied(false);
         }
       } catch (error) {
@@ -87,18 +118,24 @@ const CampusDriveDetails = () => {
     
     setIsSubmitting(true);
     try {
-      // Mock application creation
-      const newApplication: CampusApplication = {
-        id: Math.random().toString(36).substr(2, 9),
-        drive_id: drive.id,
-        student_id: currentUser.id,
-        status: 'pending',
-        applied_at: new Date().toISOString(),
-        note: applicationNote
-      };
+      // Create new application
+      const { data, error } = await supabase
+        .from('campus_applications')
+        .insert({
+          drive_id: drive.id,
+          student_id: currentUser.id,
+          status: 'pending',
+          applied_at: new Date().toISOString(),
+          note: applicationNote
+        })
+        .select();
+      
+      if (error) throw error;
       
       setHasApplied(true);
-      setUserApplication(newApplication);
+      if (data && data[0]) {
+        setUserApplication(data[0] as ExtendedApplication);
+      }
       
       toast.success('Application submitted successfully');
       setIsApplyModalOpen(false);
@@ -118,6 +155,13 @@ const CampusDriveDetails = () => {
     }
     
     try {
+      const { error } = await supabase
+        .from('campus_applications')
+        .update({ status })
+        .eq('id', applicationId);
+      
+      if (error) throw error;
+      
       // Update local state
       setApplications(prev => 
         prev.map(app => 
@@ -167,8 +211,8 @@ const CampusDriveDetails = () => {
           <CardContent className="p-6">
             <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
               <Avatar className="w-24 h-24">
-                <AvatarImage src={drive.company.logo} alt={drive.company.name} />
-                <AvatarFallback>{drive.company.name[0].toUpperCase()}</AvatarFallback>
+                <AvatarImage src={drive.company_logo || undefined} alt={drive.company_name} />
+                <AvatarFallback>{drive.company_name ? drive.company_name[0].toUpperCase() : 'C'}</AvatarFallback>
               </Avatar>
               <div className="flex-1">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
@@ -176,7 +220,7 @@ const CampusDriveDetails = () => {
                     <h1 className="text-2xl font-bold">{drive.title}</h1>
                     <p className="text-gray-600 flex items-center gap-1">
                       <Building className="h-4 w-4" />
-                      {drive.company.name}
+                      {drive.company_name || 'Company'}
                     </p>
                   </div>
                   <Badge variant={
@@ -252,26 +296,6 @@ const CampusDriveDetails = () => {
                   <h3 className="text-lg font-semibold mb-2">Eligibility Criteria</h3>
                   <p className="text-gray-700 whitespace-pre-line">{drive.eligibility_criteria}</p>
                 </div>
-
-                <div>
-                  <h3 className="text-lg font-semibold mb-2">Roles Available</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {drive.roles.map((role, index) => (
-                      <Badge key={index} variant="secondary">
-                        {role}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-semibold mb-2">Requirements</h3>
-                  <ul className="list-disc list-inside space-y-1">
-                    {drive.requirements.map((req, index) => (
-                      <li key={index} className="text-gray-700">{req}</li>
-                    ))}
-                  </ul>
-                </div>
               </CardContent>
             </Card>
           </div>
@@ -279,31 +303,147 @@ const CampusDriveDetails = () => {
           <div>
             <Card>
               <CardHeader>
-                <CardTitle>Drive Details</CardTitle>
+                <CardTitle>Company Information</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <h4 className="font-semibold">Salary Package</h4>
-                  <p className="text-gray-600">{drive.salary}</p>
-                </div>
-                <div>
-                  <h4 className="font-semibold">Registration Deadline</h4>
-                  <p className="text-gray-600">{format(new Date(drive.registration_deadline), 'PPP')}</p>
-                </div>
-                <div>
-                  <h4 className="font-semibold">Positions Available</h4>
-                  <p className="text-gray-600">{drive.positions}</p>
-                </div>
-                {drive.application_count && (
+              <CardContent>
+                <div className="flex items-center gap-3 mb-4">
+                  <Avatar>
+                    <AvatarImage src={drive.company_logo || undefined} alt={drive.company_name} />
+                    <AvatarFallback>{drive.company_name ? drive.company_name[0].toUpperCase() : 'C'}</AvatarFallback>
+                  </Avatar>
                   <div>
-                    <h4 className="font-semibold">Applications Received</h4>
-                    <p className="text-gray-600">{drive.application_count}</p>
+                    <h3 className="font-semibold">{drive.company_name}</h3>
+                    <p className="text-sm text-gray-600">Recruiter</p>
                   </div>
-                )}
+                </div>
+                <Button variant="outline" className="w-full" onClick={() => navigate(`/companies/${drive.company_id}`)}>
+                  View Company Profile
+                </Button>
               </CardContent>
             </Card>
+            
+            {currentUser && currentUser.role === 'company' && currentUser.id === drive.company_id && (
+              <Card className="mt-6">
+                <CardHeader>
+                  <CardTitle>Manage Drive</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Button variant="outline" className="w-full" onClick={() => {
+                    // Update drive status logic
+                    const newStatus = drive.status === 'upcoming' ? 'ongoing' : 
+                                     drive.status === 'ongoing' ? 'completed' : 'upcoming';
+                    
+                    supabase
+                      .from('campus_drives')
+                      .update({ status: newStatus })
+                      .eq('id', drive.id)
+                      .then(({ error }) => {
+                        if (error) {
+                          toast.error('Failed to update drive status');
+                          return;
+                        }
+                        
+                        setDrive(prev => prev ? { ...prev, status: newStatus } : null);
+                        toast.success(`Drive marked as ${newStatus}`);
+                      });
+                  }}>
+                    Mark as {drive.status === 'upcoming' ? 'Ongoing' : 
+                            drive.status === 'ongoing' ? 'Completed' : 'Upcoming'}
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
+        
+        {/* Applications Section (for company users) */}
+        {currentUser && currentUser.role === 'company' && currentUser.id === drive.company_id && (
+          <Card className="mt-6">
+            <CardHeader>
+              <CardTitle>Applications ({applications.length})</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {applications.length === 0 ? (
+                <p className="text-gray-600 text-center py-4">No applications received yet.</p>
+              ) : (
+                <div className="space-y-4">
+                  {applications.map((application) => (
+                    <Card key={application.id} className="p-4">
+                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                          <Avatar>
+                            <AvatarImage src={application.student?.avatar_url || undefined} alt={application.student?.name} />
+                            <AvatarFallback>{application.student?.name ? application.student.name[0].toUpperCase() : 'S'}</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <h3 className="font-semibold">{application.student?.name}</h3>
+                            <p className="text-sm text-gray-600">{application.student?.email}</p>
+                            <p className="text-xs text-gray-500">Applied on {format(new Date(application.applied_at), 'PP')}</p>
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          <Badge variant={
+                            application.status === 'selected' ? 'default' :
+                            application.status === 'shortlisted' ? 'outline' :
+                            application.status === 'rejected' ? 'destructive' :
+                            application.status === 'interview' ? 'secondary' :
+                            'secondary'
+                          }>
+                            {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
+                          </Badge>
+                          <div className="flex gap-2 mt-2 md:mt-0">
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => navigate(`/students/${application.student_id}`)}
+                            >
+                              <User className="h-4 w-4 mr-1" />
+                              Profile
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => updateApplicationStatus(application.id, 'shortlisted')}
+                              disabled={application.status === 'shortlisted'}
+                            >
+                              <CheckCircle className="h-4 w-4 mr-1" />
+                              Shortlist
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => updateApplicationStatus(application.id, 'interview')}
+                              disabled={application.status === 'interview'}
+                            >
+                              Schedule Interview
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => updateApplicationStatus(application.id, 'selected')}
+                              disabled={application.status === 'selected'}
+                            >
+                              Select
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => updateApplicationStatus(application.id, 'rejected')}
+                              disabled={application.status === 'rejected'}
+                            >
+                              <XCircle className="h-4 w-4 mr-1" />
+                              Reject
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
       </div>
       
       {/* Apply Modal */}

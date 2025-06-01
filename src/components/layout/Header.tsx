@@ -1,4 +1,5 @@
 
+import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -10,21 +11,30 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { 
+  User, 
+  LogOut, 
+  Settings, 
+  Home, 
+  Briefcase, 
+  Building2, 
+  Users, 
+  Calendar,
+  Code,
+  Search
+} from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { LogOut, User, Settings, Bell } from 'lucide-react';
-import { toast } from 'sonner';
 
 const Header = () => {
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogout = async () => {
+  const handleSignOut = async () => {
     try {
       await logout();
-      toast.success('Logged out successfully');
-      navigate('/');
+      navigate('/login');
     } catch (error) {
-      toast.error('Failed to logout');
+      console.error('Error signing out:', error);
     }
   };
 
@@ -41,107 +51,121 @@ const Header = () => {
       case 'management':
         return '/management-dashboard';
       case 'superadmin':
-        return '/super-admin-dashboard';
+        return '/admin';
       default:
         return '/';
     }
   };
 
   return (
-    <header className="border-b bg-white">
+    <header className="bg-white shadow-sm border-b">
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
-          <Link to="/" className="text-xl font-bold text-blue-600">
-            Campus Placement Portal
+          {/* Logo */}
+          <Link to="/" className="flex items-center space-x-2">
+            <div className="bg-primary rounded-lg p-2">
+              <Briefcase className="h-6 w-6 text-white" />
+            </div>
+            <span className="text-xl font-bold text-primary">PlacementPro</span>
           </Link>
-          
-          <nav className="hidden md:flex items-center space-x-6">
-            <Link to="/" className="text-gray-600 hover:text-blue-600">
-              Home
-            </Link>
-            <Link to="/jobs" className="text-gray-600 hover:text-blue-600">
-              Jobs
-            </Link>
-            <Link to="/companies" className="text-gray-600 hover:text-blue-600">
-              Companies
-            </Link>
-            <Link to="/students" className="text-gray-600 hover:text-blue-600">
-              Students
-            </Link>
-            <Link to="/campus-recruitment" className="text-gray-600 hover:text-blue-600">
-              Campus Recruitment
-            </Link>
-            <Link to="/college-search" className="text-gray-600 hover:text-blue-600">
-              College Search
-            </Link>
-            <Link to="/developers-team" className="text-gray-600 hover:text-blue-600">
-              Developer's Team
-            </Link>
+
+          {/* Navigation */}
+          <nav className="hidden md:flex items-center space-x-1">
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/" className="flex items-center space-x-2">
+                <Home className="h-4 w-4" />
+                <span>Dashboard</span>
+              </Link>
+            </Button>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/jobs" className="flex items-center space-x-2">
+                <Briefcase className="h-4 w-4" />
+                <span>Jobs</span>
+              </Link>
+            </Button>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/companies" className="flex items-center space-x-2">
+                <Building2 className="h-4 w-4" />
+                <span>Companies</span>
+              </Link>
+            </Button>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/students" className="flex items-center space-x-2">
+                <Users className="h-4 w-4" />
+                <span>Students</span>
+              </Link>
+            </Button>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/campus-recruitment" className="flex items-center space-x-2">
+                <Calendar className="h-4 w-4" />
+                <span>Campus Recruitment</span>
+              </Link>
+            </Button>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/college-search" className="flex items-center space-x-2">
+                <Search className="h-4 w-4" />
+                <span>College Search</span>
+              </Link>
+            </Button>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/developers-team" className="flex items-center space-x-2">
+                <Code className="h-4 w-4" />
+                <span>Developer's Team</span>
+              </Link>
+            </Button>
           </nav>
 
+          {/* User Menu */}
           <div className="flex items-center space-x-4">
             {currentUser ? (
-              <>
-                {/* Dashboard Link */}
-                <Button variant="outline" asChild>
-                  <Link to={getDashboardRoute()}>Dashboard</Link>
-                </Button>
-
-                {/* Notifications */}
-                <Button variant="ghost" size="icon">
-                  <Bell className="h-4 w-4" />
-                </Button>
-
-                {/* User Menu */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src={currentUser.avatar_url || currentUser.avatar} alt={currentUser.name} />
-                        <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
-                      </Avatar>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56" align="end" forceMount>
-                    <DropdownMenuLabel className="font-normal">
-                      <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">{currentUser.name}</p>
-                        <p className="text-xs leading-none text-muted-foreground">
-                          {currentUser.email}
-                        </p>
-                        <p className="text-xs leading-none text-muted-foreground capitalize">
-                          {currentUser.role}
-                        </p>
-                      </div>
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link to="/profile" className="cursor-pointer">
-                        <User className="mr-2 h-4 w-4" />
-                        <span>Profile</span>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to={getDashboardRoute()} className="cursor-pointer">
-                        <Settings className="mr-2 h-4 w-4" />
-                        <span>Dashboard</span>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <span>Log out</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={currentUser.avatar} alt={currentUser.name} />
+                      <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">{currentUser.name}</p>
+                      <p className="text-xs leading-none text-muted-foreground">
+                        {currentUser.email}
+                      </p>
+                      <p className="text-xs leading-none text-muted-foreground capitalize">
+                        {currentUser.role}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link to={getDashboardRoute()} className="cursor-pointer">
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Dashboard</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile" className="cursor-pointer">
+                      <Settings className="mr-2 h-4 w-4" />
+                      <span>Profile Settings</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : (
               <div className="flex items-center space-x-2">
-                <Button variant="outline" asChild>
-                  <Link to="/login">Login</Link>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/login">Log in</Link>
                 </Button>
-                <Button asChild>
-                  <Link to="/register">Sign Up</Link>
+                <Button size="sm" asChild>
+                  <Link to="/register">Sign up</Link>
                 </Button>
               </div>
             )}
