@@ -61,6 +61,72 @@ const StudentDashboard = () => {
     fetchApplications();
   }, [currentUser]);
 
+  // Set up real-time subscription for applications
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const channel = supabase
+      .channel('student-applications')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'job_applications',
+          filter: `student_id=eq.${currentUser.id}`
+        },
+        (payload) => {
+          console.log('Real-time application update:', payload);
+          
+          if (payload.eventType === 'INSERT') {
+            // Fetch the full application data with job details
+            const fetchNewApplication = async () => {
+              const { data, error } = await supabase
+                .from('job_applications')
+                .select(`
+                  *,
+                  job:job_id (
+                    id,
+                    title,
+                    company_id,
+                    deadline,
+                    status,
+                    company:company_id (
+                      id,
+                      company_name
+                    )
+                  )
+                `)
+                .eq('id', payload.new.id)
+                .single();
+
+              if (data && !error) {
+                setApplications(prev => [data, ...prev]);
+                toast.success('New application submitted!');
+              }
+            };
+            fetchNewApplication();
+          } else if (payload.eventType === 'UPDATE') {
+            setApplications(prev => 
+              prev.map(app => 
+                app.id === payload.new.id 
+                  ? { ...app, ...payload.new }
+                  : app
+              )
+            );
+            toast.info('Application status updated');
+          } else if (payload.eventType === 'DELETE') {
+            setApplications(prev => prev.filter(app => app.id !== payload.old.id));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [currentUser]);
+
   if (isLoading) {
     return (
       <Layout>

@@ -1,678 +1,312 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { format, isAfter, isBefore, addDays } from 'date-fns';
-import { toast } from 'sonner';
-import { useAuth } from '@/contexts/AuthContext';
-import { useApplications } from '@/contexts/ApplicationContext';
-import { supabase } from '@/integrations/supabase/client';
-import Layout from '@/components/layout/Layout';
+
+import React, { useState, useEffect } from 'react';
+import Layout from '../components/layout/Layout';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Clock, CheckCircle, XCircle, MapPin, Calendar, Briefcase, Plus, Search, Users } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { MapPin, Calendar, Users, Building, Search, Filter } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
-// Types
-type DriveStatus = 'upcoming' | 'ongoing' | 'completed';
-
-interface ExtendedCampusDrive {
-  id: string;
-  title: string;
-  company_id: string;
-  company_name: string;
-  company_logo?: string;
-  location: string;
-  date: string;
-  description: string;
-  eligibility_criteria: string;
-  positions: number;
-  status: DriveStatus;
-  registration_deadline: string;
-  roles: string[];
-  applied?: boolean;
-  created_at?: string;
-  updated_at?: string;
-}
-
-interface DriveFormData {
-  title: string;
-  location: string;
-  date: string;
-  description: string;
-  eligibility_criteria: string;
-  positions: number;
-  registration_deadline: string;
-  roles: string;
-}
-
-// Mock data for campus drives
-const MOCK_CAMPUS_DRIVES: ExtendedCampusDrive[] = [
+// Updated mock data with 2025 dates
+const mockCampusDrives = [
   {
     id: '1',
-    title: 'Summer Internship 2024',
-    company_id: 'company-1',
-    company_name: 'Tech Corp',
-    company_logo: 'https://via.placeholder.com/50',
-    location: 'Virtual',
-    date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days from now
-    description: 'Join our summer internship program for hands-on experience in software development.',
-    eligibility_criteria: 'Currently enrolled in a Computer Science program',
-    positions: 10,
+    title: 'Tech Giants Campus Drive 2025',
+    company: {
+      id: 'google',
+      name: 'Google',
+      logo: '/placeholder.svg'
+    },
+    location: 'Main Campus Auditorium',
+    date: '2025-02-15',
+    registrationDeadline: '2025-02-10',
+    positions: 25,
+    roles: ['Software Engineer', 'Product Manager', 'Data Scientist'],
+    eligibility: 'B.Tech/M.Tech CSE, IT, ECE',
+    salary: '₹18-25 LPA',
     status: 'upcoming',
-    registration_deadline: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days from now
-    roles: ['Software Engineer Intern', 'Data Science Intern'],
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    description: 'Join Google for an exciting campus recruitment drive. We are looking for talented engineers to join our teams across various products.',
+    requirements: [
+      'Strong programming skills in Python, Java, or C++',
+      'Problem-solving abilities',
+      'Good communication skills',
+      'CGPA > 8.0'
+    ]
   },
   {
     id: '2',
-    title: 'Campus Recruitment Drive',
-    company_id: 'company-2',
-    company_name: 'Data Systems Inc',
-    company_logo: 'https://via.placeholder.com/50',
-    location: 'Main Campus, Building A',
-    date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
-    description: 'Full-time positions available for fresh graduates in various technical roles.',
-    eligibility_criteria: 'B.Tech/BE in CS/IT/ECE, 2024 batch',
-    positions: 15,
-    status: 'ongoing',
-    registration_deadline: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
-    roles: ['Associate Software Engineer', 'QA Engineer'],
-    created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-    updated_at: new Date().toISOString(),
+    title: 'Microsoft Campus Recruitment',
+    company: {
+      id: 'microsoft',
+      name: 'Microsoft',
+      logo: '/placeholder.svg'
+    },
+    location: 'Engineering Block',
+    date: '2025-02-20',
+    registrationDeadline: '2025-02-15',
+    positions: 30,
+    roles: ['Software Development Engineer', 'Program Manager'],
+    eligibility: 'All Engineering Branches',
+    salary: '₹16-22 LPA',
+    status: 'upcoming',
+    description: 'Microsoft is conducting campus recruitment for fresh graduates. Join us to build technology that empowers every person and organization on the planet.',
+    requirements: [
+      'Programming proficiency',
+      'System design knowledge',
+      'Leadership qualities',
+      'CGPA > 7.5'
+    ]
   },
   {
     id: '3',
-    title: 'Winter Internship Program',
-    company_id: 'company-3',
-    company_name: 'Cloud Solutions',
-    company_logo: 'https://via.placeholder.com/50',
-    location: 'Remote',
-    date: new Date('2023-12-15T10:00:00Z').toISOString(),
-    description: '4-week intensive winter internship program for 3rd year students.',
-    eligibility_criteria: '3rd or 4th year students in CS/IT',
-    positions: 8,
-    status: 'completed',
-    registration_deadline: new Date('2023-12-01T23:59:59Z').toISOString(),
-    roles: ['Cloud Intern', 'DevOps Intern'],
-    created_at: new Date('2023-10-15T00:00:00Z').toISOString(),
-    updated_at: new Date('2023-12-16T00:00:00Z').toISOString(),
+    title: 'Amazon Campus Drive',
+    company: {
+      id: 'amazon',
+      name: 'Amazon',
+      logo: '/placeholder.svg'
+    },
+    location: 'Computer Center',
+    date: '2025-02-25',
+    registrationDeadline: '2025-02-20',
+    positions: 40,
+    roles: ['SDE I', 'Support Engineer', 'Business Analyst'],
+    eligibility: 'B.Tech/M.Tech/MCA',
+    salary: '₹15-20 LPA',
+    status: 'upcoming',
+    description: 'Amazon is looking for passionate individuals to join our team. We offer exciting opportunities to work on cutting-edge technology.',
+    requirements: [
+      'Strong coding skills',
+      'Data structures and algorithms',
+      'Customer obsession',
+      'CGPA > 7.0'
+    ]
   },
+  {
+    id: '4',
+    title: 'TCS Campus Recruitment',
+    company: {
+      id: 'tcs',
+      name: 'Tata Consultancy Services',
+      logo: '/placeholder.svg'
+    },
+    location: 'Main Auditorium',
+    date: '2025-03-05',
+    registrationDeadline: '2025-02-28',
+    positions: 100,
+    roles: ['Assistant System Engineer', 'Digital Analyst'],
+    eligibility: 'All Branches',
+    salary: '₹7-9 LPA',
+    status: 'upcoming',
+    description: 'TCS is conducting mass recruitment for fresh graduates. Join India\'s largest IT services company.',
+    requirements: [
+      'Basic programming knowledge',
+      'Good communication skills',
+      'Willingness to learn',
+      'CGPA > 6.0'
+    ]
+  },
+  {
+    id: '5',
+    title: 'Infosys Campus Connect',
+    company: {
+      id: 'infosys',
+      name: 'Infosys',
+      logo: '/placeholder.svg'
+    },
+    location: 'Seminar Hall',
+    date: '2025-03-10',
+    registrationDeadline: '2025-03-05',
+    positions: 80,
+    roles: ['Systems Engineer', 'Technology Analyst'],
+    eligibility: 'B.Tech/B.E/M.Tech/MCA',
+    salary: '₹8-12 LPA',
+    status: 'upcoming',
+    description: 'Infosys invites bright minds to join our global team. Experience innovation and growth opportunities.',
+    requirements: [
+      'Programming fundamentals',
+      'Analytical thinking',
+      'Team collaboration',
+      'CGPA > 6.5'
+    ]
+  }
 ];
 
-const CampusRecruitment: React.FC = () => {
-  const { currentUser } = useAuth();
-  const { addCampusDriveApplication } = useApplications();
-  const navigate = useNavigate();
-  const [campusDrives, setCampusDrives] = useState<ExtendedCampusDrive[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isCreateDriveOpen, setIsCreateDriveOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [activeTab, setActiveTab] = useState<DriveStatus>('upcoming');
-  const [selectedDrive, setSelectedDrive] = useState<ExtendedCampusDrive | null>(null);
+const CampusRecruitment = () => {
+  const [drives, setDrives] = useState(mockCampusDrives);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [currentDate, setCurrentDate] = useState(new Date());
 
-  // Form state for creating a new campus drive
-  const [driveForm, setDriveForm] = useState<DriveFormData>({
-    title: '',
-    location: '',
-    date: '',
-    description: '',
-    eligibility_criteria: '',
-    positions: 1,
-    registration_deadline: '',
-    roles: ''
+  // Update current date every minute for real-time display
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentDate(new Date());
+    }, 60000); // Update every minute
+
+    return () => clearInterval(timer);
+  }, []);
+
+  // Filter drives based on search and status
+  const filteredDrives = drives.filter(drive => {
+    const matchesSearch = drive.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         drive.company.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = filterStatus === 'all' || drive.status === filterStatus;
+    return matchesSearch && matchesStatus;
   });
 
-  // Check if user is logged in and redirect if not
-  useEffect(() => {
-    if (!currentUser) {
-      toast.error('Please login to access campus recruitment');
-      navigate('/login', { state: { from: '/campus-recruitment' } });
-    }
-  }, [currentUser, navigate]);
-
-  // Initialize with mock data and filter
-  useEffect(() => {
-    const fetchCampusDrives = async () => {
-      try {
-        setLoading(true);
-        // In a real app, fetch from your API
-        // const { data, error } = await supabase
-        //   .from('campus_drives')
-        //   .select('*')
-        //   .order('date', { ascending: true });
-        // if (error) throw error;
-        // setCampusDrives(data);
-        
-        // Ensure all required fields are present in the mock data
-        const drivesWithRequiredFields = MOCK_CAMPUS_DRIVES.map(drive => ({
-          ...drive,
-          registration_deadline: drive.registration_deadline || new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
-          roles: drive.roles || [],
-          company_logo: drive.company_logo || 'https://via.placeholder.com/50',
-          created_at: drive.created_at || new Date().toISOString(),
-          updated_at: drive.updated_at || new Date().toISOString()
-        }));
-        
-        setCampusDrives(drivesWithRequiredFields);
-      } catch (error) {
-        console.error('Error fetching campus drives:', error);
-        toast.error('Failed to load campus drives');
-      } finally {
-        setLoading(false);
-      }
-    };
+  const getStatusBadge = (status: string, driveDate: string) => {
+    const today = currentDate.toISOString().split('T')[0];
+    const drive = new Date(driveDate);
+    const now = new Date(today);
     
-    if (currentUser) {
-      fetchCampusDrives();
+    if (drive < now) {
+      return <Badge variant="outline" className="bg-gray-100 text-gray-800">Completed</Badge>;
+    } else if (drive.getTime() === now.getTime()) {
+      return <Badge variant="outline" className="bg-blue-100 text-blue-800">Today</Badge>;
+    } else {
+      return <Badge variant="outline" className="bg-green-100 text-green-800">Upcoming</Badge>;
     }
-  }, [currentUser]);
+  };
 
-  // Handle view drive details
-  const handleViewDetails = (drive: ExtendedCampusDrive) => {
-    setSelectedDrive(drive);
-  };
-  
-  // Handle close details dialog
-  const handleCloseDetails = () => {
-    setSelectedDrive(null);
-  };
-  
-  // Handle apply for drive
-  const handleApply = async (driveId: string) => {
-    if (!currentUser) {
-      toast.error('Please login to apply for this drive');
-      navigate('/login', { state: { from: '/campus-recruitment' } });
-      return;
-    }
+  const getDaysUntil = (dateString: string) => {
+    const targetDate = new Date(dateString);
+    const today = new Date();
+    const diffTime = targetDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     
-    try {
-      // Find the drive in our state
-      const drive = campusDrives.find(d => d.id === driveId);
-      if (!drive) {
-        throw new Error('Drive not found');
-      }
-      
-      // In a real app, submit application to your backend
-      // await supabase
-      //   .from('drive_applications')
-      //   .insert([
-      //     { 
-      //       drive_id: driveId, 
-      //       student_id: currentUser.id,
-      //       status: 'applied',
-      //     },
-      //   ]);
-      
-      // Update local state to reflect the application
-      setCampusDrives(prevDrives => 
-        prevDrives.map(d => 
-          d.id === driveId 
-            ? { ...d, applied: true }
-            : d
-        )
-      );
-      
-      // Add to application context
-      addCampusDriveApplication({
-        drive_id: drive.id,
-        drive_title: drive.title,
-        company_name: drive.company_name || 'Unknown Company',
-        company_logo: drive.company_logo
-      });
-      
-      toast.success('Successfully applied to the drive!');
-    } catch (error) {
-      console.error('Error applying to drive:', error);
-      toast.error('Failed to apply to the drive');
-    }
-  };
-  
-  // Format date for display
-  const formatDriveDate = (dateString: string) => {
-    return format(new Date(dateString), 'MMM d, yyyy hh:mm a');
-  };
-  
-  // Get status badge component
-  const renderStatusBadge = (status: DriveStatus) => {
-    switch (status) {
-      case 'upcoming':
-        return (
-          <Badge className="bg-blue-100 text-blue-800">
-            <Clock className="w-3 h-3 mr-1" />
-            Upcoming
-          </Badge>
-        );
-      case 'ongoing':
-        return (
-          <Badge className="bg-green-100 text-green-800">
-            <CheckCircle className="w-3 h-3 mr-1" />
-            Ongoing
-          </Badge>
-        );
-      case 'completed':
-        return (
-          <Badge className="bg-gray-100 text-gray-800">
-            <XCircle className="w-3 h-3 mr-1" />
-            Completed
-          </Badge>
-        );
-      default:
-        return null;
-    }
-  };
-
-  // Handle form input changes
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setDriveForm(prev => ({
-      ...prev,
-      [name]: name === 'positions' ? parseInt(value) || 1 : value
-    }));
-  };
-
-  // Filter drives based on search query and active tab
-  const filteredDrives = useMemo(() => {
-    const now = new Date();
-    return campusDrives.filter(drive => {
-      // Filter by search query
-      const searchLower = searchQuery.toLowerCase();
-      const matchesSearch = 
-        drive.title.toLowerCase().includes(searchLower) ||
-        (drive.company_name?.toLowerCase().includes(searchLower) ?? false) ||
-        drive.location.toLowerCase().includes(searchLower) ||
-        drive.description.toLowerCase().includes(searchLower);
-      
-      // Filter by status
-      const driveDate = new Date(drive.date);
-      const isUpcoming = isAfter(driveDate, now);
-      const isOngoing = isBefore(driveDate, now) && isAfter(driveDate, addDays(now, -1));
-      
-      // Use the drive's status if available, otherwise determine from date
-      const statusMatches = 
-        (activeTab === 'upcoming' && (drive.status === 'upcoming' || isUpcoming)) ||
-        (activeTab === 'ongoing' && (drive.status === 'ongoing' || isOngoing)) ||
-        (activeTab === 'completed' && (drive.status === 'completed' || isBefore(driveDate, addDays(now, -1))));
-      
-      return matchesSearch && statusMatches;
-    });
-  }, [campusDrives, searchQuery, activeTab]);
-
-  // Handle create drive form submission
-  const handleCreateDrive = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!currentUser) {
-      toast.error('Please login to create a campus drive');
-      return;
-    }
-
-    try {
-      setIsSubmitting(true);
-      
-      // In a real app, you would submit this to your backend
-      const newDrive: ExtendedCampusDrive = {
-        id: `drive-${Date.now()}`,
-        title: driveForm.title,
-        company_id: currentUser.id,
-        company_name: currentUser.email?.split('@')[0] || 'Your Company',
-        location: driveForm.location,
-        date: driveForm.date,
-        description: driveForm.description,
-        eligibility_criteria: driveForm.eligibility_criteria,
-        positions: driveForm.positions,
-        status: 'upcoming',
-        registration_deadline: driveForm.registration_deadline,
-        roles: driveForm.roles.split(',').map(r => r.trim()).filter(Boolean),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
-
-      setCampusDrives(prev => [newDrive, ...prev]);
-      setIsCreateDriveOpen(false);
-      toast.success('Campus drive created successfully!');
-      
-      // Reset form
-      setDriveForm({
-        title: '',
-        location: '',
-        date: '',
-        description: '',
-        eligibility_criteria: '',
-        positions: 1,
-        registration_deadline: '',
-        roles: ''
-      });
-    } catch (error) {
-      console.error('Error creating drive:', error);
-      toast.error('Failed to create campus drive');
-    } finally {
-      setIsSubmitting(false);
-    }
+    if (diffDays < 0) return 'Completed';
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return 'Tomorrow';
+    return `${diffDays} days`;
   };
 
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold">Campus Recruitment</h1>
-            <p className="text-muted-foreground">Find and apply to campus recruitment drives</p>
-          </div>
-          {currentUser?.role === 'company' && (
-            <Button onClick={() => setIsCreateDriveOpen(true)} className="mt-4 md:mt-0">
-              <Plus className="mr-2 h-4 w-4" />
-              Create Drive
-            </Button>
-          )}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-2">Campus Recruitment 2025</h1>
+          <p className="text-gray-600">
+            Current Date: {currentDate.toLocaleDateString('en-IN', { 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            })}
+          </p>
+          <p className="text-gray-600">
+            Discover upcoming campus drives and placement opportunities
+          </p>
         </div>
 
-        {/* Search and filter */}
-        <div className="mb-6">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        {/* Search and Filter Controls */}
+        <div className="flex flex-col md:flex-row gap-4 mb-6">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
             <Input
-              type="text"
-              placeholder="Search drives..."
-              className="pl-10 w-full md:w-96"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search by company or drive name..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
             />
           </div>
+          <Select value={filterStatus} onValueChange={setFilterStatus}>
+            <SelectTrigger className="w-full md:w-48">
+              <Filter className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="Filter by status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Drives</SelectItem>
+              <SelectItem value="upcoming">Upcoming</SelectItem>
+              <SelectItem value="ongoing">Ongoing</SelectItem>
+              <SelectItem value="completed">Completed</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
-        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as DriveStatus)} className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
-            <TabsTrigger value="ongoing">Ongoing</TabsTrigger>
-            <TabsTrigger value="completed">Completed</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value={activeTab} className="mt-6">
-            {loading ? (
-              <div className="flex justify-center items-center h-64">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-              </div>
-            ) : filteredDrives.length === 0 ? (
-              <div className="text-center py-12">
-                <Briefcase className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-medium">No {activeTab} drives found</h3>
-                <p className="text-muted-foreground">
-                  {searchQuery ? 'Try adjusting your search' : 'Check back later for new opportunities'}
-                </p>
-              </div>
-            ) : (
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {filteredDrives.map((drive) => (
-                  <Card key={drive.id} className="h-full flex flex-col">
-                    <CardHeader className="pb-2">
-                      <div className="flex justify-between items-start">
-                        <CardTitle className="text-lg">{drive.title}</CardTitle>
-                        {renderStatusBadge(drive.status)}
-                      </div>
-                      <CardDescription>{drive.company_name}</CardDescription>
-                    </CardHeader>
-                    <CardContent className="flex-1">
-                      <div className="space-y-2 text-sm">
-                        <div className="flex items-center">
-                          <MapPin className="mr-2 h-4 w-4 text-muted-foreground" />
-                          <span>{drive.location}</span>
-                        </div>
-                        <div className="flex items-center">
-                          <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
-                          <span>{formatDriveDate(drive.date)}</span>
-                        </div>
-                        <div className="flex items-center">
-                          <Users className="mr-2 h-4 w-4 text-muted-foreground" />
-                          <span>{drive.positions} position{drive.positions !== 1 ? 's' : ''} available</span>
-                        </div>
-                        <p className="line-clamp-3 text-muted-foreground">{drive.description}</p>
-                      </div>
-                    </CardContent>
-                    <CardFooter className="flex justify-between pt-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={() => handleViewDetails(drive)}
-                      >
-                        View Details
-                      </Button>
-                      {currentUser?.role === 'student' && (
-                        <Button 
-                          size="sm" 
-                          onClick={() => handleApply(drive.id)}
-                          disabled={drive.applied}
-                        >
-                          {drive.applied ? 'Applied' : 'Apply Now'}
-                        </Button>
-                      )}
-                    </CardFooter>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
-
-        {/* Create Drive Dialog */}
-        <Dialog open={isCreateDriveOpen} onOpenChange={setIsCreateDriveOpen}>
-          <DialogContent className="sm:max-w-[600px]">
-            <DialogHeader>
-              <DialogTitle>Create Campus Drive</DialogTitle>
-              <DialogDescription>
-                Fill in the details below to create a new campus recruitment drive.
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleCreateDrive} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="title">Drive Title *</Label>
-                  <Input
-                    id="title"
-                    name="title"
-                    value={driveForm.title}
-                    onChange={handleInputChange}
-                    placeholder="e.g., Summer Internship 2024"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="location">Location *</Label>
-                  <Input
-                    id="location"
-                    name="location"
-                    value={driveForm.location}
-                    onChange={handleInputChange}
-                    placeholder="e.g., Campus Auditorium"
-                    required
-                  />
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="date">Drive Date & Time *</Label>
-                  <Input
-                    type="datetime-local"
-                    id="date"
-                    name="date"
-                    value={driveForm.date}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="registration_deadline">Registration Deadline *</Label>
-                  <Input
-                    type="datetime-local"
-                    id="registration_deadline"
-                    name="registration_deadline"
-                    value={driveForm.registration_deadline}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="description">Description *</Label>
-                <Textarea
-                  id="description"
-                  name="description"
-                  value={driveForm.description}
-                  onChange={handleInputChange}
-                  placeholder="Provide details about the drive, requirements, and what candidates can expect..."
-                  rows={3}
-                  required
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="eligibility_criteria">Eligibility Criteria *</Label>
-                <Textarea
-                  id="eligibility_criteria"
-                  name="eligibility_criteria"
-                  value={driveForm.eligibility_criteria}
-                  onChange={handleInputChange}
-                  placeholder="List the eligibility criteria for applicants..."
-                  rows={2}
-                  required
-                />
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="positions">Number of Positions *</Label>
-                  <Input
-                    type="number"
-                    id="positions"
-                    name="positions"
-                    min="1"
-                    value={driveForm.positions}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="roles">Roles (comma separated) *</Label>
-                  <Input
-                    id="roles"
-                    name="roles"
-                    value={driveForm.roles}
-                    onChange={handleInputChange}
-                    placeholder="e.g., Software Developer, Data Analyst"
-                    required
-                  />
-                </div>
-              </div>
-              
-              <DialogFooter className="pt-4">
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={() => setIsCreateDriveOpen(false)}
-                  disabled={isSubmitting}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? 'Creating...' : 'Create Drive'}
-                </Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
-
-        {/* Drive Details Dialog */}
-        <Dialog open={!!selectedDrive} onOpenChange={(open) => !open && setSelectedDrive(null)}>
-          <DialogContent className="sm:max-w-[600px]">
-            {selectedDrive && (
-              <>
-                <DialogHeader>
-                  <DialogTitle>{selectedDrive.title}</DialogTitle>
-                  <div className="flex items-center space-x-2 pt-1">
-                    <span className="text-sm text-muted-foreground">
-                      {selectedDrive.company_name}
-                    </span>
-                    {renderStatusBadge(selectedDrive.status)}
-                  </div>
-                </DialogHeader>
-                
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <h4 className="font-medium">Drive Details</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                      <div className="space-y-1">
-                        <p className="text-muted-foreground">Date & Time</p>
-                        <p>{formatDriveDate(selectedDrive.date)}</p>
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-muted-foreground">Location</p>
-                        <p>{selectedDrive.location}</p>
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-muted-foreground">Positions Available</p>
-                        <p>{selectedDrive.positions}</p>
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-muted-foreground">Registration Deadline</p>
-                        <p>{formatDriveDate(selectedDrive.registration_deadline)}</p>
-                      </div>
+        {/* Campus Drives Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredDrives.map((drive) => (
+            <Card key={drive.id} className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Avatar>
+                      <AvatarImage src={drive.company.logo} alt={drive.company.name} />
+                      <AvatarFallback>{drive.company.name[0]}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <CardTitle className="text-lg">{drive.title}</CardTitle>
+                      <CardDescription>{drive.company.name}</CardDescription>
                     </div>
                   </div>
-                  
-                  <div className="space-y-2">
-                    <h4 className="font-medium">Eligibility Criteria</h4>
-                    <p className="text-sm">{selectedDrive.eligibility_criteria}</p>
+                  {getStatusBadge(drive.status, drive.date)}
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Calendar className="h-4 w-4" />
+                    <span>{new Date(drive.date).toLocaleDateString()} ({getDaysUntil(drive.date)})</span>
                   </div>
-                  
-                  <div className="space-y-2">
-                    <h4 className="font-medium">Available Roles</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {selectedDrive.roles?.map((role, index) => (
-                        <Badge key={index} variant="secondary">
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <MapPin className="h-4 w-4" />
+                    <span>{drive.location}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Users className="h-4 w-4" />
+                    <span>{drive.positions} positions</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Building className="h-4 w-4" />
+                    <span>{drive.salary}</span>
+                  </div>
+
+                  <div className="pt-2">
+                    <p className="text-sm text-gray-700 mb-2">
+                      <strong>Eligibility:</strong> {drive.eligibility}
+                    </p>
+                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                      {drive.description}
+                    </p>
+                    <div className="flex flex-wrap gap-1 mb-3">
+                      {drive.roles.slice(0, 2).map((role, index) => (
+                        <Badge key={index} variant="secondary" className="text-xs">
                           {role}
                         </Badge>
                       ))}
+                      {drive.roles.length > 2 && (
+                        <Badge variant="secondary" className="text-xs">
+                          +{drive.roles.length - 2} more
+                        </Badge>
+                      )}
                     </div>
                   </div>
-                  
-                  <div className="space-y-2">
-                    <h4 className="font-medium">Description</h4>
-                    <p className="text-sm text-muted-foreground">
-                      {selectedDrive.description}
-                    </p>
+
+                  <div className="pt-3 border-t">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-gray-500">
+                        Registration deadline: {new Date(drive.registrationDeadline).toLocaleDateString()}
+                      </span>
+                      <Button size="sm" asChild>
+                        <Link to={`/campus-drive/${drive.id}`}>
+                          View Details
+                        </Link>
+                      </Button>
+                    </div>
                   </div>
                 </div>
-                
-                <DialogFooter>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setSelectedDrive(null)}
-                  >
-                    Close
-                  </Button>
-                  {currentUser?.role === 'student' && (
-                    <Button 
-                      onClick={() => {
-                        handleApply(selectedDrive.id);
-                        setSelectedDrive(null);
-                      }}
-                      disabled={selectedDrive.applied}
-                    >
-                      {selectedDrive.applied ? 'Already Applied' : 'Apply Now'}
-                    </Button>
-                  )}
-                </DialogFooter>
-              </>
-            )}
-          </DialogContent>
-        </Dialog>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {filteredDrives.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-lg text-gray-600">No campus drives found matching your criteria.</p>
+          </div>
+        )}
       </div>
     </Layout>
   );

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
@@ -10,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import JobApplicationModal from '@/components/jobs/JobApplicationModal';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { mockJobs } from '@/data/mockData';
 
 // Define types for job and application data
 interface Profile {
@@ -77,7 +77,41 @@ const JobDetails = () => {
       
       setLoading(true);
       try {
-        // Fetch job with company and applications data
+        // First try to find in mock data
+        const mockJob = mockJobs.find(j => j.id === id);
+        if (mockJob) {
+          // Convert mock job to the expected format
+          const convertedJob = {
+            id: mockJob.id,
+            title: mockJob.title,
+            description: mockJob.description,
+            company_id: mockJob.company.id,
+            location: mockJob.location,
+            salary: mockJob.salary,
+            status: mockJob.status,
+            deadline: mockJob.deadline,
+            positions: mockJob.positions,
+            requirements: mockJob.requirements,
+            created_at: mockJob.postedDate,
+            eligibility: null,
+            min_qualification: null,
+            min_experience: null,
+            company: {
+              id: mockJob.company.id,
+              company_name: mockJob.company.companyName,
+              description: mockJob.company.description || "A leading company in the industry",
+              website: mockJob.company.website || null,
+              location: mockJob.location,
+              industry: mockJob.company.industry || null
+            },
+            applications: []
+          };
+          setJob(convertedJob);
+          setLoading(false);
+          return;
+        }
+
+        // If not in mock data, try Supabase
         const { data, error } = await supabase
           .from('jobs')
           .select(`
@@ -108,17 +142,19 @@ const JobDetails = () => {
           .eq('id', id)
           .single();
 
-        if (error) throw error;
-        
-        if (!data) {
-          throw new Error('Job not found');
+        if (error) {
+          console.warn('Job not found in Supabase, using mock data fallback');
+          throw error;
         }
         
-        console.log('Job data loaded:', data);
-        setJob(data);
+        if (data) {
+          console.log('Job data loaded from Supabase:', data);
+          setJob(data);
+        }
       } catch (error) {
         console.error('Error loading job details:', error);
-        toast.error('Failed to load job details');
+        toast.error('Job not found');
+        // Don't navigate away, just show error state
       } finally {
         setLoading(false);
       }

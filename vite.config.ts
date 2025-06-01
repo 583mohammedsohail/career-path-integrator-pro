@@ -1,34 +1,16 @@
-import { defineConfig } from 'vite';
-import { fileURLToPath } from 'url';
-import { createHtmlPlugin } from 'vite-plugin-html';
-import react from '@vitejs/plugin-react-swc';
 
-// https://vitejs.dev/config/
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react-swc'
+import path from 'path'
+
 export default defineConfig({
-  plugins: [
-    react(),
-    createHtmlPlugin({
-      minify: true,
-    }),
-  ],
-  
+  server: {
+    port: 8080
+  },
+  plugins: [react()],
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
-    }
+      "@": path.resolve(__dirname, "./src"),
+    },
   },
-  
-  server: {
-    port: 3000,
-    open: true,
-  },
-  
-  build: {
-    outDir: 'dist',
-    sourcemap: true,
-  },
-  
-  optimizeDeps: {
-    include: ['react', 'react-dom', 'react-router-dom'],
-  }
 })
