@@ -33,7 +33,8 @@ interface Application {
 
 interface Company {
   id: string;
-  company_name: string;
+  company_name?: string;
+  companyName?: string;
   description?: string | null;
   website?: string | null;
   location?: string | null;
@@ -48,7 +49,7 @@ interface Job {
   location?: string | null;
   salary?: string | null;
   status?: string | null;
-  deadline: string;
+  deadline?: string | null;
   positions?: number | null;
   requirements?: string[] | null;
   created_at?: string | null;
@@ -57,6 +58,8 @@ interface Job {
   min_experience?: number | null;
   company?: Company | null;
   applications: Application[];
+  // Mock data compatibility fields
+  postedDate?: string;
 }
 
 const JobDetails = () => {
@@ -80,30 +83,36 @@ const JobDetails = () => {
         // First try to find in mock data
         const mockJob = mockJobs.find(j => j.id === id);
         if (mockJob) {
+          // Cast the mock job to any to handle unknown structure
+          const mockJobData = mockJob as any;
+          
+          // Extract company data safely
+          const companyData = mockJobData.company || {};
+          
           // Convert mock job to the expected format
-          const convertedJob = {
-            id: mockJob.id,
-            title: mockJob.title,
-            description: mockJob.description,
-            company_id: mockJob.company.id,
-            location: mockJob.location,
-            salary: mockJob.salary,
-            status: mockJob.status,
-            deadline: mockJob.deadline,
-            positions: mockJob.positions,
-            requirements: mockJob.requirements,
-            created_at: mockJob.postedDate,
+          const convertedJob: Job = {
+            id: mockJobData.id || '',
+            title: mockJobData.title || '',
+            description: mockJobData.description || '',
+            company_id: typeof companyData === 'object' ? companyData.id || '' : '',
+            location: mockJobData.location || null,
+            salary: mockJobData.salary || null,
+            status: mockJobData.status || null,
+            deadline: mockJobData.deadline || null,
+            positions: mockJobData.positions || null,
+            requirements: Array.isArray(mockJobData.requirements) ? mockJobData.requirements : [], // Ensure requirements is always an array
+            created_at: mockJobData.created_at || null,
             eligibility: null,
             min_qualification: null,
             min_experience: null,
-            company: {
-              id: mockJob.company.id,
-              company_name: mockJob.company.companyName,
-              description: mockJob.company.description || "A leading company in the industry",
-              website: mockJob.company.website || null,
-              location: mockJob.location,
-              industry: mockJob.company.industry || null
-            },
+            company: typeof companyData === 'object' ? {
+              id: companyData.id || '',
+              company_name: companyData.company_name || companyData.companyName || '',
+              description: companyData.description || "A leading company in the industry",
+              website: companyData.website || null,
+              location: mockJobData.location || null,
+              industry: companyData.industry || null
+            } : null,
             applications: []
           };
           setJob(convertedJob);
@@ -149,7 +158,41 @@ const JobDetails = () => {
         
         if (data) {
           console.log('Job data loaded from Supabase:', data);
-          setJob(data);
+          
+          // Cast the data to any to handle unknown structure
+          const supabaseData = data as any;
+          
+          // Convert Supabase data to match our Job interface
+          const jobData: Job = {
+            id: supabaseData.id || '',
+            title: supabaseData.title || '',
+            description: supabaseData.description || '',
+            company_id: supabaseData.company_id || '',
+            location: supabaseData.location || null,
+            salary: supabaseData.salary || null,
+            status: supabaseData.status || null,
+            deadline: supabaseData.deadline || null,
+            // Handle potential missing fields
+            positions: typeof supabaseData.positions === 'number' ? supabaseData.positions : null,
+            requirements: Array.isArray(supabaseData.requirements) ? supabaseData.requirements : [],
+            created_at: supabaseData.created_at || null,
+            // These fields might not exist in the Supabase response
+            eligibility: null,
+            min_qualification: null,
+            min_experience: null,
+            // Handle company data safely
+            company: supabaseData.company && typeof supabaseData.company === 'object' ? {
+              id: supabaseData.company.id || '',
+              company_name: supabaseData.company.company_name || '',
+              description: supabaseData.company.description || null,
+              website: supabaseData.company.website || null,
+              location: supabaseData.company.location || null,
+              industry: supabaseData.company.industry || null
+            } : null,
+            // Ensure applications is an array
+            applications: Array.isArray(supabaseData.applications) ? supabaseData.applications : []
+          };
+          setJob(jobData);
         }
       } catch (error) {
         console.error('Error loading job details:', error);
@@ -268,16 +311,18 @@ const JobDetails = () => {
                   <p className="text-gray-700 whitespace-pre-line">{job.description}</p>
                 </div>
 
-                {job.requirements && job.requirements.length > 0 && (
-                  <div>
-                    <h2 className="text-xl font-semibold mb-2">Requirements</h2>
-                    <ul className="list-disc pl-5 space-y-1">
-                      {job.requirements.map((req, index) => (
-                        <li key={index} className="text-gray-700">{req}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+                <div className="mt-6">
+                  <h3 className="text-lg font-semibold mb-4">Requirements</h3>
+                  <ul className="list-disc pl-5 space-y-2">
+                    {job.requirements && job.requirements.length > 0 ? (
+                      job.requirements.map((requirement, index) => (
+                        <li key={index} className="text-gray-700">{requirement}</li>
+                      ))
+                    ) : (
+                      <li className="text-gray-700">No specific requirements listed</li>
+                    )}
+                  </ul>
+                </div>
 
                 <div>
                   <h2 className="text-xl font-semibold mb-2">Compensation</h2>
