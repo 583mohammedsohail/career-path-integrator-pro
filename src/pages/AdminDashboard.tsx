@@ -7,7 +7,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Users, FileText, Activity, BarChart2 } from 'lucide-react';
-import ApplicationsTable from '@/components/admin/ApplicationsTable';
 import ActivityLog from '@/components/admin/ActivityLog';
 import DashboardStats from '@/components/admin/DashboardStats';
 
@@ -32,18 +31,6 @@ const AdminDashboard = () => {
   if (!currentUser || currentUser.role !== 'admin') {
     return <Navigate to="/login" replace />;
   }
-
-  // Mock applications data
-  const mockApplications = [
-    {
-      id: '1',
-      student_name: 'John Doe',
-      job_title: 'Software Engineer',
-      company_name: 'Tech Corp',
-      status: 'pending',
-      applied_date: '2025-01-01'
-    }
-  ];
 
   return (
     <Layout>
@@ -85,13 +72,10 @@ const AdminDashboard = () => {
                 <CardTitle>Job Applications</CardTitle>
               </CardHeader>
               <CardContent>
-                <ApplicationsTable 
-                  applications={mockApplications}
-                  onUpdateStatus={() => {}}
-                  onViewDetails={() => {}}
-                  onDownloadResume={() => {}}
-                  onSendMessage={() => {}}
-                />
+                <div className="text-center py-8 text-gray-500">
+                  <p>No applications found at the moment.</p>
+                  <p className="text-sm">Applications will appear here when students start applying for jobs.</p>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

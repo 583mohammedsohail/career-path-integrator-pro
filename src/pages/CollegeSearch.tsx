@@ -34,6 +34,7 @@ type College = {
 
 // Default location (center of India)
 const DEFAULT_LOCATION = { lat: 20.5937, lng: 78.9629 };
+const GOOGLE_MAPS_API_KEY = "AIzaSyC6k680hSHNQB2QABFuwe4MyisofNSZIc4";
 
 // Google Maps services
 let placesService: google.maps.places.PlacesService | null = null;
@@ -185,9 +186,9 @@ export default function CollegeSearch() {
     
     return new Promise((resolve) => {
       const request: google.maps.places.TextSearchRequest = {
-        query: `${query} college`,
+        query: `${query} college university`,
         location: new google.maps.LatLng(DEFAULT_LOCATION.lat, DEFAULT_LOCATION.lng),
-        radius: 50000, // 50km radius
+        radius: 50000,
       };
 
       if (!placesService) {
@@ -212,8 +213,8 @@ export default function CollegeSearch() {
                 lng: location?.lng() || 0
               },
               rating: place.rating,
-              website: place.website as string | undefined,
-              photos: place.photos?.map(photo => 
+              website: place.website,
+              photos: place.photos?.map((photo: any) => 
                 photo.getUrl({ maxWidth: 800 })
               ),
               types: place.types,
@@ -221,7 +222,7 @@ export default function CollegeSearch() {
                 open_now: place.opening_hours.open_now || false,
                 weekday_text: place.opening_hours.weekday_text
               } : undefined,
-              reviews: place.reviews?.map(review => ({
+              reviews: place.reviews?.map((review: any) => ({
                 author_name: review.author_name || 'Anonymous',
                 rating: review.rating || 0,
                 text: review.text || '',
@@ -284,10 +285,8 @@ export default function CollegeSearch() {
   // Toggle street view
   const toggleStreetView = useCallback(() => {
     setShowStreetView(prev => {
-      // Will be the opposite of current state
       const newState = !prev;
       
-      // If turning ON street view and we have a selected college, update the panorama
       if (newState && selectedCollege && streetViewPanorama.current) {
         streetViewPanorama.current.setPosition(selectedCollege.location);
       }
@@ -298,36 +297,28 @@ export default function CollegeSearch() {
 
   // Initialize Google Maps when component mounts
   useEffect(() => {
-    // Check if Google Maps is already loaded
     if (!window.google || !window.google.maps) {
-      // Create script element to load Google Maps API
       const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyC6k680hSHNQB2QABFuwe4MyisofNSZIc4&libraries=places`;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places`;
       script.async = true;
       script.defer = true;
       
-      // Set up onload handler
       script.onload = () => {
         initGoogleMapsServices();
         initMap();
       };
       
-      // Add script to document head
       document.head.appendChild(script);
       
-      // Handle script loading errors
       script.onerror = () => {
         setError('Failed to load Google Maps API. Please check your internet connection and try again.');
       };
     } else {
-      // Google Maps already loaded
       initGoogleMapsServices();
       initMap();
     }
 
-    // Cleanup function
     return () => {
-      // Clean up markers
       markersRef.current.forEach(marker => marker.setMap(null));
     };
   }, [initMap]);
@@ -421,6 +412,20 @@ export default function CollegeSearch() {
                             <span className="ml-1 text-xs text-gray-500">
                               ({college.rating.toFixed(1)})
                             </span>
+                          </div>
+                        )}
+                        {college.website && (
+                          <div className="mt-2">
+                            <a
+                              href={college.website}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:underline text-xs flex items-center"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              Visit Website
+                              <ExternalLink className="ml-1 h-3 w-3" />
+                            </a>
                           </div>
                         )}
                       </div>
@@ -534,6 +539,22 @@ export default function CollegeSearch() {
                           </li>
                         ))}
                       </ul>
+                    </div>
+                  )}
+
+                  {selectedCollege.photos && selectedCollege.photos.length > 0 && (
+                    <div>
+                      <h3 className="font-medium">Photos</h3>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2">
+                        {selectedCollege.photos.slice(0, 6).map((photo, index) => (
+                          <img
+                            key={index}
+                            src={photo}
+                            alt={`${selectedCollege.name} ${index + 1}`}
+                            className="w-full h-20 object-cover rounded-lg"
+                          />
+                        ))}
+                      </div>
                     </div>
                   )}
                 </CardContent>
