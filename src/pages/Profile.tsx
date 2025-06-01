@@ -1,9 +1,8 @@
-
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useApplications } from '../contexts/ApplicationContext';
 import Layout from '../components/layout/Layout';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -19,26 +18,22 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 
-// Define user profile data structure
-interface UserProfile {
-  id: string;
+// Use the User interface from types instead of defining a duplicate
+// Profile form state interface
+interface ProfileFormState {
   name: string;
-  email: string;
-  role: string;
-  avatar_url?: string;
-  metadata?: {
-    phone?: string;
-    address?: string;
-    about?: string;
-  };
+  phone: string;
+  address: string;
+  about: string;
+  avatar: string;
 }
 
 const Profile = () => {
-  const { currentUser, isLoading } = useAuth();
+  const { currentUser, setCurrentUser, isLoading } = useAuth();
   const { jobApplications, campusDriveApplications, isLoading: isLoadingApplications } = useApplications();
   const navigate = useNavigate();
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
-  const [profileForm, setProfileForm] = useState({
+  const [profileForm, setProfileForm] = useState<ProfileFormState>({
     name: '',
     phone: '',
     address: '',
@@ -46,7 +41,7 @@ const Profile = () => {
     avatar: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [activeTab, setActiveTab] = useState('personal');
+  // Default tab for navigation - pre-selected
 
   if (isLoading) {
     return (
@@ -64,14 +59,15 @@ const Profile = () => {
     return <Navigate to="/login" replace />;
   }
 
-  // Get profile information from user data or use defaults
-  const userMetadata = currentUser?.user_metadata || {};
+  // Get profile information 
+  // Extract user metadata for profile info - use properties directly from User type
+  // Instead of relying on user_metadata which doesn't exist in our User type
   const profileInfo = {
-    phone: userMetadata.phone || '+91 98765 43210',
-    address: userMetadata.address || 'Hyderabad, India',
-    about: userMetadata.about || `Professional with a passion for ${currentUser?.role === 'student' ? 'learning and development' : 'industry advancement'}. Looking forward to ${currentUser?.role === 'student' ? 'career opportunities' : 'collaborating with talented individuals'}.`,
+    phone: currentUser.phone || '+91 98765 43210',
+    address: currentUser.address || 'Hyderabad, India',
+    about: currentUser.description || `Professional with a passion for ${currentUser?.role === 'student' ? 'learning and development' : 'industry advancement'}. Looking forward to ${currentUser?.role === 'student' ? 'career opportunities' : 'collaborating with talented individuals'}.`,
   };
-  
+
   // Open edit profile dialog and initialize form with current values
   const handleEditProfile = () => {
     setProfileForm({
@@ -83,7 +79,7 @@ const Profile = () => {
     });
     setIsEditProfileOpen(true);
   };
-  
+
   // Handle profile form input changes
   const handleProfileInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -92,42 +88,41 @@ const Profile = () => {
       [name]: value
     }));
   };
-  
+
   // Save updated profile
   const handleSaveProfile = async () => {
     if (!currentUser?.id) return;
-    
+
     setIsSubmitting(true);
     try {
-      // Update user metadata in Supabase Auth
+      // Update user metadata in Supabase Auth - Fixed to use proper metadata structure
       const { error } = await supabase.auth.updateUser({
         data: {
           name: profileForm.name,
           phone: profileForm.phone,
           address: profileForm.address,
-          about: profileForm.about
+          description: profileForm.about, // Map 'about' form field to 'description' property in User type
+          avatar_url: profileForm.avatar
         }
       });
-      
+
       if (error) throw error;
-      
-      // Update avatar in profiles table if needed
-      if (profileForm.avatar && profileForm.avatar !== currentUser?.avatar_url) {
-        const { error: avatarError } = await supabase
-          .from('profiles')
-          .update({
-            avatar_url: profileForm.avatar
-          })
-          .eq('id', currentUser.id);
-          
-        if (avatarError) throw avatarError;
-      }
-      
+
+      // Update local state instead of page reload
+      setCurrentUser(prev => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          name: profileForm.name,
+          phone: profileForm.phone,
+          address: profileForm.address,
+          description: profileForm.about, // Map 'about' form field to 'description' property in User type
+          avatar_url: profileForm.avatar
+        };
+      });
+
       toast.success('Profile updated successfully');
       setIsEditProfileOpen(false);
-      
-      // Refresh the page to show updated profile
-      setTimeout(() => window.location.reload(), 1000);
     } catch (error) {
       console.error('Error updating profile:', error);
       toast.error('Failed to update profile');
@@ -395,9 +390,9 @@ const Profile = () => {
         <Card className="mb-6">
           <CardContent className="p-6">
             <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-              <Avatar className="w-24 h-24">
-                <AvatarImage src={currentUser.avatar} alt={currentUser.name} />
-                <AvatarFallback>{currentUser.name ? currentUser.name[0].toUpperCase() : 'U'}</AvatarFallback>
+              <Avatar className="w-20 h-20 border-4 border-white shadow-lg">
+                <AvatarImage src={currentUser?.avatar_url || '/avatars/placeholder.png'} alt={currentUser?.name} />
+                <AvatarFallback>{currentUser?.name?.charAt(0)}</AvatarFallback>
               </Avatar>
               <div className="flex-1">
                 <h1 className="text-2xl font-bold">{currentUser.name}</h1>

@@ -8,6 +8,7 @@ import { mockStudents, mockCompanies, mockAdmins, mockManagement, mockSuperAdmin
 
 interface AuthContextType {
   currentUser: User | null;
+  setCurrentUser: React.Dispatch<React.SetStateAction<User | null>>;
   login: (email: string, password: string, role?: string) => Promise<void>;
   logout: () => Promise<void>;
   isLoading: boolean;
@@ -219,6 +220,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const value = {
     currentUser,
+    setCurrentUser,
     login,
     logout,
     isLoading,
