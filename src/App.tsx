@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 import { createBrowserRouter, RouterProvider, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ApplicationProvider } from './contexts/ApplicationContext';
+import ErrorBoundary from './components/ErrorBoundary';
 import Index from '@/pages/Index';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
@@ -199,12 +200,14 @@ const router = createBrowserRouter([
 const App: React.FC = () => {
   return (
     <React.StrictMode>
-      <AuthProvider>
-        <ApplicationProvider>
-          <Toaster position="top-center" richColors closeButton />
-          <RouterProvider router={router} />
-        </ApplicationProvider>
-      </AuthProvider>
+      <ErrorBoundary>
+        <AuthProvider>
+          <ApplicationProvider>
+            <Toaster position="top-center" richColors closeButton />
+            <RouterProvider router={router} />
+          </ApplicationProvider>
+        </AuthProvider>
+      </ErrorBoundary>
     </React.StrictMode>
   );
 };

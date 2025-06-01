@@ -57,18 +57,20 @@ const JobCard: React.FC<JobCardProps> = ({ job }) => {
 
         <div className="mb-4">
           <p className="text-sm text-muted-foreground line-clamp-2">{job.description}</p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {job.requirements.slice(0, 2).map((req, index) => (
-              <Badge key={index} variant="secondary" className="font-normal text-xs">
-                {req.length > 20 ? req.substring(0, 20) + '...' : req}
-              </Badge>
-            ))}
-            {job.requirements.length > 2 && (
-              <Badge variant="secondary" className="font-normal text-xs">
-                +{job.requirements.length - 2} more
-              </Badge>
-            )}
-          </div>
+          {job.requirements && job.requirements.length > 0 && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {job.requirements.slice(0, 2).map((req, index) => (
+                <Badge key={index} variant="secondary" className="font-normal text-xs">
+                  {req.length > 20 ? req.substring(0, 20) + '...' : req}
+                </Badge>
+              ))}
+              {job.requirements.length > 2 && (
+                <Badge variant="secondary" className="font-normal text-xs">
+                  +{job.requirements.length - 2} more
+                </Badge>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="flex items-center justify-between">

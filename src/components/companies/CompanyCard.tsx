@@ -18,25 +18,27 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ company }) => {
       <CardContent className="p-6">
         <div className="flex items-start gap-4">
           <Avatar className="h-16 w-16">
-            <AvatarImage src={company.avatar_url} alt={company.company_name} />
-            <AvatarFallback>{company.company_name.charAt(0)}</AvatarFallback>
+            <AvatarImage src={company?.avatar_url} alt={company?.company_name || 'Company'} />
+            <AvatarFallback>
+              {company?.company_name?.charAt(0) || 'C'}
+            </AvatarFallback>
           </Avatar>
           <div className="flex-1">
-            <h3 className="text-xl font-semibold mb-1">{company.company_name}</h3>
-            {company.industry && (
+            <h3 className="text-xl font-semibold mb-1">{company?.company_name || 'Unnamed Company'}</h3>
+            {company?.industry && (
               <Badge variant="secondary" className="mb-2">
                 {company.industry}
               </Badge>
             )}
             
             <div className="space-y-2 mb-4">
-              {company.location && (
+              {company?.location && (
                 <div className="flex items-center gap-2 text-sm text-gray-600">
                   <MapPin className="h-4 w-4" />
                   <span>{company.location}</span>
                 </div>
               )}
-              {company.website && (
+              {company?.website && (
                 <div className="flex items-center gap-2 text-sm text-gray-600">
                   <Globe className="h-4 w-4" />
                   <a
@@ -49,7 +51,7 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ company }) => {
                   </a>
                 </div>
               )}
-              {company.size && (
+              {company?.size && (
                 <div className="flex items-center gap-2 text-sm text-gray-600">
                   <Users className="h-4 w-4" />
                   <span>{company.size} employees</span>
@@ -57,7 +59,7 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ company }) => {
               )}
             </div>
 
-            {company.description && (
+            {company?.description && (
               <p className="text-sm text-gray-700 mb-4 line-clamp-3">
                 {company.description}
               </p>

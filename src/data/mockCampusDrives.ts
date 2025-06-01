@@ -7,7 +7,9 @@ export const mockCampusDrives: CampusDrive[] = [
     title: 'Google India Campus Drive 2025',
     company: {
       id: 'google',
+      company_name: 'Google',
       name: 'Google',
+      avatar_url: 'https://logo.clearbit.com/google.com',
       logo: 'https://logo.clearbit.com/google.com'
     },
     location: 'Main Campus Auditorium',

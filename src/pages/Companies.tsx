@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Layout from '../components/layout/Layout';
 import CompanyCard from '../components/companies/CompanyCard';
 import { Input } from '@/components/ui/input';
@@ -12,9 +12,9 @@ const Companies = () => {
 
   // Filter companies based on search query
   const filteredCompanies = mockCompanies.filter(company => 
-    company.companyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    company.industry.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    company.description.toLowerCase().includes(searchQuery.toLowerCase())
+    (company.company_name?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+    (company.industry?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+    (company.description?.toLowerCase() || '').includes(searchQuery.toLowerCase())
   );
 
   return (

@@ -91,20 +91,31 @@ export interface SystemActivity {
 export interface CampusDrive {
   id: string;
   title: string;
-  company_id: string;
+  company_id?: string;
   company_name?: string;
   company_logo?: string;
   location: string;
   date: string;
-  registration_deadline: string;
+  registration_deadline?: string;
+  registrationDeadline?: string;
   positions: number;
   roles: string[];
-  eligibility_criteria: string;
+  eligibility_criteria?: string;
+  eligibility?: string;
   salary: string;
   status: 'upcoming' | 'ongoing' | 'completed';
   description: string;
   requirements: string[];
   application_count?: number;
+  applicationCount?: number;
   registered_students?: string[];
-  created_at: string;
+  registeredStudents?: string[];
+  created_at?: string;
+  company?: {
+    id: string;
+    company_name?: string;
+    name?: string;
+    avatar_url?: string;
+    logo?: string;
+  };
 }
