@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import Layout from '../components/layout/Layout';
 import PostCampusDriveModal from '../components/campus/PostCampusDriveModal';
@@ -11,10 +12,12 @@ import { MapPin, Calendar, Users, Building, Search, Filter, Clock, Plus } from '
 import { Link } from 'react-router-dom';
 import { mockCampusDrives } from '@/data/mockCampusDrives';
 import { useAuth } from '@/contexts/AuthContext';
+import { CampusDrive } from '@/types';
+import { toast } from 'sonner';
 
 const CampusRecruitment = () => {
   const { currentUser } = useAuth();
-  const [drives, setDrives] = useState(mockCampusDrives);
+  const [drives, setDrives] = useState<CampusDrive[]>(mockCampusDrives);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -65,10 +68,25 @@ const CampusRecruitment = () => {
 
   const canPostDrives = currentUser && ['company', 'admin', 'management', 'superadmin'].includes(currentUser.role);
 
-  const handleDrivePosted = () => {
-    // Refresh the drives list - in a real app, this would fetch from the database
-    console.log('Campus drive posted successfully');
+  const handleDrivePosted = (newDrive: any) => {
+    // Add the new drive with real-time company logo
+    const driveWithLogo: CampusDrive = {
+      ...newDrive,
+      id: Math.random().toString(36).substr(2, 9),
+      company: {
+        id: newDrive.company_id,
+        name: newDrive.company_name,
+        logo: `https://logo.clearbit.com/${newDrive.company_name.toLowerCase().replace(/\s+/g, '')}.com`,
+      },
+      created_at: new Date().toISOString(),
+      status: 'upcoming',
+      application_count: 0,
+      registered_students: [],
+    };
+    
+    setDrives(prev => [driveWithLogo, ...prev]);
     setIsPostDriveModalOpen(false);
+    toast.success('Campus drive posted successfully and is now visible to all users!');
   };
 
   return (
@@ -101,7 +119,7 @@ const CampusRecruitment = () => {
             })}
           </p>
           <p className="text-gray-600">
-            Discover upcoming campus drives and placement opportunities
+            Discover {filteredDrives.length} campus drives and placement opportunities
           </p>
         </div>
 
@@ -172,7 +190,7 @@ const CampusRecruitment = () => {
 
                   <div className="pt-2">
                     <p className="text-sm text-gray-700 mb-2">
-                      <strong>Eligibility:</strong> {drive.eligibility}
+                      <strong>Eligibility:</strong> {drive.eligibility_criteria}
                     </p>
                     <p className="text-sm text-gray-600 mb-3 line-clamp-2">
                       {drive.description}
@@ -190,10 +208,10 @@ const CampusRecruitment = () => {
                       )}
                     </div>
                     
-                    {drive.applicationCount && (
+                    {drive.application_count && (
                       <div className="flex items-center gap-2 text-xs text-green-600 mb-3">
                         <Users className="h-3 w-3" />
-                        <span>{drive.applicationCount} students applied</span>
+                        <span>{drive.application_count} students applied</span>
                       </div>
                     )}
                   </div>
@@ -201,7 +219,7 @@ const CampusRecruitment = () => {
                   <div className="pt-3 border-t">
                     <div className="flex justify-between items-center">
                       <span className="text-xs text-gray-500">
-                        Registration deadline: {new Date(drive.registrationDeadline).toLocaleDateString('en-IN')}
+                        Registration deadline: {new Date(drive.registration_deadline).toLocaleDateString('en-IN')}
                       </span>
                       <Button size="sm" asChild>
                         <Link to={`/campus-drive/${drive.id}`}>
