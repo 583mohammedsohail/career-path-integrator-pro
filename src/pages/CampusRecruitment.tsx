@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/layout/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -135,7 +134,7 @@ const mockCampusDrives = [
 ];
 
 const CampusRecruitment = () => {
-  const [drives, setDrives] = useState(mockCampusDrives);
+  const [drives] = useState(mockCampusDrives);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -157,7 +156,7 @@ const CampusRecruitment = () => {
     return matchesSearch && matchesStatus;
   });
 
-  const getStatusBadge = (status: string, driveDate: string) => {
+  const getStatusBadge = (driveDate: string) => {
     const today = currentDate.toISOString().split('T')[0];
     const drive = new Date(driveDate);
     const now = new Date(today);

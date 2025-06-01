@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-import { createBrowserRouter, RouterProvider, Navigate, useNavigate } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ApplicationProvider } from './contexts/ApplicationContext';
 import Index from '@/pages/Index';

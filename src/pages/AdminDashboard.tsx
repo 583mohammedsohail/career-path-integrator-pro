@@ -1,12 +1,12 @@
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Layout from '../components/layout/Layout';
 import { useAuth } from '../contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Users, FileText, Activity, BarChart2, Settings } from 'lucide-react';
+import { Users, FileText, Activity, BarChart2 } from 'lucide-react';
 import ApplicationsTable from '@/components/admin/ApplicationsTable';
 import ActivityLog from '@/components/admin/ActivityLog';
 import DashboardStats from '@/components/admin/DashboardStats';
@@ -74,7 +74,6 @@ const AdminDashboard = () => {
               </CardHeader>
               <CardContent>
                 <ApplicationsTable 
-                  applications={true}
                   onUpdateStatus={() => {}}
                   onViewDetails={() => {}}
                   onDownloadResume={() => {}}
