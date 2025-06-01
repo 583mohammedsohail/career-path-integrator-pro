@@ -15,7 +15,8 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 
 // Import types
-import { CampusDrive, CampusApplication } from '@/types/database';
+import { CampusDrive, CampusApplication } from '@/types/index';
+import { mockCampusDrives } from '@/data/mockCampusDrives';
 
 // Extended campus drive interface with company info
 interface ExtendedCampusDrive extends CampusDrive {
@@ -54,85 +55,48 @@ const CampusDriveDetails = () => {
       try {
         setLoading(true);
         
-        // Get campus drive details
-        const { data: driveData, error: driveError } = await supabase
-          .from('campus_drives')
-          .select('*')
-          .eq('id', id)
-          .single();
+        // Find the drive from mock data
+        const foundDrive = mockCampusDrives.find(d => d.id === id);
         
-        if (driveError) throw driveError;
-        
-        if (!driveData) {
+        if (!foundDrive) {
           toast.error('Campus drive not found');
           navigate('/campus-recruitment');
           return;
         }
         
-        // Get company details
-        const { data: companyData } = await supabase
-          .from('profiles')
-          .select('name, avatar_url')
-          .eq('id', driveData.company_id)
-          .single();
+        // Set the drive data
+        setDrive({
+          ...foundDrive,
+          company_name: foundDrive.company.name,
+          company_logo: foundDrive.company.logo
+        });
         
-        // Process drive data
-        const processedDrive: ExtendedCampusDrive = {
-          ...driveData,
-          company_name: companyData?.name || 'Unknown Company',
-          company_logo: companyData?.avatar_url
-        };
-        
-        setDrive(processedDrive);
-        
-        // If user is a company and owns this drive, fetch applications
-        if (currentUser && currentUser.role === 'company' && currentUser.id === driveData.company_id) {
-          const { data: applicationsData, error: applicationsError } = await supabase
-            .from('campus_applications')
-            .select('*')
-            .eq('drive_id', id);
-          
-          if (applicationsError) throw applicationsError;
-          
-          if (applicationsData) {
-            // Fetch student details for each application
-            const appsWithStudentInfo = await Promise.all(
-              applicationsData.map(async (app) => {
-                const { data: studentData } = await supabase
-                  .from('profiles')
-                  .select('name, email, avatar_url')
-                  .eq('id', app.student_id)
-                  .single();
-                
-                return {
-                  ...app,
-                  student: studentData ? {
-                    name: studentData.name,
-                    email: studentData.email,
-                    avatar_url: studentData.avatar_url,
-                    user_metadata: {}
-                  } : undefined
-                };
-              })
-            );
-            
-            setApplications(appsWithStudentInfo);
-          }
+        // Mock applications data for company users
+        if (currentUser && currentUser.role === 'company') {
+          // Add some mock applications
+          const mockApplications = [
+            {
+              id: '1',
+              student_id: '1',
+              drive_id: id,
+              status: 'pending' as const,
+              applied_at: new Date().toISOString(),
+              note: 'Interested in this position',
+              student: {
+                name: 'John Doe',
+                email: 'john@example.com',
+                avatar_url: null,
+                user_metadata: {}
+              }
+            }
+          ];
+          setApplications(mockApplications);
         }
         
-        // If user is a student, check if they've already applied
+        // Check if current user has applied (mock check)
         if (currentUser && currentUser.role === 'student') {
-          const { data: applicationData } = await supabase
-            .from('campus_applications')
-            .select('*')
-            .eq('drive_id', id)
-            .eq('student_id', currentUser.id)
-            .single();
-          
-          if (applicationData) {
-            setHasApplied(true);
-            setUserApplication(applicationData);
-          }
+          // For demo purposes, assume no application exists
+          setHasApplied(false);
         }
       } catch (error) {
         console.error('Error fetching campus drive details:', error);

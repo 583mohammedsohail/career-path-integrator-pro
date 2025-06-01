@@ -1,21 +1,24 @@
-
 import { useState, useEffect } from 'react';
 import Layout from '../components/layout/Layout';
+import PostCampusDriveModal from '../components/campus/PostCampusDriveModal';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { MapPin, Calendar, Users, Building, Search, Filter, Clock } from 'lucide-react';
+import { MapPin, Calendar, Users, Building, Search, Filter, Clock, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { mockCampusDrives } from '@/data/mockCampusDrives';
+import { useAuth } from '@/contexts/AuthContext';
 
 const CampusRecruitment = () => {
+  const { currentUser } = useAuth();
   const [drives, setDrives] = useState(mockCampusDrives);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [isPostDriveModalOpen, setIsPostDriveModalOpen] = useState(false);
 
   // Update current date every minute for real-time display
   useEffect(() => {
@@ -60,17 +63,35 @@ const CampusRecruitment = () => {
     return `${diffDays} days`;
   };
 
+  const canPostDrives = currentUser && ['company', 'admin', 'management', 'superadmin'].includes(currentUser.role);
+
+  const handleDrivePosted = () => {
+    // Refresh the drives list - in a real app, this would fetch from the database
+    console.log('Campus drive posted successfully');
+    setIsPostDriveModalOpen(false);
+  };
+
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <div className="flex items-center gap-3 mb-4">
-            <h1 className="text-3xl font-bold">Campus Recruitment 2025</h1>
-            <div className="flex items-center gap-2 px-3 py-1 bg-blue-100 rounded-full">
-              <Clock className="h-4 w-4 text-blue-600" />
-              <span className="text-sm font-medium text-blue-800">Live</span>
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
+            <div className="flex items-center gap-3">
+              <h1 className="text-3xl font-bold">Campus Recruitment 2025</h1>
+              <div className="flex items-center gap-2 px-3 py-1 bg-blue-100 rounded-full">
+                <Clock className="h-4 w-4 text-blue-600" />
+                <span className="text-sm font-medium text-blue-800">Live</span>
+              </div>
             </div>
+            
+            {canPostDrives && (
+              <Button onClick={() => setIsPostDriveModalOpen(true)} className="flex items-center gap-2">
+                <Plus className="h-4 w-4" />
+                Post Campus Drive
+              </Button>
+            )}
           </div>
+          
           <p className="text-gray-600">
             Current Date: {currentDate.toLocaleDateString('en-IN', { 
               year: 'numeric', 
@@ -205,6 +226,13 @@ const CampusRecruitment = () => {
           </div>
         )}
       </div>
+
+      {/* Post Campus Drive Modal */}
+      <PostCampusDriveModal
+        isOpen={isPostDriveModalOpen}
+        onClose={() => setIsPostDriveModalOpen(false)}
+        onDrivePosted={handleDrivePosted}
+      />
     </Layout>
   );
 };

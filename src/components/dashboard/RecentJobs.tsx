@@ -1,75 +1,73 @@
 
-import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Job } from '@/types';
-import { Link } from 'react-router-dom';
-import { ArrowRight, MapPin, Calendar, Users } from 'lucide-react';
+import { Calendar, MapPin, Users, TrendingUp } from 'lucide-react';
+import { format } from 'date-fns';
 import { mockJobs } from '@/data/mockData';
 
-interface RecentJobsProps {
-  jobs?: Job[];
-}
+const RecentJobs = () => {
+  // Get the 5 most recent jobs
+  const recentJobs = mockJobs
+    .filter(job => job.status === 'active')
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    .slice(0, 5);
 
-const RecentJobs: React.FC<RecentJobsProps> = ({ jobs = mockJobs }) => {
+  const totalActiveJobs = mockJobs.filter(job => job.status === 'active').length;
+
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle>Recent Job Postings</CardTitle>
-        <Button variant="ghost" size="sm" asChild>
-          <Link to="/jobs" className="flex items-center gap-1">
-            <span>View all</span>
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </Button>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-base font-medium">Recent Job Postings</CardTitle>
+        <TrendingUp className="h-4 w-4 text-muted-foreground" />
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {jobs.slice(0, 5).map((job) => (
-            <div key={job.id} className="rounded-lg border p-4">
-              <div className="flex items-center justify-between">
-                <h3 className="font-medium text-lg">{job.title}</h3>
-                <Badge variant="outline" className={
-                  job.status === 'open' 
-                    ? 'bg-green-100 text-green-800 hover:bg-green-100 border-green-200'
-                    : 'bg-gray-100 text-gray-800 hover:bg-gray-100 border-gray-200'
-                }>
-                  {job.status === 'open' ? 'Open' : 'Closed'}
+          {recentJobs.map((job) => (
+            <div key={job.id} className="flex items-center justify-between space-x-4">
+              <div className="space-y-1">
+                <p className="text-sm font-medium leading-none">{job.title}</p>
+                <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+                  <span>Company ID: {job.company_id}</span>
+                  {job.location && (
+                    <>
+                      <span>•</span>
+                      <div className="flex items-center">
+                        <MapPin className="mr-1 h-3 w-3" />
+                        {job.location}
+                      </div>
+                    </>
+                  )}
+                </div>
+                {job.deadline && (
+                  <div className="flex items-center text-xs text-muted-foreground">
+                    <Calendar className="mr-1 h-3 w-3" />
+                    Deadline: {format(new Date(job.deadline), 'MMM dd, yyyy')}
+                  </div>
+                )}
+              </div>
+              <div className="text-right space-y-1">
+                <Badge variant="outline" className="text-xs">
+                  {job.status}
                 </Badge>
-              </div>
-              
-              <div className="mt-2">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <span>{job.company.companyName}</span>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-3">
-                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                    <MapPin className="h-4 w-4" />
-                    <span>{job.location}</span>
+                {job.positions && (
+                  <div className="flex items-center text-xs text-muted-foreground">
+                    <Users className="mr-1 h-3 w-3" />
+                    {job.positions} positions
                   </div>
-                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                    <Calendar className="h-4 w-4" />
-                    <span>Deadline: {new Date(job.deadline).toLocaleDateString()}</span>
-                  </div>
-                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                    <Users className="h-4 w-4" />
-                    <span>{job.positions} positions</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="mt-4 flex items-center justify-between">
-                <div>
-                  <span className="text-sm font-medium">{job.salary}</span>
-                </div>
-                <Button size="sm" asChild>
-                  <Link to={`/jobs/${job.id}`}>View Details</Link>
-                </Button>
+                )}
               </div>
             </div>
           ))}
+        </div>
+        {recentJobs.length === 0 && (
+          <p className="text-sm text-muted-foreground">No recent job postings</p>
+        )}
+        <div className="mt-4 pt-4 border-t">
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-muted-foreground">Total Active Jobs</span>
+            <span className="text-sm font-medium">{totalActiveJobs}</span>
+          </div>
         </div>
       </CardContent>
     </Card>

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   Dialog,
@@ -19,25 +20,22 @@ interface JobDetailsModalProps {
   job: {
     id: string;
     title: string;
-    company: {
-      name: string;
-      logo: string;
-    };
-    location: string;
-    salary: string;
+    company_id: string;
+    location?: string;
+    salary?: string;
     description: string;
     requirements: string[];
-    deadline: string;
+    deadline?: string;
     applications: Array<{
       id: string;
       student: {
         id: string;
         name: string;
-        avatar: string;
+        avatar_url?: string;
         email: string;
       };
       status: string;
-      appliedDate: string;
+      applied_at: string;
     }>;
   };
 }
@@ -60,20 +58,26 @@ const JobDetailsModal: React.FC<JobDetailsModalProps> = ({
           <DialogDescription className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <Building className="h-4 w-4" />
-              {job.company.name}
+              Company ID: {job.company_id}
             </div>
-            <div className="flex items-center gap-2">
-              <MapPin className="h-4 w-4" />
-              {job.location}
-            </div>
-            <div className="flex items-center gap-2">
-              <CreditCard className="h-4 w-4" />
-              {job.salary}
-            </div>
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              Deadline: {new Date(job.deadline).toLocaleDateString()}
-            </div>
+            {job.location && (
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4" />
+                {job.location}
+              </div>
+            )}
+            {job.salary && (
+              <div className="flex items-center gap-2">
+                <CreditCard className="h-4 w-4" />
+                {job.salary}
+              </div>
+            )}
+            {job.deadline && (
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                Deadline: {new Date(job.deadline).toLocaleDateString()}
+              </div>
+            )}
           </DialogDescription>
         </DialogHeader>
 
@@ -116,7 +120,7 @@ const JobDetailsModal: React.FC<JobDetailsModalProps> = ({
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <Avatar>
-                            <AvatarImage src={application.student.avatar} />
+                            <AvatarImage src={application.student.avatar_url} />
                             <AvatarFallback>
                               {application.student.name.charAt(0)}
                             </AvatarFallback>
@@ -132,7 +136,7 @@ const JobDetailsModal: React.FC<JobDetailsModalProps> = ({
                           <Badge
                             variant={
                               application.status === 'selected'
-                                ? 'success'
+                                ? 'default'
                                 : application.status === 'rejected'
                                 ? 'destructive'
                                 : 'secondary'
@@ -141,7 +145,7 @@ const JobDetailsModal: React.FC<JobDetailsModalProps> = ({
                             {application.status}
                           </Badge>
                           <p className="text-xs text-muted-foreground mt-1">
-                            Applied: {new Date(application.appliedDate).toLocaleDateString()}
+                            Applied: {new Date(application.applied_at).toLocaleDateString()}
                           </p>
                         </div>
                       </div>
@@ -158,4 +162,4 @@ const JobDetailsModal: React.FC<JobDetailsModalProps> = ({
   );
 };
 
-export default JobDetailsModal; 
+export default JobDetailsModal;

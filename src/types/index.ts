@@ -4,7 +4,7 @@ export interface User {
   name: string;
   email: string;
   role: 'student' | 'company' | 'admin' | 'management' | 'superadmin';
-  avatar?: string;
+  avatar_url?: string;
   department?: string;
   course?: string;
   year?: number;
@@ -24,26 +24,26 @@ export interface User {
 export interface Job {
   id: string;
   title: string;
-  company: string;
-  location: string;
-  type: 'full-time' | 'part-time' | 'internship' | 'contract';
+  company_id: string;
+  location?: string;
+  type?: 'full-time' | 'part-time' | 'internship' | 'contract';
   salary?: string;
   description: string;
   requirements: string[];
-  posted_date: string;
+  created_at: string;
   deadline?: string;
-  company_id?: string;
   status?: 'active' | 'closed' | 'draft';
+  positions?: number;
 }
 
 export interface Company {
   id: string;
-  name: string;
-  industry: string;
-  location: string;
-  description: string;
+  company_name: string;
+  industry?: string;
+  location?: string;
+  description?: string;
   website?: string;
-  logo?: string;
+  avatar_url?: string;
   size?: string;
   founded?: string;
   employees?: string;
@@ -60,7 +60,7 @@ export interface Student {
   year: number;
   cgpa: number;
   skills: string[];
-  avatar?: string;
+  avatar_url?: string;
   resume_url?: string;
   phone?: string;
   address?: string;
@@ -70,12 +70,12 @@ export interface Student {
 
 export interface Application {
   id: string;
-  student: Student;
-  job: Job;
+  student_id: string;
+  job_id: string;
   status: 'pending' | 'approved' | 'rejected' | 'interviewed';
-  appliedDate: string;
-  resumeUrl?: string;
-  coverLetter?: string;
+  applied_at: string;
+  resume_url?: string;
+  cover_letter?: string;
 }
 
 export interface SystemActivity {
@@ -91,21 +91,20 @@ export interface SystemActivity {
 export interface CampusDrive {
   id: string;
   title: string;
-  company: {
-    id: string;
-    name: string;
-    logo: string;
-  };
+  company_id: string;
+  company_name?: string;
+  company_logo?: string;
   location: string;
   date: string;
-  registrationDeadline: string;
+  registration_deadline: string;
   positions: number;
   roles: string[];
-  eligibility: string;
+  eligibility_criteria: string;
   salary: string;
   status: 'upcoming' | 'ongoing' | 'completed';
   description: string;
   requirements: string[];
-  applicationCount?: number;
-  registeredStudents?: string[];
+  application_count?: number;
+  registered_students?: string[];
+  created_at: string;
 }

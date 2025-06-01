@@ -1,89 +1,159 @@
 
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Layout from '../components/layout/Layout';
 import JobCard from '../components/jobs/JobCard';
+import PostJobModal from '../components/jobs/PostJobModal';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { mockJobs } from '../data/mockData';
-import { Search, Filter } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Search, Filter, Plus, Briefcase } from 'lucide-react';
+import { mockJobs } from '@/data/mockData';
+import { useAuth } from '@/contexts/AuthContext';
+import { Job } from '@/types';
 
 const Jobs = () => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const { currentUser } = useAuth();
+  const [jobs, setJobs] = useState<Job[]>(mockJobs);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterType, setFilterType] = useState('all');
+  const [filterLocation, setFilterLocation] = useState('all');
+  const [isPostJobModalOpen, setIsPostJobModalOpen] = useState(false);
 
-  // Filter jobs based on search query and status
-  const filteredJobs = mockJobs.filter(job => {
-    const matchesSearch = job.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          job.company.companyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          job.description.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesStatus = statusFilter === 'all' || job.status === statusFilter;
-    
-    return matchesSearch && matchesStatus;
+  // Filter jobs based on search and filters
+  const filteredJobs = jobs.filter(job => {
+    const matchesSearch = job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         job.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesType = filterType === 'all' || job.type === filterType;
+    const matchesLocation = filterLocation === 'all' || job.location?.toLowerCase().includes(filterLocation.toLowerCase());
+    return matchesSearch && matchesType && matchesLocation;
   });
+
+  const handleJobPosted = () => {
+    // Refresh the jobs list - in a real app, this would fetch from the database
+    console.log('Job posted successfully');
+    // For now, we'll just close the modal
+    setIsPostJobModalOpen(false);
+  };
+
+  const canPostJobs = currentUser && ['company', 'admin', 'management', 'superadmin'].includes(currentUser.role);
 
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col md:flex-row items-center justify-between mb-8">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
           <div>
-            <h1 className="text-2xl font-bold">Job Listings</h1>
-            <p className="text-gray-600 mt-1">Find your next career opportunity</p>
+            <h1 className="text-3xl font-bold mb-2">Job Opportunities</h1>
+            <p className="text-gray-600">Discover your next career move</p>
           </div>
-          <div className="w-full md:w-auto mt-4 md:mt-0">
+          
+          {canPostJobs && (
+            <Button onClick={() => setIsPostJobModalOpen(true)} className="flex items-center gap-2">
+              <Plus className="h-4 w-4" />
+              Post Job
+            </Button>
+          )}
+        </div>
+
+        {/* Search and Filter Controls */}
+        <Card className="mb-6">
+          <CardContent className="p-6">
             <div className="flex flex-col md:flex-row gap-4">
-              <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <Input
-                  placeholder="Search jobs..."
-                  className="pl-8 w-full md:w-80"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search jobs by title or description..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
                 />
               </div>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[180px]">
-                  <span className="flex items-center gap-2">
-                    <Filter className="h-4 w-4" />
-                    <SelectValue placeholder="Filter by status" />
-                  </span>
+              
+              <Select value={filterType} onValueChange={setFilterType}>
+                <SelectTrigger className="w-full md:w-48">
+                  <Filter className="h-4 w-4 mr-2" />
+                  <SelectValue placeholder="Job Type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Jobs</SelectItem>
-                  <SelectItem value="open">Open</SelectItem>
-                  <SelectItem value="closed">Closed</SelectItem>
+                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="full-time">Full Time</SelectItem>
+                  <SelectItem value="part-time">Part Time</SelectItem>
+                  <SelectItem value="internship">Internship</SelectItem>
+                  <SelectItem value="contract">Contract</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <Select value={filterLocation} onValueChange={setFilterLocation}>
+                <SelectTrigger className="w-full md:w-48">
+                  <SelectValue placeholder="Location" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Locations</SelectItem>
+                  <SelectItem value="bangalore">Bangalore</SelectItem>
+                  <SelectItem value="mumbai">Mumbai</SelectItem>
+                  <SelectItem value="delhi">Delhi</SelectItem>
+                  <SelectItem value="hyderabad">Hyderabad</SelectItem>
+                  <SelectItem value="pune">Pune</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-          </div>
+          </CardContent>
+        </Card>
+
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <Card>
+            <CardContent className="p-4 flex items-center">
+              <Briefcase className="h-8 w-8 text-blue-600 mr-3" />
+              <div>
+                <p className="text-2xl font-bold">{filteredJobs.length}</p>
+                <p className="text-sm text-gray-600">Available Jobs</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 flex items-center">
+              <Briefcase className="h-8 w-8 text-green-600 mr-3" />
+              <div>
+                <p className="text-2xl font-bold">{filteredJobs.filter(job => job.status === 'active').length}</p>
+                <p className="text-sm text-gray-600">Active Jobs</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 flex items-center">
+              <Briefcase className="h-8 w-8 text-purple-600 mr-3" />
+              <div>
+                <p className="text-2xl font-bold">{filteredJobs.filter(job => job.type === 'internship').length}</p>
+                <p className="text-sm text-gray-600">Internships</p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
+        {/* Jobs Grid */}
         {filteredJobs.length > 0 ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredJobs.map((job) => (
               <JobCard key={job.id} job={job} />
             ))}
           </div>
         ) : (
           <div className="text-center py-12">
-            <p className="text-lg text-gray-600">
-              No job listings matching your criteria.
-            </p>
-            <Button className="mt-4" onClick={() => {
-              setSearchQuery('');
-              setStatusFilter('all');
-            }}>
-              Clear Filters
-            </Button>
+            <div className="text-gray-400 mb-4">
+              <Search className="h-16 w-16 mx-auto" />
+            </div>
+            <p className="text-lg text-gray-600 mb-2">No jobs found matching your criteria.</p>
+            <p className="text-sm text-gray-500">Try adjusting your search terms or filters.</p>
           </div>
         )}
+
+        {/* Post Job Modal */}
+        <PostJobModal
+          isOpen={isPostJobModalOpen}
+          onClose={() => setIsPostJobModalOpen(false)}
+          onJobPosted={handleJobPosted}
+        />
       </div>
     </Layout>
   );
