@@ -9,7 +9,7 @@ import { mockStudents, mockCompanies, mockAdmins, mockManagement, mockSuperAdmin
 interface AuthContextType {
   currentUser: User | null;
   setCurrentUser: React.Dispatch<React.SetStateAction<User | null>>;
-  login: (email: string, password: string, role?: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   isLoading: boolean;
   session: Session | null;
@@ -72,7 +72,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               name: session.user.user_metadata?.name || 'User',
               email: email || '',
               role: session.user.user_metadata?.role || 'student',
-              avatar: session.user.user_metadata?.avatar_url || ''
+              avatar_url: session.user.user_metadata?.avatar_url || ''
             });
           }
 
@@ -115,7 +115,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             name: session.user.user_metadata?.name || 'User',
             email: email,
             role: session.user.user_metadata?.role || 'student',
-            avatar: session.user.user_metadata?.avatar_url || ''
+            avatar_url: session.user.user_metadata?.avatar_url || ''
           });
         }
       }
@@ -128,7 +128,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, []);
 
-  const login = async (email: string, password: string, role?: string) => {
+  const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
       // Clean up any existing auth state

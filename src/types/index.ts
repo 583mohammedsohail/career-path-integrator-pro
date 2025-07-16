@@ -5,6 +5,7 @@ export interface User {
   email: string;
   role: 'student' | 'company' | 'admin' | 'management' | 'superadmin';
   avatar_url?: string;
+  avatar?: string;
   department?: string;
   course?: string;
   year?: number;
@@ -19,6 +20,74 @@ export interface User {
   description?: string;
   location?: string;
   roll_number?: string;
+}
+
+export interface CampusDriveApplication {
+  id: string;
+  student_id: string;
+  campus_drive_id: string;
+  status: 'pending' | 'reviewing' | 'shortlisted' | 'rejected' | 'accepted';
+  applied_at: string;
+  resume_url?: string;
+  cover_letter?: string;
+}
+
+export interface JobApplication {
+  id: string;
+  student_id: string;
+  job_id: string;
+  status: 'pending' | 'reviewing' | 'shortlisted' | 'rejected' | 'accepted';
+  applied_at: string;
+  resume_url?: string;
+  cover_letter?: string;
+  job?: {
+    title: string;
+    company_name: string;
+    location: string;
+    salary: string;
+  };
+}
+
+export interface PlacementStats {
+  totalStudents: number;
+  placedStudents: number;
+  placementPercentage: number;
+  averagePackage: string;
+  highestPackage: string;
+}
+
+export interface Notification {
+  id: string;
+  user_id: string;
+  message: string;
+  is_read: boolean;
+  created_at: string;
+}
+
+export interface Admin {
+  id: string;
+  name: string;
+  email: string;
+  role: 'admin';
+  avatar_url?: string;
+  department?: string;
+}
+
+export interface Management {
+  id: string;
+  name: string;
+  email: string;
+  role: 'management';
+  avatar_url?: string;
+  department?: string;
+}
+
+export interface SuperAdmin {
+  id: string;
+  name: string;
+  email: string;
+  role: 'superadmin';
+  avatar_url?: string;
 }
 
 export interface Job {

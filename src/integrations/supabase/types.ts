@@ -14,6 +14,93 @@ export type Database = {
   }
   public: {
     Tables: {
+      campus_drive_applications: {
+        Row: {
+          applied_at: string | null
+          campus_drive_id: string
+          cover_letter: string | null
+          id: string
+          resume_url: string | null
+          status: string | null
+          student_id: string
+        }
+        Insert: {
+          applied_at?: string | null
+          campus_drive_id: string
+          cover_letter?: string | null
+          id?: string
+          resume_url?: string | null
+          status?: string | null
+          student_id: string
+        }
+        Update: {
+          applied_at?: string | null
+          campus_drive_id?: string
+          cover_letter?: string | null
+          id?: string
+          resume_url?: string | null
+          status?: string | null
+          student_id?: string
+        }
+        Relationships: []
+      }
+      campus_drives: {
+        Row: {
+          company_id: string | null
+          company_logo: string | null
+          company_name: string | null
+          created_at: string | null
+          date: string
+          description: string
+          eligibility_criteria: string | null
+          id: string
+          location: string
+          positions: number
+          registration_deadline: string | null
+          requirements: string[] | null
+          roles: string[] | null
+          salary: string | null
+          status: string | null
+          title: string
+        }
+        Insert: {
+          company_id?: string | null
+          company_logo?: string | null
+          company_name?: string | null
+          created_at?: string | null
+          date: string
+          description: string
+          eligibility_criteria?: string | null
+          id?: string
+          location: string
+          positions?: number
+          registration_deadline?: string | null
+          requirements?: string[] | null
+          roles?: string[] | null
+          salary?: string | null
+          status?: string | null
+          title: string
+        }
+        Update: {
+          company_id?: string | null
+          company_logo?: string | null
+          company_name?: string | null
+          created_at?: string | null
+          date?: string
+          description?: string
+          eligibility_criteria?: string | null
+          id?: string
+          location?: string
+          positions?: number
+          registration_deadline?: string | null
+          requirements?: string[] | null
+          roles?: string[] | null
+          salary?: string | null
+          status?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
       companies: {
         Row: {
           company_name: string

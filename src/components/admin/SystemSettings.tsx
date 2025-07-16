@@ -9,13 +9,9 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import {
   Shield,
-  Mail,
   Bell,
-  Calendar,
-  Lock,
   Database,
-  RefreshCw,
-  HardDrive
+  RefreshCw
 } from 'lucide-react';
 
 interface SystemSettingsProps {
@@ -55,7 +51,7 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ settings, onUpdateSetti
     try {
       const { error } = await supabase
         .from('system_settings')
-        .upsert([currentSettings]);
+        .upsert(currentSettings);
 
       if (error) throw error;
       
@@ -101,7 +97,7 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ settings, onUpdateSetti
     },
     {
       title: 'Application Settings',
-      icon: Calendar,
+      icon: Bell,
       settings: [
         {
           key: 'autoApproveCompanies',
@@ -174,7 +170,7 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ settings, onUpdateSetti
                       id={setting.key}
                       type="number"
                       className="w-24"
-                      value={currentSettings[setting.key as keyof typeof currentSettings]}
+                      value={String(currentSettings[setting.key as keyof typeof currentSettings])}
                       onChange={(e) => handleNumberChange(setting.key, e.target.value)}
                     />
                   )}
