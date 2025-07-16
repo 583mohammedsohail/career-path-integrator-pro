@@ -1,20 +1,25 @@
-
-import { CampusDrive } from '@/types';
+import { CampusDrive, Company } from '@/types';
 
 export const mockCampusDrives: CampusDrive[] = [
   {
     id: '1',
     title: 'Google India Campus Drive 2025',
+    company_id: '1',
+    company_name: 'Google',
+    company_logo: 'https://logo.clearbit.com/google.com',
     company: {
-      id: 'google',
-      company_name: 'Google',
+      id: '1',
       name: 'Google',
+      company_name: 'Google',
+      logo: 'https://logo.clearbit.com/google.com',
       avatar_url: 'https://logo.clearbit.com/google.com',
-      logo: 'https://logo.clearbit.com/google.com'
+      location: 'Hyderabad, Telangana',
+      size: '5,000+',
+      description: 'Multinational technology company specializing in Internet-related services and products'
     },
     location: 'Main Campus Auditorium',
-    date: '2025-06-15',
-    registrationDeadline: '2025-06-10',
+    date: '2025-11-05',
+    registrationDeadline: '2025-11-01',
     positions: 25,
     roles: ['Software Engineer', 'Product Manager', 'Data Scientist'],
     eligibility: 'B.Tech/M.Tech CSE, IT, ECE with CGPA > 8.0',
@@ -33,14 +38,22 @@ export const mockCampusDrives: CampusDrive[] = [
   {
     id: '2',
     title: 'Microsoft Campus Recruitment 2025',
+    company_id: '2',
+    company_name: 'Microsoft',
+    company_logo: 'https://logo.clearbit.com/microsoft.com',
     company: {
-      id: 'microsoft',
+      id: '2',
       name: 'Microsoft',
-      logo: 'https://logo.clearbit.com/microsoft.com'
+      company_name: 'Microsoft',
+      logo: 'https://logo.clearbit.com/microsoft.com',
+      avatar_url: 'https://logo.clearbit.com/microsoft.com',
+      location: 'Hyderabad, Telangana',
+      size: '1,200+',
+      description: 'Multinational technology company specializing in computer software, consumer electronics, and personal computers'
     },
     location: 'Engineering Block',
-    date: '2025-06-20',
-    registrationDeadline: '2025-06-15',
+    date: '2025-11-12',
+    registrationDeadline: '2025-11-08',
     positions: 30,
     roles: ['Software Development Engineer', 'Program Manager', 'Cloud Solutions Architect'],
     eligibility: 'All Engineering Branches with CGPA > 7.5',
@@ -59,14 +72,22 @@ export const mockCampusDrives: CampusDrive[] = [
   {
     id: '3',
     title: 'Amazon Web Services Campus Drive',
+    company_id: '3',
+    company_name: 'Amazon',
+    company_logo: 'https://logo.clearbit.com/amazon.com',
     company: {
-      id: 'amazon',
+      id: '3',
       name: 'Amazon',
-      logo: 'https://logo.clearbit.com/amazon.com'
+      company_name: 'Amazon',
+      logo: 'https://logo.clearbit.com/amazon.com',
+      avatar_url: 'https://logo.clearbit.com/amazon.com',
+      location: 'Hyderabad, Telangana',
+      size: '3,500+',
+      description: 'Multinational technology company specializing in e-commerce, cloud computing, and artificial intelligence'
     },
     location: 'Computer Center',
-    date: '2025-06-25',
-    registrationDeadline: '2025-06-20',
+    date: '2025-11-22',
+    registrationDeadline: '2025-11-18',
     positions: 40,
     roles: ['SDE I', 'Cloud Support Engineer', 'Business Analyst'],
     eligibility: 'B.Tech/M.Tech/MCA with CGPA > 7.0',
@@ -85,14 +106,22 @@ export const mockCampusDrives: CampusDrive[] = [
   {
     id: '4',
     title: 'TCS National Qualifier Test 2025',
+    company_id: '4',
+    company_name: 'Tata Consultancy Services',
+    company_logo: 'https://logo.clearbit.com/tcs.com',
     company: {
-      id: 'tcs',
+      id: '4',
       name: 'Tata Consultancy Services',
-      logo: 'https://logo.clearbit.com/tcs.com'
+      company_name: 'Tata Consultancy Services',
+      logo: 'https://logo.clearbit.com/tcs.com',
+      avatar_url: 'https://logo.clearbit.com/tcs.com',
+      location: 'Hyderabad, Telangana',
+      size: '4,000+',
+      description: 'Indian multinational information technology consulting and business solutions company'
     },
     location: 'Main Auditorium',
-    date: '2025-07-05',
-    registrationDeadline: '2025-06-28',
+    date: '2025-11-15',
+    registrationDeadline: '2025-11-11',
     positions: 100,
     roles: ['Assistant System Engineer', 'Digital Analyst', 'Business Analyst'],
     eligibility: 'All Branches with CGPA > 6.0',
@@ -111,14 +140,22 @@ export const mockCampusDrives: CampusDrive[] = [
   {
     id: '5',
     title: 'Infosys Campus Connect 2025',
+    company_id: '5',
+    company_name: 'Infosys',
+    company_logo: 'https://logo.clearbit.com/infosys.com',
     company: {
-      id: 'infosys',
+      id: '5',
       name: 'Infosys',
-      logo: 'https://logo.clearbit.com/infosys.com'
+      company_name: 'Infosys',
+      logo: 'https://logo.clearbit.com/infosys.com',
+      avatar_url: 'https://logo.clearbit.com/infosys.com',
+      location: 'Hyderabad, Telangana',
+      size: '2,500+',
+      description: 'Indian multinational information technology consulting and business solutions company'
     },
     location: 'Seminar Hall',
-    date: '2025-07-10',
-    registrationDeadline: '2025-07-05',
+    date: '2025-11-28',
+    registrationDeadline: '2025-11-24',
     positions: 80,
     roles: ['Systems Engineer', 'Technology Analyst', 'Digital Specialist'],
     eligibility: 'B.Tech/B.E/M.Tech/MCA with CGPA > 6.5',
@@ -137,14 +174,22 @@ export const mockCampusDrives: CampusDrive[] = [
   {
     id: '6',
     title: 'Wipro Elite National Talent Hunt',
+    company_id: '6',
+    company_name: 'Wipro',
+    company_logo: 'https://logo.clearbit.com/wipro.com',
     company: {
-      id: 'wipro',
+      id: '6',
       name: 'Wipro',
-      logo: 'https://logo.clearbit.com/wipro.com'
+      company_name: 'Wipro',
+      logo: 'https://logo.clearbit.com/wipro.com',
+      avatar_url: 'https://logo.clearbit.com/wipro.com',
+      location: 'Hyderabad, Telangana',
+      size: '3,000+',
+      description: 'Indian multinational information technology consulting and business solutions company'
     },
     location: 'Central Library',
-    date: '2025-07-15',
-    registrationDeadline: '2025-07-10',
+    date: '2025-11-10',
+    registrationDeadline: '2025-11-06',
     positions: 60,
     roles: ['Project Engineer', 'Senior Software Engineer', 'Technical Lead'],
     eligibility: 'Engineering graduates with CGPA > 7.0',
@@ -163,14 +208,22 @@ export const mockCampusDrives: CampusDrive[] = [
   {
     id: '7',
     title: 'Adobe Campus Recruitment Drive',
+    company_id: '7',
+    company_name: 'Adobe',
+    company_logo: 'https://logo.clearbit.com/adobe.com',
     company: {
-      id: 'adobe',
+      id: '7',
       name: 'Adobe',
-      logo: 'https://logo.clearbit.com/adobe.com'
+      company_name: 'Adobe',
+      logo: 'https://logo.clearbit.com/adobe.com',
+      avatar_url: 'https://logo.clearbit.com/adobe.com',
+      location: 'Hyderabad, Telangana',
+      size: '1,500+',
+      description: 'Multinational computer software company specializing in creative software products'
     },
     location: 'Innovation Lab',
-    date: '2025-07-20',
-    registrationDeadline: '2025-07-15',
+    date: '2025-11-25',
+    registrationDeadline: '2025-11-21',
     positions: 15,
     roles: ['Software Engineer', 'UX Designer', 'Product Manager'],
     eligibility: 'B.Tech/M.Tech with CGPA > 8.5',
@@ -189,14 +242,22 @@ export const mockCampusDrives: CampusDrive[] = [
   {
     id: '8',
     title: 'Salesforce Developer Program',
+    company_id: '8',
+    company_name: 'Salesforce',
+    company_logo: 'https://logo.clearbit.com/salesforce.com',
     company: {
-      id: 'salesforce',
+      id: '8',
       name: 'Salesforce',
-      logo: 'https://logo.clearbit.com/salesforce.com'
+      company_name: 'Salesforce',
+      logo: 'https://logo.clearbit.com/salesforce.com',
+      avatar_url: 'https://logo.clearbit.com/salesforce.com',
+      location: 'Hyderabad, Telangana',
+      size: '2,000+',
+      description: 'American cloud-based software company specializing in customer relationship management solutions'
     },
     location: 'Tech Hub',
-    date: '2025-07-25',
-    registrationDeadline: '2025-07-20',
+    date: '2025-11-18',
+    registrationDeadline: '2025-11-14',
     positions: 20,
     roles: ['Software Engineer', 'Cloud Developer', 'Solutions Engineer'],
     eligibility: 'CSE/IT with CGPA > 8.0',
@@ -215,14 +276,22 @@ export const mockCampusDrives: CampusDrive[] = [
   {
     id: '9',
     title: 'Accenture Technology Consulting',
+    company_id: '9',
+    company_name: 'Accenture',
+    company_logo: 'https://logo.clearbit.com/accenture.com',
     company: {
-      id: 'accenture',
+      id: '9',
       name: 'Accenture',
-      logo: 'https://logo.clearbit.com/accenture.com'
+      company_name: 'Accenture',
+      logo: 'https://logo.clearbit.com/accenture.com',
+      avatar_url: 'https://logo.clearbit.com/accenture.com',
+      location: 'Hyderabad, Telangana',
+      size: '4,500+',
+      description: 'Multinational management consulting and professional services company'
     },
     location: 'Conference Hall',
-    date: '2025-08-01',
-    registrationDeadline: '2025-07-27',
+    date: '2025-11-20',
+    registrationDeadline: '2025-11-16',
     positions: 50,
     roles: ['Technology Analyst', 'Application Developer', 'Testing Specialist'],
     eligibility: 'All branches with CGPA > 6.5',
@@ -241,14 +310,22 @@ export const mockCampusDrives: CampusDrive[] = [
   {
     id: '10',
     title: 'JP Morgan Technology Program',
+    company_id: '10',
+    company_name: 'JP Morgan Chase',
+    company_logo: 'https://logo.clearbit.com/jpmorganchase.com',
     company: {
-      id: 'jpmorgan',
+      id: '10',
       name: 'JP Morgan Chase',
-      logo: 'https://logo.clearbit.com/jpmorganchase.com'
+      company_name: 'JP Morgan Chase',
+      logo: 'https://logo.clearbit.com/jpmorganchase.com',
+      avatar_url: 'https://logo.clearbit.com/jpmorganchase.com',
+      location: 'Hyderabad, Telangana',
+      size: '1,800+',
+      description: 'American multinational investment bank and financial services company'
     },
     location: 'Finance Lab',
-    date: '2025-08-05',
-    registrationDeadline: '2025-07-30',
+    date: '2025-11-12',
+    registrationDeadline: '2025-11-08',
     positions: 12,
     roles: ['Software Engineer', 'Quantitative Analyst', 'Technology Analyst'],
     eligibility: 'CSE/IT/ECE with CGPA > 8.5',

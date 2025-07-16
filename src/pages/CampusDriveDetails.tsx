@@ -5,10 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Briefcase, MapPin, Calendar, Users, Building, User, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { Briefcase, MapPin, Calendar, Users, Building, User, Clock, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -24,6 +24,9 @@ interface MockCompany {
   company_name?: string;
   logo?: string;
   avatar_url?: string;
+  location?: string;
+  size?: string;
+  description?: string;
 }
 
 // Define the structure of the mock campus drive data
@@ -101,7 +104,9 @@ const CampusDriveDetails = () => {
   const [applicationNote, setApplicationNote] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasApplied, setHasApplied] = useState(false);
-  const [userApplication, setUserApplication] = useState<ExtendedApplication | null>(null);
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [resumePreview, setResumePreview] = useState<string | null>(null);
 
   // Fetch campus drive details
   useEffect(() => {
@@ -184,46 +189,82 @@ const CampusDriveDetails = () => {
     fetchDriveDetails();
   }, [id, navigate, currentUser]);
 
-  // Apply for campus drive
-  const applyForDrive = async () => {
-    if (!currentUser || !drive) return;
-    
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      
+      // File validation
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('File size should be less than 5MB');
+        return;
+      }
+      
+      if (!['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(file.type)) {
+        toast.error('Please upload a PDF or Word document');
+        return;
+      }
+      
+      setResumeFile(file);
+      
+      // Generate preview for PDF
+      if (file.type === 'application/pdf') {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          setResumePreview(e.target?.result as string);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        // For Word docs, we'll show a generic preview
+        setResumePreview(null);
+      }
+    }
+  };
+
+  const handleApply = async () => {
+    if (!resumeFile) {
+      toast.error('Please upload your resume');
+      return;
+    }
+
+    setIsSubmitting(true);
     try {
-      setIsSubmitting(true);
+      setIsUploading(true);
+      const formData = new FormData();
+      formData.append('resume', resumeFile);
+      formData.append('driveId', id || '');
+      formData.append('note', applicationNote);
       
-      // Create a mock application since we're not using Supabase in this demo
-      const mockApplication: ExtendedApplication = {
-        id: `mock-app-${Date.now()}`,
-        drive_id: drive.id,
-        student_id: currentUser.id,
-        status: 'pending',
-        applied_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        note: applicationNote,
-        student: {
-          name: currentUser.name || 'Current User',
-          email: currentUser.email || 'user@example.com',
-          avatar_url: currentUser.avatar_url,
-          user_metadata: {}
+      let token = '';
+      if (currentUser) {
+        // For Firebase:
+        // token = await currentUser.getIdToken();
+        // For custom JWT:
+        // token = currentUser.token;
+        // For demo purposes:
+        token = 'demo-token';
+      }
+
+      const response = await fetch('/api/applications/upload', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Authorization': `Bearer ${token}`
         }
-      };
+      });
+
+      if (!response.ok) throw new Error('Upload failed');
       
-      // Simulate a delay for realism
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Update application state to include the new application
-      setApplications(prev => [...prev, mockApplication]);
-      
-      setHasApplied(true);
-      setUserApplication(mockApplication);
-      
-      toast.success('Application submitted successfully');
+      toast.success('Application submitted successfully!');
       setIsApplyModalOpen(false);
+      setResumeFile(null);
+      setApplicationNote('');
+      setHasApplied(true);
     } catch (error) {
-      console.error('Error applying for campus drive:', error);
+      console.error('Error applying:', error);
       toast.error('Failed to submit application');
     } finally {
       setIsSubmitting(false);
+      setIsUploading(false);
     }
   };
 
@@ -339,18 +380,11 @@ const CampusDriveDetails = () => {
                   {hasApplied ? (
                     <div className="flex flex-col items-center gap-2">
                       <Badge variant={
-                        userApplication?.status === 'selected' ? 'default' :
-                        userApplication?.status === 'shortlisted' ? 'outline' :
-                        userApplication?.status === 'rejected' ? 'destructive' :
                         'secondary'
                       } className="px-3 py-1">
-                        {userApplication?.status === 'selected' ? 'Selected' :
-                         userApplication?.status === 'shortlisted' ? 'Shortlisted' :
-                         userApplication?.status === 'rejected' ? 'Not Selected' :
-                         userApplication?.status === 'interview' ? 'Interview Scheduled' :
-                         'Application Pending'}
+                        Application Pending
                       </Badge>
-                      <p className="text-xs text-gray-500">Applied on {userApplication?.applied_at ? format(new Date(userApplication.applied_at), 'PP') : 'N/A'}</p>
+                      <p className="text-xs text-gray-500">Applied on {new Date().toISOString()}</p>
                     </div>
                   ) : (
                     <Button onClick={() => setIsApplyModalOpen(true)}>
@@ -391,19 +425,18 @@ const CampusDriveDetails = () => {
                 <CardTitle>Company Information</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center gap-3 mb-4">
-                  <Avatar>
-                    <AvatarImage src={drive.company_logo || undefined} alt={drive.company_name} />
-                    <AvatarFallback>{drive.company_name ? drive.company_name[0].toUpperCase() : 'C'}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <h3 className="font-semibold">{drive.company_name}</h3>
-                    <p className="text-sm text-gray-600">Recruiter</p>
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">{drive.company?.name}</h3>
+                  <div className="flex items-center space-x-2">
+                    <MapPin className="w-4 h-4" />
+                    <span>{drive.company?.location}</span>
                   </div>
+                  <div className="flex items-center space-x-2">
+                    <Users className="w-4 h-4" />
+                    <span>{drive.company?.size} employees</span>
+                  </div>
+                  <p className="text-sm text-gray-600">{drive.company?.description}</p>
                 </div>
-                <Button variant="outline" className="w-full" onClick={() => navigate(`/companies/${drive.company_id}`)}>
-                  View Company Profile
-                </Button>
               </CardContent>
             </Card>
             
@@ -533,20 +566,62 @@ const CampusDriveDetails = () => {
       
       {/* Apply Modal */}
       <Dialog open={isApplyModalOpen} onOpenChange={setIsApplyModalOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
-            <DialogTitle>Apply for {drive.title}</DialogTitle>
+            <DialogTitle>Submit Your Application</DialogTitle>
+            <DialogDescription>
+              Complete your application by uploading your resume and adding any notes.
+              <span className="text-red-500 block mt-1">* Resume (PDF or Word) is required</span>
+            </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            <div>
-              <Label htmlFor="note" className="mb-2 block">
-                Application Note (Optional)
+            <div className="space-y-2">
+              <Label htmlFor="resume" className="block">
+                Upload Resume *
+                <span className="text-sm font-normal text-gray-500 block">
+                  PDF or Word document (max 5MB)
+                </span>
               </Label>
+              <input
+                type="file"
+                id="resume"
+                onChange={handleFileChange}
+                accept=".pdf,.doc,.docx"
+                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                required
+              />
+              {resumeFile && (
+                <p className="text-sm text-green-600 mt-1">
+                  Selected: {resumeFile.name}
+                </p>
+              )}
+            </div>
+            {resumePreview && (
+              <div className="mt-4 border rounded-md p-4 bg-gray-50">
+                <h4 className="text-sm font-medium mb-2">Resume Preview</h4>
+                <iframe 
+                  src={resumePreview} 
+                  className="w-full h-64 border rounded"
+                  title="Resume Preview"
+                />
+              </div>
+            )}
+            
+            {resumeFile && !resumePreview && (
+              <div className="mt-4 border rounded-md p-4 bg-gray-50">
+                <h4 className="text-sm font-medium mb-2">Resume Uploaded</h4>
+                <p className="text-sm text-gray-600">
+                  Preview not available for Word documents. File ready for submission.
+                </p>
+              </div>
+            )}
+            <div className="space-y-2">
+              <Label htmlFor="note">Additional Notes (Optional)</Label>
               <Textarea
                 id="note"
                 value={applicationNote}
                 onChange={(e) => setApplicationNote(e.target.value)}
-                placeholder="Add any additional information you'd like to include with your application..."
+                placeholder="Add any additional information for the recruiter..."
                 rows={5}
               />
             </div>
@@ -555,8 +630,16 @@ const CampusDriveDetails = () => {
             <Button variant="outline" onClick={() => setIsApplyModalOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={applyForDrive} disabled={isSubmitting}>
-              {isSubmitting ? 'Submitting...' : 'Submit Application'}
+            <Button 
+              onClick={handleApply} 
+              disabled={isSubmitting || isUploading || !resumeFile}
+            >
+              {isSubmitting || isUploading ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Submitting...
+                </span>
+              ) : 'Submit Application'}
             </Button>
           </DialogFooter>
         </DialogContent>

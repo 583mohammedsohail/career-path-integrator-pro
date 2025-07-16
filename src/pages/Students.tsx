@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import Layout from '../components/layout/Layout';
 import StudentCard from '../components/students/StudentCard';
@@ -112,16 +111,16 @@ const Students = () => {
           id: student.id,
           name: student.name,
           email: student.email,
-          department: student.department,
-          year: student.year.toString(),
-          course: student.course,
-          cgpa: student.cgpa.toString(),
-          skills: student.skills,
-          avatar_url: student.avatar, // Use avatar field from mock data
+          department: student.university,
+          year: student.graduation_year?.toString() || '2025',
+          course: student.degree,
+          cgpa: '8.5', // Default value since it's not in mock data
+          skills: student.skills || [],
+          avatar_url: student.profile_pic, // Use profile_pic from mock data
           applications: [],
           user_metadata: {},
           role: 'student',
-          rollNumber: student.rollNumber
+          roll_number: student.roll_number
         }));
         
         // Combine both sets of students

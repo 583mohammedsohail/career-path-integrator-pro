@@ -16,14 +16,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
+import { Job, Company } from '@/types';
 
 interface JobApplicationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  jobId: string;
-  jobTitle: string;
-  companyName: string;
-  onSuccess: () => void;
+  job: Job | null;
+  company: Company;
 }
 
 interface FormData {
@@ -37,10 +36,8 @@ interface FormData {
 const JobApplicationModal: React.FC<JobApplicationModalProps> = ({
   isOpen,
   onClose,
-  jobId,
-  jobTitle,
-  companyName,
-  onSuccess
+  job,
+  company
 }) => {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
@@ -144,15 +141,14 @@ const JobApplicationModal: React.FC<JobApplicationModalProps> = ({
       }
 
       // Check if the job exists in the database
-      const jobExists = await checkJobExists(jobId);
+      const jobExists = await checkJobExists(job?.id || '');
       
       if (!jobExists) {
         // For development: Create a mock application without actually inserting it
-        console.log(`Development mode: Would create application for job ${jobId} if it existed`);
+        console.log(`Development mode: Would create application for job ${job?.id} if it existed`);
         
         // Show a toast message instead of an error
         toast.success('Application submitted successfully! (Development mode)');
-        onSuccess();
         
         // Simulate successful application in development
         navigate('/student-dashboard', { state: { activeTab: 'applications' } });
@@ -160,14 +156,14 @@ const JobApplicationModal: React.FC<JobApplicationModalProps> = ({
       }
       
       // Job exists, proceed with creating the application
-      console.log(`Creating application for existing job: ${jobId}`);
+      console.log(`Creating application for existing job: ${job?.id}`);
       
       // Create the job application with the resume URL
       // Note: Removed cover_letter field as it doesn't exist in the database schema
       const { error: applicationError } = await supabase
         .from('job_applications')
         .insert({
-          job_id: jobId, // Use the original job ID since we verified it exists
+          job_id: job?.id || '', // Fallback to empty string if undefined
           student_id: currentUser.id,
           status: 'pending',
           resume_url: resumeUrl,
@@ -182,7 +178,6 @@ const JobApplicationModal: React.FC<JobApplicationModalProps> = ({
       }
 
       toast.success('Application submitted successfully!');
-      onSuccess();
       
       // Redirect to student dashboard with the applications tab active
       navigate('/student-dashboard', { state: { activeTab: 'applications' } });
@@ -198,9 +193,9 @@ const JobApplicationModal: React.FC<JobApplicationModalProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Apply for {jobTitle}</DialogTitle>
+          <DialogTitle>Apply for {job?.title}</DialogTitle>
           <DialogDescription>
-            Submit your application to {companyName}. Please fill in the required information and upload your resume.
+            Submit your application to {company.company_name}. Please fill in the required information and upload your resume.
           </DialogDescription>
         </DialogHeader>
         

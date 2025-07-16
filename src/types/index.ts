@@ -1,4 +1,3 @@
-
 export interface User {
   id: string;
   name: string;
@@ -20,6 +19,7 @@ export interface User {
   description?: string;
   location?: string;
   roll_number?: string;
+  profile_pic?: string;
 }
 
 export interface CampusDriveApplication {
@@ -69,8 +69,8 @@ export interface Admin {
   name: string;
   email: string;
   role: 'admin';
-  avatar_url?: string;
-  department?: string;
+  department: string;
+  profile_pic?: string;
 }
 
 export interface Management {
@@ -78,8 +78,8 @@ export interface Management {
   name: string;
   email: string;
   role: 'management';
-  avatar_url?: string;
-  department?: string;
+  department: string;
+  profile_pic?: string;
 }
 
 export interface SuperAdmin {
@@ -87,7 +87,7 @@ export interface SuperAdmin {
   name: string;
   email: string;
   role: 'superadmin';
-  avatar_url?: string;
+  profile_pic?: string;
 }
 
 export interface Job {
@@ -107,33 +107,37 @@ export interface Job {
 
 export interface Company {
   id: string;
-  company_name: string;
-  industry?: string;
-  location?: string;
-  description?: string;
-  website?: string;
+  name?: string;
+  company_name?: string;
+  logo?: string;
   avatar_url?: string;
+  location?: string;
   size?: string;
-  founded?: string;
-  employees?: string;
+  description?: string;
   email?: string;
-  phone?: string;
+  website?: string;
+  industry?: string;
+  open_positions?: number;
+  requirements?: string[];
+  employee_count?: number;
+  founded_year?: number;
+  headquarters?: string;
+  revenue?: string;
+  tech_stack?: string[];
+  company_type?: string;
+  key_products?: string[];
 }
 
 export interface Student {
   id: string;
   name: string;
   email: string;
-  department: string;
-  course: string;
-  year: number;
-  cgpa: number;
-  skills: string[];
-  avatar_url?: string;
-  resume_url?: string;
-  phone?: string;
-  address?: string;
+  profile_pic?: string;
   university?: string;
+  degree?: string;
+  graduation_year?: string;
+  skills?: string[];
+  location?: string;
   roll_number?: string;
 }
 

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
@@ -10,18 +9,17 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface CompanyCardProps {
   company: Company;
+  open_positions?: number;
 }
 
-const CompanyCard: React.FC<CompanyCardProps> = ({ company }) => {
+const CompanyCard: React.FC<CompanyCardProps> = ({ company, open_positions }) => {
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardContent className="p-6">
         <div className="flex items-start gap-4">
-          <Avatar className="h-16 w-16">
-            <AvatarImage src={company?.avatar_url} alt={company?.company_name || 'Company'} />
-            <AvatarFallback>
-              {company?.company_name?.charAt(0) || 'C'}
-            </AvatarFallback>
+          <Avatar className="h-12 w-12">
+            <AvatarImage src={company.logo_url} />
+            <AvatarFallback>{company.company_name?.charAt(0) || 'C'}</AvatarFallback>
           </Avatar>
           <div className="flex-1">
             <h3 className="text-xl font-semibold mb-1">{company?.company_name || 'Unnamed Company'}</h3>
@@ -68,10 +66,12 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ company }) => {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Briefcase className="h-4 w-4" />
-                <span>0 open positions</span>
+                <span>{open_positions || 0} open positions</span>
               </div>
               <Button size="sm" asChild>
-                <Link to={`/companies/${company.id}`}>View Profile</Link>
+                <Link to={`/companies/${company.id}`} onClick={() => console.log('Navigating to company ID:', company.id)}>
+                  View Profile
+                </Link>
               </Button>
             </div>
           </div>

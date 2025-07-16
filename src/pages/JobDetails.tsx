@@ -39,6 +39,7 @@ interface Company {
   website?: string | null;
   location?: string | null;
   industry?: string | null;
+  logo_url?: string | null;
 }
 
 interface Job {
@@ -62,6 +63,79 @@ interface Job {
   postedDate?: string;
 }
 
+const sampleJobs = [
+  {
+    id: 'sample-se-1',
+    title: 'Software Engineer',
+    company_id: 'sample-company',
+    location: 'Remote',
+    salary: '₹8,00,000 - ₹12,00,000 per year',
+    type: 'full-time',
+    description: 'Looking for a skilled software engineer to join our team. Responsibilities include developing new features, fixing bugs, and collaborating with cross-functional teams.',
+    requirements: ['3+ years experience', 'Proficiency in JavaScript/TypeScript', 'Bachelor\'s degree in CS or related field'],
+    deadline: '2025-12-31',
+    positions: 2,
+    status: 'active',
+    created_at: new Date().toISOString()
+  },
+  {
+    id: 'sample-hr-1',
+    title: 'HR Recruiter',
+    company_id: 'sample-company',
+    location: 'Hybrid',
+    salary: '₹5,00,000 - ₹7,00,000 per year',
+    type: 'full-time',
+    description: 'Seeking an experienced HR professional to manage our recruitment process. You\'ll be responsible for sourcing candidates, conducting interviews, and managing hiring pipelines.',
+    requirements: ['2+ years HR experience', 'Excellent communication skills', 'Bachelor\'s degree in HR or related field'],
+    deadline: '2025-12-31',
+    positions: 1,
+    status: 'active',
+    created_at: new Date().toISOString()
+  },
+  {
+    id: 'sample-ba-1',
+    title: 'Business Analyst',
+    company_id: 'sample-company',
+    location: 'Hybrid',
+    salary: '₹9,00,000 - ₹14,00,000 per year',
+    type: 'full-time',
+    description: 'Looking for a Business Analyst to bridge the gap between IT and business using data analytics. You will analyze business processes, identify needs, and develop solutions.',
+    requirements: ['5+ years BA experience', 'Strong analytical skills', 'Experience with Agile methodologies', 'Bachelor\'s degree in Business or related field'],
+    deadline: '2025-12-31',
+    positions: 1,
+    status: 'active',
+    created_at: new Date().toISOString()
+  },
+  {
+    id: 'sample-tl-1',
+    title: 'Team Lead',
+    company_id: 'sample-company',
+    location: 'On-site',
+    salary: '₹15,00,000 - ₹20,00,000 per year',
+    type: 'full-time',
+    description: 'Seeking an experienced Team Lead to guide our development team. You will be responsible for technical leadership, mentoring junior developers, and ensuring project delivery.',
+    requirements: ['7+ years development experience', '2+ years leadership experience', 'Strong communication skills', 'Experience with project management'],
+    deadline: '2025-12-31',
+    positions: 1,
+    status: 'active',
+    created_at: new Date().toISOString()
+  },
+  {
+    id: 'sample-ds-1',
+    title: 'Director of Sales',
+    company_id: 'sample-company',
+    location: 'On-site',
+    salary: '₹25,00,000 - ₹35,00,000 per year',
+    type: 'full-time',
+    description: 'Looking for a Director of Sales to lead our sales team and drive revenue growth. You will develop sales strategies, build client relationships, and oversee the sales pipeline.',
+    requirements: ['10+ years sales experience', '5+ years in leadership role', 'Proven track record of meeting targets', 'Excellent negotiation skills'],
+    deadline: '2025-12-31',
+    positions: 1,
+    status: 'active',
+    created_at: new Date().toISOString()
+  }
+];
+
 const JobDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -81,10 +155,12 @@ const JobDetails = () => {
       setLoading(true);
       try {
         // First try to find in mock data
-        const mockJob = mockJobs.find(j => j.id === id);
-        if (mockJob) {
+        const job = mockJobs.find(j => j.id === id) || 
+          sampleJobs.find(j => j.id === id) || 
+          null;
+        if (job) {
           // Cast the mock job to any to handle unknown structure
-          const mockJobData = mockJob as any;
+          const mockJobData = job as any;
           
           // Extract company data safely
           const companyData = mockJobData.company || {};
@@ -111,7 +187,8 @@ const JobDetails = () => {
               description: companyData.description || "A leading company in the industry",
               website: companyData.website || null,
               location: mockJobData.location || null,
-              industry: companyData.industry || null
+              industry: companyData.industry || null,
+              logo_url: companyData.logo_url || null
             } : null,
             applications: []
           };
@@ -131,7 +208,8 @@ const JobDetails = () => {
               description,
               website,
               location,
-              industry
+              industry,
+              logo_url
             ),
             applications:job_applications(
               id,
@@ -187,7 +265,8 @@ const JobDetails = () => {
               description: supabaseData.company.description || null,
               website: supabaseData.company.website || null,
               location: supabaseData.company.location || null,
-              industry: supabaseData.company.industry || null
+              industry: supabaseData.company.industry || null,
+              logo_url: supabaseData.company.logo_url || null
             } : null,
             // Ensure applications is an array
             applications: Array.isArray(supabaseData.applications) ? supabaseData.applications : []
@@ -251,20 +330,29 @@ const JobDetails = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="space-y-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <h1 className="text-3xl font-bold">{job.title}</h1>
+            <Badge 
+              variant={job.status === 'active' ? 'default' : 'secondary'}
+              className={job.id.startsWith('sample-') ? 'bg-green-100 text-green-800' : ''}
+            >
+              {job.id.startsWith('sample-') ? 'Open' : job.status || 'Unknown'}
+            </Badge>
+          </div>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold">{job.title}</h1>
               <div className="flex items-center gap-2 mt-2">
-                <Building className="h-4 w-4 text-gray-500" />
+                {job.company?.logo_url ? (
+                  <img 
+                    src={job.company.logo_url} 
+                    alt={`${job.company.company_name} logo`}
+                    className="h-6 w-6 rounded-full object-cover"
+                  />
+                ) : (
+                  <Building className="h-4 w-4 text-gray-500" />
+                )}
                 <span className="text-lg text-gray-700">{job.company?.company_name}</span>
               </div>
               <div className="flex flex-wrap gap-3 mt-3">
-                <Badge variant={job.status === 'open' ? 'default' : 'outline'} className={
-                  job.status === 'open' 
-                    ? 'bg-green-100 text-green-800 hover:bg-green-200 border-green-200'
-                    : 'bg-gray-100 text-gray-800 hover:bg-gray-200 border-gray-200'
-                }>
-                  {job.status === 'open' ? 'Open' : 'Closed'}
-                </Badge>
                 <div className="flex items-center gap-1 text-sm">
                   <MapPin className="h-4 w-4 text-gray-500" />
                   <span>{job.location}</span>

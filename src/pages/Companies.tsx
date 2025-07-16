@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import Layout from '../components/layout/Layout';
 import CompanyCard from '../components/companies/CompanyCard';
@@ -41,7 +40,7 @@ const Companies = () => {
         {filteredCompanies.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {filteredCompanies.map((company) => (
-              <CompanyCard key={company.id} company={company} />
+              <CompanyCard key={company.id} company={company} open_positions={company.open_positions} />
             ))}
           </div>
         ) : (

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Layout from '../components/layout/Layout';
 import PostCampusDriveModal from '../components/campus/PostCampusDriveModal';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -11,10 +11,11 @@ import { MapPin, Calendar, Users, Building, Search, Filter, Clock, Plus } from '
 import { Link } from 'react-router-dom';
 import { mockCampusDrives } from '@/data/mockCampusDrives';
 import { useAuth } from '@/contexts/AuthContext';
+import { CampusDrive } from '@/types';
 
 const CampusRecruitment = () => {
   const { currentUser } = useAuth();
-  const [drives, setDrives] = useState(mockCampusDrives);
+  const [drives] = useState<CampusDrive[]>(mockCampusDrives);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -32,7 +33,7 @@ const CampusRecruitment = () => {
   // Filter drives based on search and status
   const filteredDrives = drives.filter(drive => {
     const matchesSearch = drive.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         drive.company.name.toLowerCase().includes(searchTerm.toLowerCase());
+                         (drive.company?.name || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === 'all' || drive.status === filterStatus;
     return matchesSearch && matchesStatus;
   });
@@ -42,7 +43,7 @@ const CampusRecruitment = () => {
     const drive = new Date(driveDate);
     const now = new Date(today);
     
-    if (status === 'completed' || drive < now) {
+    if (status === 'completed') {
       return <Badge variant="outline" className="bg-gray-100 text-gray-800">Completed</Badge>;
     } else if (drive.getTime() === now.getTime()) {
       return <Badge variant="outline" className="bg-blue-100 text-blue-800">Today</Badge>;
@@ -140,13 +141,21 @@ const CampusRecruitment = () => {
               
               <CardHeader className="pb-4">
                 <div className="flex items-start gap-3">
-                  <Avatar className="h-12 w-12">
-                    <AvatarImage src={drive.company.logo} alt={drive.company.name} />
-                    <AvatarFallback>{drive.company.name[0]}</AvatarFallback>
-                  </Avatar>
+                  <div className="flex items-center gap-2 mb-1">
+                    <Avatar className="h-6 w-6">
+                      <AvatarImage src={drive.company?.logo} alt={drive.company?.name} />
+                      <AvatarFallback>{drive.company?.name?.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <Link 
+                      to={`/companies/${drive.company?.id}`}
+                      className="font-medium hover:underline"
+                      onClick={() => console.log('Company ID:', drive.company?.id, 'Name:', drive.company?.name)}
+                    >
+                      {drive.company?.name}
+                    </Link>
+                  </div>
                   <div className="flex-1">
                     <CardTitle className="text-lg mb-1">{drive.title}</CardTitle>
-                    <CardDescription className="font-medium">{drive.company.name}</CardDescription>
                   </div>
                 </div>
               </CardHeader>
@@ -201,12 +210,21 @@ const CampusRecruitment = () => {
                   <div className="pt-3 border-t">
                     <div className="flex justify-between items-center">
                       <span className="text-xs text-gray-500">
-                        Registration deadline: {new Date(drive.registrationDeadline).toLocaleDateString('en-IN')}
+                        Registration deadline: {new Date(drive.registrationDeadline ?? '').toLocaleDateString('en-IN')}
+                        {new Date(drive.registrationDeadline ?? '').getTime() - currentDate.getTime() < 30 * 24 * 60 * 60 * 1000 && (
+                          <span className="ml-1 text-yellow-600 font-medium">(Closing soon)</span>
+                        )}
                       </span>
                       <Button size="sm" asChild>
                         <Link to={`/campus-drive/${drive.id}`}>
                           View Details
                         </Link>
+                      </Button>
+                      <Button size="sm" onClick={() => {
+                        // Logic to handle application
+                        alert(`Application for ${drive.title} will be processed`);
+                      }}>
+                        Apply Now
                       </Button>
                     </div>
                   </div>
