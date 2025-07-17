@@ -48,7 +48,7 @@ export const RealtimeApplicationProvider: React.FC<{ children: React.ReactNode }
       // Try to fetch campus drive applications
       try {
         const { data: campusApps, error: campusError } = await supabase
-          .from('campus_drive_applications')
+        .from('campus_applications')
           .select('*')
           .eq('student_id', currentUser.id);
 
@@ -116,7 +116,7 @@ export const RealtimeApplicationProvider: React.FC<{ children: React.ReactNode }
       if (error) {
         // Fallback to direct insert if RPC doesn't exist
         const { error: insertError } = await supabase
-          .from('campus_drive_applications')
+        .from('campus_applications')
           .insert([{
             campus_drive_id: campusDriveId,
             student_id: currentUser.id,

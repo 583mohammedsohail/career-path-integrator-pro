@@ -49,9 +49,15 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ settings, onUpdateSetti
   const handleSaveSettings = async () => {
     setIsLoading(true);
     try {
+      // Update system settings - convert to key-value pairs for the database
+      const settingsArray = Object.entries(currentSettings).map(([key, value]) => ({
+        setting_key: key,
+        setting_value: JSON.stringify(value)
+      }));
+
       const { error } = await supabase
         .from('system_settings')
-        .upsert(currentSettings);
+        .upsert(settingsArray);
 
       if (error) throw error;
       
