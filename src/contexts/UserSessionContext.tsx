@@ -14,7 +14,7 @@ export const UserSessionProvider: React.FC<{ children: React.ReactNode }> = ({ c
     const startSession = async () => {
       try {
         // Try to call the function to update user activity
-        const { error } = await supabase.rpc('update_user_activity');
+        const { error } = await supabase.rpc('update_user_activity' as any);
         if (error) {
           console.log('Session tracking not yet implemented:', error.message);
         }

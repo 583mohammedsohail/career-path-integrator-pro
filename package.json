@@ -51,6 +51,7 @@
     "framer-motion": "^12.10.4",
     "input-otp": "^1.2.4",
     "lovable-tagger": "^1.1.8",
+    "mapbox-gl": "^3.13.0",
     "next-themes": "^0.3.0",
     "particles.js": "^2.0.0",
     "react": "^18.3.1",

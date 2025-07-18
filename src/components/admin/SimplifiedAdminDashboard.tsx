@@ -9,7 +9,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
-import { UserCheck, Activity, Briefcase, UserPlus, Calendar } from 'lucide-react';
+import { UserCheck, Activity, Briefcase, UserPlus, Calendar, GraduationCap } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -55,6 +55,16 @@ const SimplifiedAdminDashboard = () => {
   const [campusDate, setCampusDate] = useState('');
   const [campusLocation, setCampusLocation] = useState('');
   const [campusPositions, setCampusPositions] = useState('');
+
+  // Student creation form states
+  const [studentName, setStudentName] = useState('');
+  const [studentEmail, setStudentEmail] = useState('');
+  const [studentPassword, setStudentPassword] = useState('');
+  const [studentRollNumber, setStudentRollNumber] = useState('');
+  const [studentDepartment, setStudentDepartment] = useState('');
+  const [studentCourse, setStudentCourse] = useState('');
+  const [studentYear, setStudentYear] = useState('');
+  const [studentCgpa, setStudentCgpa] = useState('');
 
   // User creation form states
   const [newUserEmail, setNewUserEmail] = useState('');
@@ -133,7 +143,7 @@ const SimplifiedAdminDashboard = () => {
 
   const markAttendance = async (userId: string, status: 'present' | 'absent' | 'late' | 'excused') => {
     try {
-      // For now, just show success since student_attendance table may not be available in types
+      // For now, just show success since student_attendance table structure may need adjustment
       toast.success(`Attendance marked as ${status} for student`);
       console.log(`Attendance marked for user ${userId} as ${status}`);
     } catch (error: any) {
@@ -209,6 +219,66 @@ const SimplifiedAdminDashboard = () => {
     }
   };
 
+  const createStudent = async () => {
+    if (!studentName || !studentEmail || !studentPassword || !studentRollNumber || !studentDepartment) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: studentEmail,
+        password: studentPassword,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+          data: {
+            name: studentName,
+            role: 'student'
+          }
+        }
+      });
+
+      if (error) throw error;
+
+      if (data.user) {
+        // Create profile
+        await supabase
+          .from('profiles')
+          .insert({
+            id: data.user.id,
+            name: studentName,
+            email: studentEmail,
+            role: 'student'
+          });
+
+        // Create student profile
+        await supabase
+          .from('students')
+          .insert({
+            id: data.user.id,
+            roll_number: studentRollNumber,
+            department: studentDepartment,
+            course: studentCourse || 'General',
+            year: parseInt(studentYear) || 1,
+            cgpa: parseFloat(studentCgpa) || 0.0
+          });
+      }
+
+      toast.success('Student created successfully');
+      // Reset form
+      setStudentName('');
+      setStudentEmail('');
+      setStudentPassword('');
+      setStudentRollNumber('');
+      setStudentDepartment('');
+      setStudentCourse('');
+      setStudentYear('');
+      setStudentCgpa('');
+    } catch (error: any) {
+      toast.error('Failed to create student: ' + error.message);
+    }
+  };
+
   const createUser = async () => {
     if (!newUserEmail || !newUserPassword || !newUserName || !newUserRole) {
       toast.error('Please fill in all required fields');
@@ -240,20 +310,6 @@ const SimplifiedAdminDashboard = () => {
             email: newUserEmail,
             role: newUserRole
           });
-
-        // Create student profile if role is student
-        if (newUserRole === 'student') {
-          await supabase
-            .from('students')
-            .insert({
-              id: data.user.id,
-              roll_number: `STU${Date.now()}`,
-              department: 'General',
-              course: 'General',
-              year: 1,
-              cgpa: 0.0
-            });
-        }
 
         // Create company profile if role is company
         if (newUserRole === 'company') {
@@ -314,10 +370,11 @@ const SimplifiedAdminDashboard = () => {
       </Card>
 
       <Tabs defaultValue="attendance" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="attendance">Attendance</TabsTrigger>
           <TabsTrigger value="jobs">Jobs</TabsTrigger>
           <TabsTrigger value="campus">Campus Drives</TabsTrigger>
+          <TabsTrigger value="students">Add Students</TabsTrigger>
           <TabsTrigger value="users">Add Users</TabsTrigger>
         </TabsList>
 
@@ -511,6 +568,108 @@ const SimplifiedAdminDashboard = () => {
           </Card>
         </TabsContent>
 
+        <TabsContent value="students" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <GraduationCap className="h-5 w-5" />
+                Add New Student Profile
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="studentName">Full Name *</Label>
+                  <Input
+                    id="studentName"
+                    value={studentName}
+                    onChange={(e) => setStudentName(e.target.value)}
+                    placeholder="John Doe"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="studentEmail">Email *</Label>
+                  <Input
+                    id="studentEmail"
+                    type="email"
+                    value={studentEmail}
+                    onChange={(e) => setStudentEmail(e.target.value)}
+                    placeholder="john@student.edu"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="studentPassword">Password *</Label>
+                  <Input
+                    id="studentPassword"
+                    type="password"
+                    value={studentPassword}
+                    onChange={(e) => setStudentPassword(e.target.value)}
+                    placeholder="••••••••"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="studentRollNumber">Roll Number *</Label>
+                  <Input
+                    id="studentRollNumber"
+                    value={studentRollNumber}
+                    onChange={(e) => setStudentRollNumber(e.target.value)}
+                    placeholder="CS21B001"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="studentDepartment">Department *</Label>
+                  <Input
+                    id="studentDepartment"
+                    value={studentDepartment}
+                    onChange={(e) => setStudentDepartment(e.target.value)}
+                    placeholder="Computer Science"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="studentCourse">Course</Label>
+                  <Input
+                    id="studentCourse"
+                    value={studentCourse}
+                    onChange={(e) => setStudentCourse(e.target.value)}
+                    placeholder="B.Tech"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="studentYear">Year</Label>
+                  <Select value={studentYear} onValueChange={setStudentYear}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select year" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">1st Year</SelectItem>
+                      <SelectItem value="2">2nd Year</SelectItem>
+                      <SelectItem value="3">3rd Year</SelectItem>
+                      <SelectItem value="4">4th Year</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="studentCgpa">CGPA</Label>
+                  <Input
+                    id="studentCgpa"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    max="10"
+                    value={studentCgpa}
+                    onChange={(e) => setStudentCgpa(e.target.value)}
+                    placeholder="8.5"
+                  />
+                </div>
+              </div>
+              <Button onClick={createStudent} className="w-full">
+                <GraduationCap className="h-4 w-4 mr-2" />
+                Create Student Profile
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         <TabsContent value="users" className="space-y-4">
           <Card>
             <CardHeader>
@@ -557,7 +716,6 @@ const SimplifiedAdminDashboard = () => {
                       <SelectValue placeholder="Select role" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="student">Student</SelectItem>
                       <SelectItem value="company">Company</SelectItem>
                       <SelectItem value="management">Management</SelectItem>
                       <SelectItem value="admin">Admin</SelectItem>

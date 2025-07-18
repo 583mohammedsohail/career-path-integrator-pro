@@ -45,10 +45,10 @@ export const RealtimeApplicationProvider: React.FC<{ children: React.ReactNode }
 
       if (jobError) throw jobError;
 
-      // Try to fetch campus drive applications
+      // Try to fetch campus drive applications - use correct table name
       try {
         const { data: campusApps, error: campusError } = await supabase
-        .from('campus_applications')
+          .from('campus_drive_applications')
           .select('*')
           .eq('student_id', currentUser.id);
 
@@ -83,8 +83,7 @@ export const RealtimeApplicationProvider: React.FC<{ children: React.ReactNode }
           job_id: jobId,
           student_id: currentUser.id,
           status: 'pending',
-          resume_url: resumeUrl,
-          cover_letter: coverLetter
+          resume_url: resumeUrl
         }]);
 
       if (error) throw error;
@@ -105,28 +104,18 @@ export const RealtimeApplicationProvider: React.FC<{ children: React.ReactNode }
     }
 
     try {
-      // Use direct SQL if the table doesn't exist in types
-      const { error } = await supabase.rpc('apply_campus_drive', {
-        p_campus_drive_id: campusDriveId,
-        p_student_id: currentUser.id,
-        p_resume_url: resumeUrl,
-        p_cover_letter: coverLetter
-      });
-
-      if (error) {
-        // Fallback to direct insert if RPC doesn't exist
-        const { error: insertError } = await supabase
-        .from('campus_applications')
-          .insert([{
-            campus_drive_id: campusDriveId,
-            student_id: currentUser.id,
-            status: 'pending',
-            resume_url: resumeUrl,
-            cover_letter: coverLetter
-          }]);
+      // Use correct table name from schema
+      const { error } = await supabase
+        .from('campus_drive_applications')
+        .insert([{
+          campus_drive_id: campusDriveId,
+          student_id: currentUser.id,
+          status: 'pending',
+          resume_url: resumeUrl,
+          cover_letter: coverLetter
+        }]);
         
-        if (insertError) throw insertError;
-      }
+      if (error) throw error;
 
       toast.success('Campus drive application submitted successfully!');
       await fetchApplications(); // Refresh the list

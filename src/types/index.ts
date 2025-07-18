@@ -110,6 +110,7 @@ export interface Company {
   name?: string;
   company_name?: string;
   logo?: string;
+  logo_url?: string;
   avatar_url?: string;
   location?: string;
   size?: string;
@@ -133,12 +134,17 @@ export interface Student {
   name: string;
   email: string;
   profile_pic?: string;
+  avatar_url?: string;
   university?: string;
   degree?: string;
   graduation_year?: string;
   skills?: string[];
   location?: string;
   roll_number?: string;
+  department?: string;
+  course?: string;
+  year?: number;
+  cgpa?: number;
 }
 
 export interface Application {
