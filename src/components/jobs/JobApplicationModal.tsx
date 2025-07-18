@@ -39,6 +39,12 @@ const JobApplicationModal: React.FC<JobApplicationModalProps> = ({
   job,
   company
 }) => {
+  // Add early return if required props are missing
+  if (!job || !company) {
+    console.error('Missing required props in JobApplicationModal:', { job, company });
+    return null;
+  }
+
   const { currentUser } = useAuth();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -195,77 +201,78 @@ const JobApplicationModal: React.FC<JobApplicationModalProps> = ({
         <DialogHeader>
           <DialogTitle>Apply for {job?.title}</DialogTitle>
           <DialogDescription>
-            Submit your application to {company.company_name}. Please fill in the required information and upload your resume.
+            Submit your application to {company?.company_name || 'Company'}. Please fill in the required information and upload your resume.
           </DialogDescription>
         </DialogHeader>
         
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Full Name</Label>
-            <Input
-              id="name"
-              {...register("name", { required: "Name is required" })}
-              placeholder="Enter your full name"
-              defaultValue={currentUser?.name || ''}
-            />
-            {errors.name && <p className="text-sm text-red-500">{errors.name.message}</p>}
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              {...register("email", { required: "Email is required" })}
-              placeholder="Enter your email"
-              defaultValue={currentUser?.email || ''}
-            />
-            {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="phone">Phone Number</Label>
-            <Input
-              id="phone"
-              {...register("phone", { required: "Phone number is required" })}
-              placeholder="Enter your phone number"
-            />
-            {errors.phone && <p className="text-sm text-red-500">{errors.phone.message}</p>}
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="coverletter">Cover Letter (Optional)</Label>
-            <Textarea
-              id="coverletter"
-              {...register("coverletter")}
-              placeholder="Tell us why you're a good fit for this role"
-              className="min-h-[100px]"
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="resume">Resume</Label>
-            <Input
-              id="resume"
-              type="file"
-              {...register("resume", { 
-                required: "Resume is required",
-                validate: {
-                  fileType: (value) => {
-                    if (!value?.[0]) return true;
-                    const acceptedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-                    return acceptedTypes.includes(value[0].type) || "Only PDF and Word documents are accepted";
-                  },
-                  fileSize: (value) => {
-                    if (!value?.[0]) return true;
-                    return value[0].size <= 5000000 || "File size must be less than 5MB";
-                  }
-                }
-              })}
-              accept=".pdf,.doc,.docx"
-            />
-            {errors.resume && <p className="text-sm text-red-500">{errors.resume.message}</p>}
-            <p className="text-xs text-gray-500">Accepted formats: PDF, DOC, DOCX. Max size: 5MB</p>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="name">Full Name *</Label>
+                <Input
+                  id="name"
+                  {...register('name', { required: 'Full name is required' })}
+                />
+                {errors.name && <p className="text-sm text-red-500">{errors.name.message}</p>}
+              </div>
+              <div>
+                <Label htmlFor="email">Email *</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  {...register('email', { 
+                    required: 'Email is required',
+                    pattern: {
+                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                      message: 'Invalid email address'
+                    }
+                  })}
+                />
+                {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="phone">Phone Number</Label>
+                <Input
+                  id="phone"
+                  {...register('phone')}
+                />
+              </div>
+              <div>
+                <Label htmlFor="resume">Resume * (PDF or Word)</Label>
+                <Input
+                  id="resume"
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  {...register('resume', { 
+                    required: 'Resume is required',
+                    validate: {
+                      fileSize: (value) => !value?.[0] || value[0].size <= 5000000 || 'File size must be less than 5MB',
+                      fileType: (value) => {
+                        if (!value?.[0]) return true;
+                        const acceptedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+                        return acceptedTypes.includes(value[0].type) || 'Only PDF and Word documents are accepted';
+                      }
+                    }
+                  })}
+                />
+                {errors.resume && <p className="text-sm text-red-500">{errors.resume.message}</p>}
+                <p className="text-xs text-muted-foreground mt-1">Max file size: 5MB</p>
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="coverletter">Cover Letter</Label>
+              <Textarea
+                id="coverletter"
+                className="min-h-[120px]"
+                placeholder="Tell us why you're a good fit for this position"
+                {...register('coverletter')}
+              />
+            </div>
           </div>
           
           <DialogFooter>

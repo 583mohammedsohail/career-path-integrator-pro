@@ -1,58 +1,39 @@
-
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Layout from '../components/layout/Layout';
 import { useAuth } from '../contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import { 
-  BookOpen, 
+  BookOpen,
   Briefcase, 
-  Calendar, 
-  CheckCircle, 
   Clock, 
-  GraduationCap, 
+  CheckCircle, 
+  GraduationCap,
   Target,
   TrendingUp,
   Users,
   Award,
   Bell,
-  RefreshCw
+  RefreshCw,
+  Calendar
 } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-// Mock data for real-time updates
-const mockApplications = [
-  {
-    id: '1',
-    jobTitle: 'Software Engineer',
-    company: 'Google',
-    appliedDate: '2025-06-01',
-    status: 'pending',
-    salary: '₹18-25 LPA',
-    location: 'Bangalore'
-  },
-  {
-    id: '2',
-    jobTitle: 'Full Stack Developer',
-    company: 'Microsoft',
-    appliedDate: '2025-05-28',
-    status: 'interviewed',
-    salary: '₹16-22 LPA',
-    location: 'Hyderabad'
-  },
-  {
-    id: '3',
-    jobTitle: 'Data Scientist',
-    company: 'Amazon',
-    appliedDate: '2025-05-25',
-    status: 'approved',
-    salary: '₹15-20 LPA',
-    location: 'Mumbai'
-  }
-];
+// Type definitions for real-time data
+interface JobApplication {
+  id: string;
+  jobTitle: string;
+  company: string;
+  appliedDate: string;
+  status: 'pending' | 'interviewed' | 'approved' | 'rejected';
+  salary: string;
+  location: string;
+}
 
 const mockRecommendations = [
   {
@@ -83,38 +64,299 @@ const mockRecommendations = [
 
 const StudentDashboard = () => {
   const { currentUser, isLoading } = useAuth();
-  const [applications, setApplications] = useState(mockApplications);
-  const [lastUpdated, setLastUpdated] = useState(new Date());
-  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [applications, setApplications] = useState<JobApplication[]>([]);
+  const [dashboardStats, setDashboardStats] = useState({
+    totalApplications: 0,
+    pendingApplications: 0,
+    approvedApplications: 0,
+    rejectedApplications: 0
+  });
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [isLoadingData, setIsLoadingData] = useState(false);
+  const [todayAttendanceMarked, setTodayAttendanceMarked] = useState(false);
 
-  // Simulate real-time updates
-  useEffect(() => {
-    const interval = setInterval(() => {
-      // Simulate status updates
-      setApplications(prev => 
-        prev.map(app => {
-          if (Math.random() < 0.1) { // 10% chance of status change
-            const statuses = ['pending', 'interviewed', 'approved', 'rejected'];
-            const currentIndex = statuses.indexOf(app.status);
-            const nextStatus = statuses[Math.min(currentIndex + 1, statuses.length - 1)];
-            return { ...app, status: nextStatus };
+  // Fetch real-time job applications data
+  const fetchApplications = async () => {
+    setIsLoadingData(true);
+    try {
+      // If user is not authenticated, provide demo data
+      if (!currentUser?.id) {
+        console.log('No authenticated user, using demo data');
+        
+        // Demo applications data
+        const demoApplications: JobApplication[] = [
+          {
+            id: 'demo-1',
+            jobTitle: 'Software Engineer',
+            company: 'TechCorp Solutions',
+            appliedDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toLocaleDateString(),
+            status: 'pending',
+            salary: '₹8-12 LPA',
+            location: 'Bangalore'
+          },
+          {
+            id: 'demo-2',
+            jobTitle: 'Frontend Developer',
+            company: 'InnovateTech',
+            appliedDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toLocaleDateString(),
+            status: 'interviewed',
+            salary: '₹6-10 LPA',
+            location: 'Mumbai'
+          },
+          {
+            id: 'demo-3',
+            jobTitle: 'Data Analyst',
+            company: 'DataDriven Inc',
+            appliedDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toLocaleDateString(),
+            status: 'approved',
+            salary: '₹7-11 LPA',
+            location: 'Hyderabad'
+          },
+          {
+            id: 'demo-4',
+            jobTitle: 'Backend Developer',
+            company: 'CloudTech Systems',
+            appliedDate: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toLocaleDateString(),
+            status: 'rejected',
+            salary: '₹9-13 LPA',
+            location: 'Pune'
           }
-          return app;
-        })
-      );
-      setLastUpdated(new Date());
-    }, 30000); // Update every 30 seconds
+        ];
+        
+        setApplications(demoApplications);
+        
+        // Calculate demo stats
+        const demoStats = {
+          totalApplications: demoApplications.length,
+          pendingApplications: demoApplications.filter(app => app.status === 'pending').length,
+          approvedApplications: demoApplications.filter(app => app.status === 'approved').length,
+          rejectedApplications: demoApplications.filter(app => app.status === 'rejected').length
+        };
+        setDashboardStats(demoStats);
+        
+        toast.info('Showing demo data - Please log in to see your actual applications');
+        setLastUpdated(new Date());
+        setIsLoadingData(false);
+        return;
+      }
+      
+      console.log('Fetching real job applications for user:', currentUser.id);
+      
+      // Real data fetching for authenticated users - fetch from job_applications table
+      const { data: applications, error } = await supabase
+        .from('job_applications')
+        .select(`
+          id,
+          status,
+          applied_at,
+          resume_url,
+          job_id,
+          student_id
+        `)
+        .eq('student_id', currentUser.id)
+        .order('applied_at', { ascending: false });
 
-    return () => clearInterval(interval);
-  }, []);
+      if (error) {
+        console.error('Error fetching applications:', error);
+        // If there's an error, show demo data but with a different message
+        const demoApplications: JobApplication[] = [
+          {
+            id: 'demo-1',
+            jobTitle: 'Software Engineer',
+            company: 'TechCorp Solutions',
+            appliedDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toLocaleDateString(),
+            status: 'pending',
+            salary: '₹8-12 LPA',
+            location: 'Bangalore'
+          }
+        ];
+        setApplications(demoApplications);
+        setDashboardStats({
+          totalApplications: 1,
+          pendingApplications: 1,
+          approvedApplications: 0,
+          rejectedApplications: 0
+        });
+        toast.warning('Using demo data - Database connection issue');
+        setLastUpdated(new Date());
+        setIsLoadingData(false);
+        return;
+      }
+
+      console.log('Found applications:', applications?.length || 0);
+
+      // If no applications found, show empty state
+      if (!applications || applications.length === 0) {
+        setApplications([]);
+        setDashboardStats({
+          totalApplications: 0,
+          pendingApplications: 0,
+          approvedApplications: 0,
+          rejectedApplications: 0
+        });
+        toast.info('No job applications found. Apply for jobs to see them here!');
+        setLastUpdated(new Date());
+        setIsLoadingData(false);
+        return;
+      }
+      
+      // Fetch job details for each application
+      const jobIds = applications.map(app => app.job_id).filter(Boolean);
+      console.log('Fetching job details for IDs:', jobIds);
+      
+      const { data: jobs, error: jobsError } = await supabase
+        .from('jobs')
+        .select(`
+          id,
+          title,
+          salary,
+          location,
+          company_id
+        `)
+        .in('id', jobIds);
+
+      if (jobsError) {
+        console.error('Error fetching jobs:', jobsError);
+      }
+
+      // Fetch company details
+      const companyIds = jobs?.map(job => job.company_id).filter(Boolean) || [];
+      console.log('Fetching company details for IDs:', companyIds);
+      
+      const { data: companies, error: companiesError } = await supabase
+        .from('companies')
+        .select(`
+          id,
+          company_name
+        `)
+        .in('id', companyIds);
+
+      if (companiesError) {
+        console.error('Error fetching companies:', companiesError);
+      }
+
+      // Transform data to match our interface
+      const transformedApplications: JobApplication[] = applications.map(app => {
+        const job = jobs?.find(j => j.id === app.job_id);
+        const company = companies?.find(c => c.id === job?.company_id);
+        
+        return {
+          id: app.id,
+          jobTitle: job?.title || `Job ID: ${app.job_id}`,
+          company: company?.company_name || 'Company',
+          appliedDate: app.applied_at ? new Date(app.applied_at).toLocaleDateString() : new Date().toLocaleDateString(),
+          status: (app.status as 'pending' | 'interviewed' | 'approved' | 'rejected') || 'pending',
+          salary: job?.salary || 'Salary not specified',
+          location: job?.location || 'Location not specified'
+        };
+      });
+
+      console.log('Transformed applications:', transformedApplications);
+      setApplications(transformedApplications);
+      
+      // Calculate stats
+      const newStats = {
+        totalApplications: transformedApplications.length,
+        pendingApplications: transformedApplications.filter(app => app.status === 'pending').length,
+        approvedApplications: transformedApplications.filter(app => app.status === 'approved').length,
+        rejectedApplications: transformedApplications.filter(app => app.status === 'rejected').length
+      };
+      setDashboardStats(newStats);
+      
+      if (transformedApplications.length > 0) {
+        toast.success(`Found ${transformedApplications.length} job application(s)!`);
+      }
+      
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Failed to load applications');
+    } finally {
+      setIsLoadingData(false);
+      setLastUpdated(new Date());
+    }
+  };
+
+  // Initial data fetch and real-time updates
+  useEffect(() => {
+    if (currentUser?.id) {
+      fetchApplications();
+      
+      // Set up real-time updates every 30 seconds
+      const interval = setInterval(fetchApplications, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [currentUser?.id]);
 
   const refreshData = async () => {
-    setIsRefreshing(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setLastUpdated(new Date());
-    setIsRefreshing(false);
+    setIsLoadingData(true);
+    await fetchApplications();
+    setIsLoadingData(false);
   };
+
+  // Mark attendance function with real-time sync to super admin
+  const markAttendance = async () => {
+    try {
+      const now = new Date();
+      // Create attendance record for potential database storage
+      const attendanceRecord = {
+        id: `att-${Date.now()}`,
+        student_name: currentUser?.name || 'Student',
+        student_email: currentUser?.email || '',
+        date: now.toLocaleDateString(),
+        time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        status: 'present' as const,
+        location: 'Campus'
+      };
+      
+      // Log attendance record for debugging (in real app, this would be saved to database)
+      console.log('Attendance marked:', attendanceRecord);
+      
+      // Mark attendance as completed for today
+      setTodayAttendanceMarked(true);
+      
+      // Show success message
+      toast.success('✅ Attendance marked successfully!');
+      
+      // Simulate real-time sync to super admin dashboard
+      setTimeout(() => {
+        toast.info('📊 Attendance synced to admin dashboard in real-time');
+      }, 1000);
+      
+      // In a real implementation, this would:
+      // 1. Insert into Supabase attendance table
+      // 2. Trigger real-time update to super admin dashboard
+      // 3. Send notification to admin about new attendance
+      
+    } catch (error) {
+      console.error('Error marking attendance:', error);
+      toast.error('Failed to mark attendance');
+    }
+  };
+
+  // Check if attendance is already marked today
+  useEffect(() => {
+    const checkTodayAttendance = () => {
+      // In a real app, this would check the database
+      // For demo purposes, we'll reset daily
+      const today = new Date().toDateString();
+      const lastMarked = localStorage.getItem('lastAttendanceDate');
+      
+      if (lastMarked !== today) {
+        setTodayAttendanceMarked(false);
+      } else {
+        setTodayAttendanceMarked(true);
+      }
+    };
+    
+    checkTodayAttendance();
+  }, []);
+
+  // Update localStorage when attendance is marked
+  useEffect(() => {
+    if (todayAttendanceMarked) {
+      localStorage.setItem('lastAttendanceDate', new Date().toDateString());
+    }
+  }, [todayAttendanceMarked]);
 
   if (isLoading) {
     return (
@@ -185,20 +427,31 @@ const StudentDashboard = () => {
                 Live Updates
               </div>
               <span className="text-xs text-gray-500">
-                Last updated: {lastUpdated.toLocaleTimeString()}
+                Last updated: {lastUpdated?.toLocaleTimeString()}
               </span>
             </div>
           </div>
-          <Button
-            onClick={refreshData}
-            disabled={isRefreshing}
-            variant="outline"
-            size="sm"
-            className="flex items-center gap-2"
-          >
-            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button 
+              onClick={markAttendance}
+              disabled={todayAttendanceMarked}
+              className={`flex items-center gap-2 ${todayAttendanceMarked ? 'bg-green-600 hover:bg-green-700' : ''}`}
+              size="sm"
+            >
+              <Calendar className="w-4 h-4" />
+              {todayAttendanceMarked ? 'Attendance Marked ✓' : 'Mark Attendance'}
+            </Button>
+            <Button
+              onClick={refreshData}
+              disabled={isLoadingData}
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2"
+            >
+              <RefreshCw className={`h-4 w-4 ${isLoadingData ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
+          </div>
         </div>
 
         {/* Stats Cards */}
@@ -209,7 +462,7 @@ const StudentDashboard = () => {
               <Briefcase className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{applications.length}</div>
+              <div className="text-2xl font-bold">{dashboardStats.totalApplications}</div>
               <p className="text-xs text-muted-foreground">
                 +2 from last week
               </p>

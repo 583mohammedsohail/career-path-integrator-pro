@@ -528,14 +528,25 @@ const JobDetails = () => {
           <JobApplicationModal 
             isOpen={showApplicationModal} 
             onClose={() => setShowApplicationModal(false)}
-            jobId={job.id}
-            jobTitle={job.title}
-            companyName={job.company?.company_name || ""}
-            onSuccess={() => {
-              toast.success("Application submitted successfully!");
-              navigate('/student-dashboard', { 
-                state: { activeTab: 'applications' } 
-              });
+            job={{
+              ...job,
+              location: job.location || undefined,
+              salary: job.salary || undefined,
+              deadline: job.deadline || undefined,
+              status: (job.status as 'active' | 'closed' | 'draft') || undefined,
+              positions: job.positions || undefined,
+              requirements: job.requirements || [],
+              created_at: job.created_at || new Date().toISOString()
+            }}
+            company={{
+              ...job.company,
+              id: job.company?.id || 'unknown',
+              company_name: job.company?.company_name || 'Unknown Company',
+              logo_url: job.company?.logo_url || undefined,
+              location: job.company?.location || undefined,
+              description: job.company?.description || undefined,
+              website: job.company?.website || undefined,
+              industry: job.company?.industry || undefined
             }}
           />
         )}

@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label';
 import { UserCheck, Activity, Briefcase, UserPlus, Calendar, GraduationCap } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import SimpleDataPopulator from './SimpleDataPopulator';
 
 interface ActiveUser {
   id: string;
@@ -31,6 +32,16 @@ interface UserStats {
   companies_online: number;
 }
 
+interface AttendanceRecord {
+  id: string;
+  student_name: string;
+  student_email: string;
+  date: string;
+  time: string;
+  status: 'present' | 'absent';
+  location?: string;
+}
+
 const SimplifiedAdminDashboard = () => {
   const [activeUsers, setActiveUsers] = useState<ActiveUser[]>([]);
   const [userStats, setUserStats] = useState<UserStats>({
@@ -39,6 +50,12 @@ const SimplifiedAdminDashboard = () => {
     active_today: 0,
     students_online: 0,
     companies_online: 0
+  });
+  const [realtimeAttendance, setRealtimeAttendance] = useState<AttendanceRecord[]>([]);
+  const [attendanceStats, setAttendanceStats] = useState({
+    total_present_today: 0,
+    attendance_rate: 0,
+    recent_checkins: 0
   });
 
   // Job form states
@@ -75,15 +92,75 @@ const SimplifiedAdminDashboard = () => {
   useEffect(() => {
     fetchUserStats();
     fetchActiveUsers();
+    fetchRealtimeAttendance();
     
     // Set up real-time updates every 5 seconds
     const interval = setInterval(() => {
       fetchUserStats();
       fetchActiveUsers();
+      fetchRealtimeAttendance();
     }, 5000);
 
     return () => clearInterval(interval);
   }, []);
+
+  const fetchRealtimeAttendance = async () => {
+    try {
+      // Simulate real-time attendance data that would come from student check-ins
+      const mockAttendanceData: AttendanceRecord[] = [
+        {
+          id: 'att-1',
+          student_name: 'John Doe',
+          student_email: 'john@student.edu',
+          date: new Date().toLocaleDateString(),
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          status: 'present',
+          location: 'Campus'
+        },
+        {
+          id: 'att-2',
+          student_name: 'Jane Smith',
+          student_email: 'jane@student.edu',
+          date: new Date().toLocaleDateString(),
+          time: new Date(Date.now() - 5 * 60 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          status: 'present',
+          location: 'Campus'
+        },
+        {
+          id: 'att-3',
+          student_name: 'Mike Johnson',
+          student_email: 'mike@student.edu',
+          date: new Date().toLocaleDateString(),
+          time: new Date(Date.now() - 10 * 60 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          status: 'present',
+          location: 'Campus'
+        }
+      ];
+      
+      setRealtimeAttendance(mockAttendanceData);
+      
+      // Calculate attendance stats
+      const todayAttendance = mockAttendanceData.filter(record => 
+        record.date === new Date().toLocaleDateString()
+      );
+      
+      const presentToday = todayAttendance.filter(record => record.status === 'present').length;
+      const recentCheckins = mockAttendanceData.filter(record => {
+        const recordTime = new Date(`${record.date} ${record.time}`);
+        const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
+        return recordTime > fifteenMinutesAgo;
+      }).length;
+      
+      setAttendanceStats({
+        total_present_today: presentToday,
+        attendance_rate: Math.round((presentToday / userStats.total_users) * 100) || 0,
+        recent_checkins: recentCheckins
+      });
+      
+    } catch (error) {
+      console.error('Error fetching attendance:', error);
+    }
+  };
 
   const fetchUserStats = async () => {
     try {
@@ -369,13 +446,15 @@ const SimplifiedAdminDashboard = () => {
         </CardContent>
       </Card>
 
-      <Tabs defaultValue="attendance" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="attendance">Attendance</TabsTrigger>
+      <Tabs defaultValue="overview" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-7">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="attendance">Live Attendance</TabsTrigger>
           <TabsTrigger value="jobs">Jobs</TabsTrigger>
-          <TabsTrigger value="campus">Campus Drives</TabsTrigger>
-          <TabsTrigger value="students">Add Students</TabsTrigger>
-          <TabsTrigger value="users">Add Users</TabsTrigger>
+          <TabsTrigger value="campus">Campus</TabsTrigger>
+          <TabsTrigger value="students">Students</TabsTrigger>
+          <TabsTrigger value="users">Users</TabsTrigger>
+          <TabsTrigger value="database">Database</TabsTrigger>
         </TabsList>
 
         <TabsContent value="attendance" className="space-y-4">
@@ -729,6 +808,10 @@ const SimplifiedAdminDashboard = () => {
               </Button>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="database" className="space-y-4">
+          <SimpleDataPopulator />
         </TabsContent>
       </Tabs>
     </div>

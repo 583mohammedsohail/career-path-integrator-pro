@@ -13,6 +13,7 @@ import Companies from '@/pages/Companies';
 import CompanyProfile from '@/pages/CompanyProfile';
 import Students from '@/pages/Students';
 import StudentProfile from '@/pages/StudentProfile';
+import StudentProfileDashboard from '@/pages/StudentProfileDashboard';
 import Profile from '@/pages/Profile';
 import NotFound from '@/pages/NotFound';
 import SuperAdminDashboard from './pages/SuperAdminDashboard';
@@ -162,6 +163,10 @@ const router = createBrowserRouter([
   {
     path: "/student-dashboard",
     element: <ProtectedRoute element={<StudentDashboard />} allowedRoles={['student']} />,
+  },
+  {
+    path: "/student-profile-dashboard",
+    element: <ProtectedRoute element={<StudentProfileDashboard />} allowedRoles={['student']} />,
   },
   {
     path: "/company-dashboard",

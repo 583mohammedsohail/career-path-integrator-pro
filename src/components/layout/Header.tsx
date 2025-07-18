@@ -145,6 +145,14 @@ const Header = () => {
                       <span>Dashboard</span>
                     </Link>
                   </DropdownMenuItem>
+                  {currentUser.role === 'student' && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/student-profile-dashboard" className="cursor-pointer">
+                        <Briefcase className="mr-2 h-4 w-4" />
+                        <span>Profile Dashboard</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem asChild>
                     <Link to="/profile" className="cursor-pointer">
                       <Settings className="mr-2 h-4 w-4" />
