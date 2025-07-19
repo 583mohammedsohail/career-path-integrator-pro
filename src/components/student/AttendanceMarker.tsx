@@ -1,6 +1,4 @@
-
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -22,7 +20,7 @@ const AttendanceMarker = () => {
 
     setIsMarking(true);
     try {
-      const { data, error } = await supabase.rpc('mark_student_attendance', {
+      const { error } = await supabase.rpc('mark_student_attendance', {
         _student_id: currentUser.id,
         _status: status
       });
