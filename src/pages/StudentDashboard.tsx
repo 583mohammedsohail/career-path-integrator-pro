@@ -1,496 +1,159 @@
-import { useState, useEffect } from 'react';
+
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
-import { useAuth } from '../contexts/AuthContext';
-import { Navigate } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Progress } from '@/components/ui/progress';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { 
+  GraduationCap, 
+  Briefcase, 
+  Calendar, 
+  TrendingUp, 
+  FileText, 
+  Bell,
+  MapPin,
+  Clock
+} from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { 
-  BookOpen,
-  Briefcase, 
-  Clock, 
-  CheckCircle, 
-  GraduationCap,
-  Target,
-  TrendingUp,
-  Users,
-  Award,
-  Bell,
-  RefreshCw,
-  Calendar
-} from 'lucide-react';
+import AttendanceMarker from '@/components/student/AttendanceMarker';
 
-// Type definitions for real-time data
-interface JobApplication {
-  id: string;
-  jobTitle: string;
-  company: string;
-  appliedDate: string;
-  status: 'pending' | 'interviewed' | 'approved' | 'rejected';
-  salary: string;
-  location: string;
+interface DashboardStats {
+  applicationsCount: number;
+  upcomingDrives: number;
+  placementRate: number;
+  cgpa: number;
 }
 
-const mockRecommendations = [
-  {
-    id: '1',
-    title: 'Frontend Developer - React',
-    company: 'Flipkart',
-    match: 95,
-    salary: '₹12-18 LPA',
-    location: 'Bangalore'
-  },
-  {
-    id: '2',
-    title: 'DevOps Engineer',
-    company: 'Paytm',
-    match: 87,
-    salary: '₹14-20 LPA',
-    location: 'Noida'
-  },
-  {
-    id: '3',
-    title: 'Mobile App Developer',
-    company: 'Zomato',
-    match: 82,
-    salary: '₹10-16 LPA',
-    location: 'Gurgaon'
-  }
-];
+interface RecentActivity {
+  id: string;
+  type: 'application' | 'campus_drive' | 'notification';
+  title: string;
+  description: string;
+  date: string;
+  status?: string;
+}
 
 const StudentDashboard = () => {
-  const { currentUser, isLoading } = useAuth();
-  const [applications, setApplications] = useState<JobApplication[]>([]);
-  const [dashboardStats, setDashboardStats] = useState({
-    totalApplications: 0,
-    pendingApplications: 0,
-    approvedApplications: 0,
-    rejectedApplications: 0
+  const { currentUser } = useAuth();
+  const navigate = useNavigate();
+  const [stats, setStats] = useState<DashboardStats>({
+    applicationsCount: 0,
+    upcomingDrives: 0,
+    placementRate: 0,
+    cgpa: 0
   });
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  const [isLoadingData, setIsLoadingData] = useState(false);
-  const [todayAttendanceMarked, setTodayAttendanceMarked] = useState(false);
+  const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Fetch real-time job applications data
-  const fetchApplications = async () => {
-    setIsLoadingData(true);
+  useEffect(() => {
+    if (currentUser) {
+      fetchDashboardData();
+    }
+  }, [currentUser]);
+
+  const fetchDashboardData = async () => {
     try {
-      // If user is not authenticated, provide demo data
-      if (!currentUser?.id) {
-        console.log('No authenticated user, using demo data');
-        
-        // Demo applications data
-        const demoApplications: JobApplication[] = [
-          {
-            id: 'demo-1',
-            jobTitle: 'Software Engineer',
-            company: 'TechCorp Solutions',
-            appliedDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toLocaleDateString(),
-            status: 'pending',
-            salary: '₹8-12 LPA',
-            location: 'Bangalore'
-          },
-          {
-            id: 'demo-2',
-            jobTitle: 'Frontend Developer',
-            company: 'InnovateTech',
-            appliedDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toLocaleDateString(),
-            status: 'interviewed',
-            salary: '₹6-10 LPA',
-            location: 'Mumbai'
-          },
-          {
-            id: 'demo-3',
-            jobTitle: 'Data Analyst',
-            company: 'DataDriven Inc',
-            appliedDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toLocaleDateString(),
-            status: 'approved',
-            salary: '₹7-11 LPA',
-            location: 'Hyderabad'
-          },
-          {
-            id: 'demo-4',
-            jobTitle: 'Backend Developer',
-            company: 'CloudTech Systems',
-            appliedDate: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toLocaleDateString(),
-            status: 'rejected',
-            salary: '₹9-13 LPA',
-            location: 'Pune'
-          }
-        ];
-        
-        setApplications(demoApplications);
-        
-        // Calculate demo stats
-        const demoStats = {
-          totalApplications: demoApplications.length,
-          pendingApplications: demoApplications.filter(app => app.status === 'pending').length,
-          approvedApplications: demoApplications.filter(app => app.status === 'approved').length,
-          rejectedApplications: demoApplications.filter(app => app.status === 'rejected').length
-        };
-        setDashboardStats(demoStats);
-        
-        toast.info('Showing demo data - Please log in to see your actual applications');
-        setLastUpdated(new Date());
-        setIsLoadingData(false);
-        return;
-      }
-      
-      console.log('Fetching real job applications for user:', currentUser.id);
-      
-      // Real data fetching for authenticated users - fetch from job_applications table
-      const { data: applications, error } = await supabase
+      // Fetch student applications
+      const { count: applicationsCount } = await supabase
+        .from('job_applications')
+        .select('*', { count: 'exact', head: true })
+        .eq('student_id', currentUser?.id);
+
+      // Fetch upcoming campus drives
+      const { count: upcomingDrives } = await supabase
+        .from('campus_drives')
+        .select('*', { count: 'exact', head: true })
+        .gte('date', new Date().toISOString());
+
+      // Fetch student profile for CGPA
+      const { data: studentData } = await supabase
+        .from('students')
+        .select('cgpa')
+        .eq('id', currentUser?.id)
+        .single();
+
+      setStats({
+        applicationsCount: applicationsCount || 0,
+        upcomingDrives: upcomingDrives || 0,
+        placementRate: 75, // Mock data
+        cgpa: studentData?.cgpa || 0
+      });
+
+      // Fetch recent activity
+      const { data: applications } = await supabase
         .from('job_applications')
         .select(`
           id,
-          status,
           applied_at,
-          resume_url,
-          job_id,
-          student_id
+          status,
+          jobs (title, company_id)
         `)
-        .eq('student_id', currentUser.id)
-        .order('applied_at', { ascending: false });
+        .eq('student_id', currentUser?.id)
+        .order('applied_at', { ascending: false })
+        .limit(5);
 
-      if (error) {
-        console.error('Error fetching applications:', error);
-        // If there's an error, show demo data but with a different message
-        const demoApplications: JobApplication[] = [
-          {
-            id: 'demo-1',
-            jobTitle: 'Software Engineer',
-            company: 'TechCorp Solutions',
-            appliedDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toLocaleDateString(),
-            status: 'pending',
-            salary: '₹8-12 LPA',
-            location: 'Bangalore'
-          }
-        ];
-        setApplications(demoApplications);
-        setDashboardStats({
-          totalApplications: 1,
-          pendingApplications: 1,
-          approvedApplications: 0,
-          rejectedApplications: 0
-        });
-        toast.warning('Using demo data - Database connection issue');
-        setLastUpdated(new Date());
-        setIsLoadingData(false);
-        return;
-      }
+      const activity: RecentActivity[] = applications?.map(app => ({
+        id: app.id,
+        type: 'application' as const,
+        title: `Applied to ${app.jobs?.title || 'Job'}`,
+        description: 'Job Application',
+        date: app.applied_at,
+        status: app.status
+      })) || [];
 
-      console.log('Found applications:', applications?.length || 0);
-
-      // If no applications found, show empty state
-      if (!applications || applications.length === 0) {
-        setApplications([]);
-        setDashboardStats({
-          totalApplications: 0,
-          pendingApplications: 0,
-          approvedApplications: 0,
-          rejectedApplications: 0
-        });
-        toast.info('No job applications found. Apply for jobs to see them here!');
-        setLastUpdated(new Date());
-        setIsLoadingData(false);
-        return;
-      }
-      
-      // Fetch job details for each application
-      const jobIds = applications.map(app => app.job_id).filter(Boolean);
-      console.log('Fetching job details for IDs:', jobIds);
-      
-      const { data: jobs, error: jobsError } = await supabase
-        .from('jobs')
-        .select(`
-          id,
-          title,
-          salary,
-          location,
-          company_id
-        `)
-        .in('id', jobIds);
-
-      if (jobsError) {
-        console.error('Error fetching jobs:', jobsError);
-      }
-
-      // Fetch company details
-      const companyIds = jobs?.map(job => job.company_id).filter(Boolean) || [];
-      console.log('Fetching company details for IDs:', companyIds);
-      
-      const { data: companies, error: companiesError } = await supabase
-        .from('companies')
-        .select(`
-          id,
-          company_name
-        `)
-        .in('id', companyIds);
-
-      if (companiesError) {
-        console.error('Error fetching companies:', companiesError);
-      }
-
-      // Transform data to match our interface
-      const transformedApplications: JobApplication[] = applications.map(app => {
-        const job = jobs?.find(j => j.id === app.job_id);
-        const company = companies?.find(c => c.id === job?.company_id);
-        
-        return {
-          id: app.id,
-          jobTitle: job?.title || `Job ID: ${app.job_id}`,
-          company: company?.company_name || 'Company',
-          appliedDate: app.applied_at ? new Date(app.applied_at).toLocaleDateString() : new Date().toLocaleDateString(),
-          status: (app.status as 'pending' | 'interviewed' | 'approved' | 'rejected') || 'pending',
-          salary: job?.salary || 'Salary not specified',
-          location: job?.location || 'Location not specified'
-        };
-      });
-
-      console.log('Transformed applications:', transformedApplications);
-      setApplications(transformedApplications);
-      
-      // Calculate stats
-      const newStats = {
-        totalApplications: transformedApplications.length,
-        pendingApplications: transformedApplications.filter(app => app.status === 'pending').length,
-        approvedApplications: transformedApplications.filter(app => app.status === 'approved').length,
-        rejectedApplications: transformedApplications.filter(app => app.status === 'rejected').length
-      };
-      setDashboardStats(newStats);
-      
-      if (transformedApplications.length > 0) {
-        toast.success(`Found ${transformedApplications.length} job application(s)!`);
-      }
-      
+      setRecentActivity(activity);
     } catch (error) {
-      console.error('Error:', error);
-      toast.error('Failed to load applications');
+      console.error('Error fetching dashboard data:', error);
     } finally {
-      setIsLoadingData(false);
-      setLastUpdated(new Date());
+      setLoading(false);
     }
   };
-
-  // Initial data fetch and real-time updates
-  useEffect(() => {
-    if (currentUser?.id) {
-      fetchApplications();
-      
-      // Set up real-time updates every 30 seconds
-      const interval = setInterval(fetchApplications, 30000);
-      return () => clearInterval(interval);
-    }
-  }, [currentUser?.id]);
-
-  const refreshData = async () => {
-    setIsLoadingData(true);
-    await fetchApplications();
-    setIsLoadingData(false);
-  };
-
-  // Mark attendance function with real-time sync to super admin
-  const markAttendance = async () => {
-    try {
-      const now = new Date();
-      // Create attendance record for potential database storage
-      const attendanceRecord = {
-        id: `att-${Date.now()}`,
-        student_name: currentUser?.name || 'Student',
-        student_email: currentUser?.email || '',
-        date: now.toLocaleDateString(),
-        time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        status: 'present' as const,
-        location: 'Campus'
-      };
-      
-      // Log attendance record for debugging (in real app, this would be saved to database)
-      console.log('Attendance marked:', attendanceRecord);
-      
-      // Mark attendance as completed for today
-      setTodayAttendanceMarked(true);
-      
-      // Show success message
-      toast.success('✅ Attendance marked successfully!');
-      
-      // Simulate real-time sync to super admin dashboard
-      setTimeout(() => {
-        toast.info('📊 Attendance synced to admin dashboard in real-time');
-      }, 1000);
-      
-      // In a real implementation, this would:
-      // 1. Insert into Supabase attendance table
-      // 2. Trigger real-time update to super admin dashboard
-      // 3. Send notification to admin about new attendance
-      
-    } catch (error) {
-      console.error('Error marking attendance:', error);
-      toast.error('Failed to mark attendance');
-    }
-  };
-
-  // Check if attendance is already marked today
-  useEffect(() => {
-    const checkTodayAttendance = () => {
-      // In a real app, this would check the database
-      // For demo purposes, we'll reset daily
-      const today = new Date().toDateString();
-      const lastMarked = localStorage.getItem('lastAttendanceDate');
-      
-      if (lastMarked !== today) {
-        setTodayAttendanceMarked(false);
-      } else {
-        setTodayAttendanceMarked(true);
-      }
-    };
-    
-    checkTodayAttendance();
-  }, []);
-
-  // Update localStorage when attendance is marked
-  useEffect(() => {
-    if (todayAttendanceMarked) {
-      localStorage.setItem('lastAttendanceDate', new Date().toDateString());
-    }
-  }, [todayAttendanceMarked]);
-
-  if (isLoading) {
-    return (
-      <Layout>
-        <div className="container mx-auto px-4 py-8">
-          <div className="animate-pulse">
-            <div className="h-12 bg-gray-200 rounded-md w-3/4 mb-6"></div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="h-32 bg-gray-200 rounded-md"></div>
-              ))}
-            </div>
-            <div className="h-64 bg-gray-200 rounded-md"></div>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
 
   if (!currentUser || currentUser.role !== 'student') {
-    return <Navigate to="/login" replace />;
+    navigate('/');
+    return null;
   }
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'approved':
-        return 'bg-green-100 text-green-800';
-      case 'interviewed':
-        return 'bg-blue-100 text-blue-800';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'rejected':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'approved':
-        return <CheckCircle className="h-4 w-4" />;
-      case 'interviewed':
-        return <Users className="h-4 w-4" />;
-      case 'pending':
-        return <Clock className="h-4 w-4" />;
-      default:
-        return <Clock className="h-4 w-4" />;
-    }
-  };
-
-  const approvedCount = applications.filter(app => app.status === 'approved').length;
-  const interviewedCount = applications.filter(app => app.status === 'interviewed').length;
-  const pendingCount = applications.filter(app => app.status === 'pending').length;
 
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold">Welcome back, {currentUser.name}!</h1>
-            <p className="text-gray-600 mt-1">
-              {currentUser.course} in {currentUser.department} • Year {currentUser.year}
-            </p>
-            <div className="flex items-center gap-2 mt-2">
-              <div className="flex items-center gap-1 text-sm text-green-600">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                Live Updates
-              </div>
-              <span className="text-xs text-gray-500">
-                Last updated: {lastUpdated?.toLocaleTimeString()}
-              </span>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button 
-              onClick={markAttendance}
-              disabled={todayAttendanceMarked}
-              className={`flex items-center gap-2 ${todayAttendanceMarked ? 'bg-green-600 hover:bg-green-700' : ''}`}
-              size="sm"
-            >
-              <Calendar className="w-4 h-4" />
-              {todayAttendanceMarked ? 'Attendance Marked ✓' : 'Mark Attendance'}
-            </Button>
-            <Button
-              onClick={refreshData}
-              disabled={isLoadingData}
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-2"
-            >
-              <RefreshCw className={`h-4 w-4 ${isLoadingData ? 'animate-spin' : ''}`} />
-              Refresh
-            </Button>
-          </div>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Welcome back, {currentUser.name || 'Student'}!
+          </h1>
+          <p className="text-gray-600">
+            Track your placement progress and stay updated with opportunities.
+          </p>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        {/* Stats Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Applications</CardTitle>
+              <CardTitle className="text-sm font-medium">Applications</CardTitle>
               <Briefcase className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{dashboardStats.totalApplications}</div>
+              <div className="text-2xl font-bold">{stats.applicationsCount}</div>
               <p className="text-xs text-muted-foreground">
-                +2 from last week
+                Total job applications
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Interviews</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">Campus Drives</CardTitle>
+              <Calendar className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{interviewedCount}</div>
+              <div className="text-2xl font-bold">{stats.upcomingDrives}</div>
               <p className="text-xs text-muted-foreground">
-                +1 this week
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Offers Received</CardTitle>
-              <Award className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{approvedCount}</div>
-              <p className="text-xs text-muted-foreground">
-                Success rate: {Math.round((approvedCount / applications.length) * 100)}%
+                Upcoming this month
               </p>
             </CardContent>
           </Card>
@@ -501,175 +164,122 @@ const StudentDashboard = () => {
               <GraduationCap className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{currentUser.cgpa}</div>
-              <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                <div 
-                  className="bg-blue-600 h-2 rounded-full" 
-                  style={{ width: `${(currentUser.cgpa || 0) * 10}%` }}
-                ></div>
-              </div>
+              <div className="text-2xl font-bold">{stats.cgpa.toFixed(2)}</div>
+              <p className="text-xs text-muted-foreground">
+                Current academic performance
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Success Rate</CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.placementRate}%</div>
+              <p className="text-xs text-muted-foreground">
+                Department average
+              </p>
             </CardContent>
           </Card>
         </div>
 
-        <Tabs defaultValue="applications" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="applications" className="flex items-center gap-2">
-              <Briefcase className="h-4 w-4" />
-              My Applications
-              {pendingCount > 0 && (
-                <Badge variant="secondary" className="ml-1">{pendingCount}</Badge>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="recommendations" className="flex items-center gap-2">
-              <Target className="h-4 w-4" />
-              Recommendations
-            </TabsTrigger>
-            <TabsTrigger value="profile" className="flex items-center gap-2">
-              <BookOpen className="h-4 w-4" />
-              Profile
-            </TabsTrigger>
-          </TabsList>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Attendance Marker */}
+          <div className="lg:col-span-1">
+            <AttendanceMarker />
+          </div>
 
-          <TabsContent value="applications" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="flex items-center gap-2">
-                      Job Applications
-                      <div className="flex items-center gap-1 text-sm text-green-600">
-                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                        Real-time
-                      </div>
-                    </CardTitle>
-                    <CardDescription>Track your job application status in real-time</CardDescription>
-                  </div>
-                  <Bell className="h-5 w-5 text-blue-600" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                {applications.length > 0 ? (
-                  <div className="space-y-4">
-                    {applications.map((application) => (
-                      <div key={application.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-3 mb-2">
-                              <h3 className="font-semibold text-lg">{application.jobTitle}</h3>
-                              <Badge className={getStatusColor(application.status)}>
-                                <div className="flex items-center gap-1">
-                                  {getStatusIcon(application.status)}
-                                  {application.status}
-                                </div>
-                              </Badge>
-                            </div>
-                            <p className="text-gray-600 mb-1">{application.company}</p>
-                            <div className="flex items-center gap-4 text-sm text-gray-500">
-                              <span>📍 {application.location}</span>
-                              <span>💰 {application.salary}</span>
-                              <span>📅 Applied: {new Date(application.appliedDate).toLocaleDateString()}</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-gray-500">
-                    <Briefcase className="mx-auto h-12 w-12 mb-4" />
-                    <p>No applications yet. Start applying to jobs to see them here!</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="recommendations" className="space-y-4">
+          {/* Recent Activity */}
+          <div className="lg:col-span-2">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Target className="h-5 w-5" />
-                  Recommended Jobs
+                  <Bell className="h-5 w-5" />
+                  Recent Activity
                 </CardTitle>
-                <CardDescription>Jobs that match your skills and profile</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {mockRecommendations.map((job) => (
-                    <div key={job.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-lg mb-1">{job.title}</h3>
-                          <p className="text-gray-600 mb-2">{job.company}</p>
-                          <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
-                            <span>📍 {job.location}</span>
-                            <span>💰 {job.salary}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium">Match:</span>
-                            <Progress value={job.match} className="w-20 h-2" />
-                            <span className="text-sm text-green-600 font-medium">{job.match}%</span>
+                  {recentActivity.length > 0 ? (
+                    recentActivity.map((activity) => (
+                      <div key={activity.id} className="flex items-start space-x-4 p-4 border rounded-lg">
+                        <div className="flex-shrink-0">
+                          {activity.type === 'application' && (
+                            <Briefcase className="h-5 w-5 text-blue-500" />
+                          )}
+                          {activity.type === 'campus_drive' && (
+                            <Calendar className="h-5 w-5 text-green-500" />
+                          )}
+                          {activity.type === 'notification' && (
+                            <Bell className="h-5 w-5 text-yellow-500" />
+                          )}
+                        </div>
+                        <div className="flex-grow">
+                          <h4 className="font-medium">{activity.title}</h4>
+                          <p className="text-sm text-muted-foreground">{activity.description}</p>
+                          <div className="flex items-center gap-2 mt-2">
+                            <span className="text-xs text-muted-foreground">
+                              {new Date(activity.date).toLocaleDateString()}
+                            </span>
+                            {activity.status && (
+                              <Badge variant="outline" className="text-xs">
+                                {activity.status}
+                              </Badge>
+                            )}
                           </div>
                         </div>
-                        <Button size="sm">Apply Now</Button>
                       </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                      <p>No recent activity to display</p>
+                      <p className="text-sm">Start by applying for jobs or registering for campus drives</p>
                     </div>
-                  ))}
+                  )}
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
+          </div>
+        </div>
 
-          <TabsContent value="profile" className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <BookOpen className="h-5 w-5" />
-                    Academic Information
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <label className="text-sm font-medium text-gray-500">Course</label>
-                    <p className="text-lg">{currentUser.course}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-500">Department</label>
-                    <p className="text-lg">{currentUser.department}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-500">Year</label>
-                    <p className="text-lg">{currentUser.year}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-500">CGPA</label>
-                    <p className="text-lg">{currentUser.cgpa}/10</p>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5" />
-                    Skills
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex flex-wrap gap-2">
-                    {currentUser.skills?.map((skill, index) => (
-                      <Badge key={index} variant="secondary">
-                        {skill}
-                      </Badge>
-                    )) || <p className="text-gray-500">No skills added yet</p>}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-        </Tabs>
+        {/* Quick Actions */}
+        <div className="mt-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>Quick Actions</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Button 
+                  onClick={() => navigate('/jobs')} 
+                  className="flex items-center gap-2"
+                >
+                  <Briefcase className="h-4 w-4" />
+                  Browse Jobs
+                </Button>
+                <Button 
+                  onClick={() => navigate('/campus-recruitment')} 
+                  variant="outline"
+                  className="flex items-center gap-2"
+                >
+                  <Calendar className="h-4 w-4" />
+                  Campus Drives
+                </Button>
+                <Button 
+                  onClick={() => navigate('/profile')} 
+                  variant="outline"
+                  className="flex items-center gap-2"
+                >
+                  <GraduationCap className="h-4 w-4" />
+                  Update Profile
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </Layout>
   );

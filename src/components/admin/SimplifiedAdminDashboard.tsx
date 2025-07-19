@@ -13,6 +13,7 @@ import { UserCheck, Activity, Briefcase, UserPlus, Calendar, GraduationCap } fro
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import SimpleDataPopulator from './SimpleDataPopulator';
+import RealTimeAttendance from './RealTimeAttendance';
 
 interface ActiveUser {
   id: string;
@@ -32,16 +33,6 @@ interface UserStats {
   companies_online: number;
 }
 
-interface AttendanceRecord {
-  id: string;
-  student_name: string;
-  student_email: string;
-  date: string;
-  time: string;
-  status: 'present' | 'absent';
-  location?: string;
-}
-
 const SimplifiedAdminDashboard = () => {
   const [activeUsers, setActiveUsers] = useState<ActiveUser[]>([]);
   const [userStats, setUserStats] = useState<UserStats>({
@@ -50,12 +41,6 @@ const SimplifiedAdminDashboard = () => {
     active_today: 0,
     students_online: 0,
     companies_online: 0
-  });
-  const [realtimeAttendance, setRealtimeAttendance] = useState<AttendanceRecord[]>([]);
-  const [attendanceStats, setAttendanceStats] = useState({
-    total_present_today: 0,
-    attendance_rate: 0,
-    recent_checkins: 0
   });
 
   // Job form states
@@ -92,75 +77,15 @@ const SimplifiedAdminDashboard = () => {
   useEffect(() => {
     fetchUserStats();
     fetchActiveUsers();
-    fetchRealtimeAttendance();
     
     // Set up real-time updates every 5 seconds
     const interval = setInterval(() => {
       fetchUserStats();
       fetchActiveUsers();
-      fetchRealtimeAttendance();
     }, 5000);
 
     return () => clearInterval(interval);
   }, []);
-
-  const fetchRealtimeAttendance = async () => {
-    try {
-      // Simulate real-time attendance data that would come from student check-ins
-      const mockAttendanceData: AttendanceRecord[] = [
-        {
-          id: 'att-1',
-          student_name: 'John Doe',
-          student_email: 'john@student.edu',
-          date: new Date().toLocaleDateString(),
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          status: 'present',
-          location: 'Campus'
-        },
-        {
-          id: 'att-2',
-          student_name: 'Jane Smith',
-          student_email: 'jane@student.edu',
-          date: new Date().toLocaleDateString(),
-          time: new Date(Date.now() - 5 * 60 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          status: 'present',
-          location: 'Campus'
-        },
-        {
-          id: 'att-3',
-          student_name: 'Mike Johnson',
-          student_email: 'mike@student.edu',
-          date: new Date().toLocaleDateString(),
-          time: new Date(Date.now() - 10 * 60 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          status: 'present',
-          location: 'Campus'
-        }
-      ];
-      
-      setRealtimeAttendance(mockAttendanceData);
-      
-      // Calculate attendance stats
-      const todayAttendance = mockAttendanceData.filter(record => 
-        record.date === new Date().toLocaleDateString()
-      );
-      
-      const presentToday = todayAttendance.filter(record => record.status === 'present').length;
-      const recentCheckins = mockAttendanceData.filter(record => {
-        const recordTime = new Date(`${record.date} ${record.time}`);
-        const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
-        return recordTime > fifteenMinutesAgo;
-      }).length;
-      
-      setAttendanceStats({
-        total_present_today: presentToday,
-        attendance_rate: Math.round((presentToday / userStats.total_users) * 100) || 0,
-        recent_checkins: recentCheckins
-      });
-      
-    } catch (error) {
-      console.error('Error fetching attendance:', error);
-    }
-  };
 
   const fetchUserStats = async () => {
     try {
@@ -215,16 +140,6 @@ const SimplifiedAdminDashboard = () => {
       setActiveUsers(formattedData);
     } catch (error) {
       console.error('Error fetching active users:', error);
-    }
-  };
-
-  const markAttendance = async (userId: string, status: 'present' | 'absent' | 'late' | 'excused') => {
-    try {
-      // For now, just show success since student_attendance table structure may need adjustment
-      toast.success(`Attendance marked as ${status} for student`);
-      console.log(`Attendance marked for user ${userId} as ${status}`);
-    } catch (error: any) {
-      toast.error('Failed to mark attendance: ' + error.message);
     }
   };
 
@@ -446,10 +361,10 @@ const SimplifiedAdminDashboard = () => {
         </CardContent>
       </Card>
 
-      <Tabs defaultValue="overview" className="space-y-4">
+      <Tabs defaultValue="attendance" className="space-y-4">
         <TabsList className="grid w-full grid-cols-7">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="attendance">Live Attendance</TabsTrigger>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="jobs">Jobs</TabsTrigger>
           <TabsTrigger value="campus">Campus</TabsTrigger>
           <TabsTrigger value="students">Students</TabsTrigger>
@@ -458,54 +373,51 @@ const SimplifiedAdminDashboard = () => {
         </TabsList>
 
         <TabsContent value="attendance" className="space-y-4">
+          <RealTimeAttendance />
+        </TabsContent>
+
+        <TabsContent value="overview" className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <UserCheck className="h-5 w-5" />
-                Mark Attendance for Active Users
-                <Badge variant="secondary">{activeUsers.filter(u => u.role === 'student').length} Students Online</Badge>
+                Active Users Management
+                <Badge variant="secondary">{activeUsers.length} Online</Badge>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ScrollArea className="h-[500px]">
+              <ScrollArea className="h-[400px]">
                 <div className="space-y-3">
-                  {activeUsers
-                    .filter(user => user.role === 'student')
-                    .map((student) => (
-                      <div key={student.id} className="flex items-center justify-between p-4 border rounded-lg bg-card">
-                        <div className="flex items-center space-x-3">
-                           <Avatar>
-                             <AvatarImage src={student.avatar_url || undefined} />
-                             <AvatarFallback>{student.name?.charAt(0) || 'S'}</AvatarFallback>
-                           </Avatar>
-                          <div>
-                            <p className="font-medium">{student.name}</p>
-                            <p className="text-sm text-muted-foreground">{student.email}</p>
-                            <div className="flex items-center gap-1 mt-1">
+                  {activeUsers.map((user) => (
+                    <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg bg-card">
+                      <div className="flex items-center space-x-3">
+                         <Avatar>
+                           <AvatarImage src={user.avatar_url || undefined} />
+                           <AvatarFallback>{user.name?.charAt(0) || 'U'}</AvatarFallback>
+                         </Avatar>
+                        <div>
+                          <p className="font-medium">{user.name}</p>
+                          <p className="text-sm text-muted-foreground">{user.email}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Badge variant="outline" className="text-xs">
+                              {user.role}
+                            </Badge>
+                            <div className="flex items-center gap-1">
                               <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
                               <span className="text-xs text-green-500">Online</span>
                             </div>
                           </div>
                         </div>
-                        <Select onValueChange={(value) => markAttendance(student.id, value as any)}>
-                          <SelectTrigger className="w-32">
-                            <SelectValue placeholder="Mark" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="present">Present</SelectItem>
-                            <SelectItem value="late">Late</SelectItem>
-                            <SelectItem value="absent">Absent</SelectItem>
-                            <SelectItem value="excused">Excused</SelectItem>
-                          </SelectContent>
-                        </Select>
                       </div>
-                    ))}
+                    </div>
+                  ))}
                 </div>
               </ScrollArea>
             </CardContent>
           </Card>
         </TabsContent>
 
+        
         <TabsContent value="jobs" className="space-y-4">
           <Card>
             <CardHeader>

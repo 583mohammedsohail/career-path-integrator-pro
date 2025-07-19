@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -101,9 +102,15 @@ const RealTimeUserTracker = () => {
     }
   };
 
-  const markAttendance = async (_studentId: string, status: 'present' | 'absent' | 'late' | 'excused') => {
+  const markAttendance = async (studentId: string, status: 'present' | 'absent' | 'late' | 'excused') => {
     try {
-      // For now, just show success message since the attendance table is new
+      const { data, error } = await supabase.rpc('mark_student_attendance', {
+        _student_id: studentId,
+        _status: status
+      });
+
+      if (error) throw error;
+
       toast.success(`Attendance marked as ${status} for student`);
     } catch (error) {
       console.error('Error marking attendance:', error);
@@ -133,6 +140,24 @@ const RealTimeUserTracker = () => {
       )
       .subscribe();
 
+    // Set up real-time subscriptions for attendance changes
+    const attendanceChannel = supabase
+      .channel('attendance-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'student_attendance'
+        },
+        () => {
+          // Refresh data when attendance is updated
+          fetchActiveUsers();
+          fetchStats();
+        }
+      )
+      .subscribe();
+
     // Refresh data every 30 seconds
     const interval = setInterval(() => {
       fetchActiveUsers();
@@ -141,6 +166,7 @@ const RealTimeUserTracker = () => {
 
     return () => {
       supabase.removeChannel(profilesChannel);
+      supabase.removeChannel(attendanceChannel);
       clearInterval(interval);
     };
   }, []);

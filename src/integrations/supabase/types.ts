@@ -554,6 +554,32 @@ export type Database = {
           companies_online: number
         }[]
       }
+      get_attendance_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          total_students: number
+          present_today: number
+          absent_today: number
+          late_today: number
+          attendance_rate: number
+        }[]
+      }
+      get_recent_attendance: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          student_id: string
+          student_name: string
+          student_email: string
+          date: string
+          status: string
+          marked_at: string
+        }[]
+      }
+      mark_student_attendance: {
+        Args: { _student_id: string; _status?: string }
+        Returns: string
+      }
       update_user_activity: {
         Args: Record<PropertyKey, never>
         Returns: undefined
