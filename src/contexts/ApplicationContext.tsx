@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
-import { supabase } from '../integrations/supabase/client';
 
 // Types for applications
 export interface JobApplication {

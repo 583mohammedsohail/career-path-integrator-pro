@@ -99,7 +99,6 @@ type FormData = z.infer<typeof formSchema>;
 
 const RegisterForm = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [avatar, setAvatar] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [showVerificationModal, setShowVerificationModal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -126,7 +125,7 @@ const RegisterForm = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      setAvatar(file);
+      // Note: Avatar file handling would be implemented here
       setAvatarPreview(URL.createObjectURL(file));
     }
   };

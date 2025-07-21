@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ExternalLink, Users } from 'lucide-react';
-import DeveloperCredits from './DeveloperCredits';
 
 const Footer: React.FC = () => {
   return (

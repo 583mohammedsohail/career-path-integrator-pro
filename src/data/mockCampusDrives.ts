@@ -1,4 +1,4 @@
-import { CampusDrive, Company } from '@/types';
+import { CampusDrive } from '@/types';
 
 export const mockCampusDrives: CampusDrive[] = [
   {

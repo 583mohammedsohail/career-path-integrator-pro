@@ -9,10 +9,10 @@ import { mockStudents } from '@/data/mockData';
 const StudentPerformance = () => {
   // Get top performing students (by CGPA)
   const topStudents = mockStudents
-    .sort((a, b) => b.cgpa - a.cgpa)
+    .sort((a, b) => (b.cgpa || 0) - (a.cgpa || 0))
     .slice(0, 5);
 
-  const averageCGPA = mockStudents.reduce((sum, student) => sum + student.cgpa, 0) / mockStudents.length;
+  const averageCGPA = mockStudents.reduce((sum, student) => sum + (student.cgpa || 0), 0) / mockStudents.length;
 
   return (
     <Card>
@@ -37,8 +37,8 @@ const StudentPerformance = () => {
                   </Badge>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Progress value={(student.cgpa / 10) * 100} className="flex-1 h-2" />
-                  <span className="text-xs font-medium">{student.cgpa.toFixed(1)}</span>
+                  <Progress value={((student.cgpa || 0) / 10) * 100} className="flex-1 h-2" />
+                  <span className="text-xs font-medium">{(student.cgpa || 0).toFixed(1)}</span>
                 </div>
               </div>
             </div>
