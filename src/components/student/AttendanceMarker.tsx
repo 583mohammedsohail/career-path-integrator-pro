@@ -20,7 +20,7 @@ const AttendanceMarker = () => {
 
     setIsMarking(true);
     try {
-      const { error } = await supabase.rpc('mark_student_attendance' as any, {
+      const { error } = await supabase.rpc('mark_student_attendance', {
         _student_id: currentUser.id,
         _status: status
       });

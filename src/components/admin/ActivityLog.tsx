@@ -9,19 +9,6 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 
-interface SystemActivity {
-  id: string;
-  user_id: string;
-  action_type: string;
-  entity_type: string;
-  entity_id: string | null;
-  details: any;
-  created_at: string;
-  user?: {
-    name: string;
-    email: string;
-  };
-}
 
 const ActivityLog: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -109,18 +96,18 @@ const ActivityLog: React.FC = () => {
                   <TableCell colSpan={5} className="text-center">No activities found</TableCell>
                 </TableRow>
               ) : (
-                activities.map((activity: SystemActivity) => (
+                activities.map((activity: any) => (
                   <TableRow key={activity.id}>
                     <TableCell>{formatDateTime(activity.created_at)}</TableCell>
                     <TableCell>
                       {activity.user?.name || activity.user?.email || 'Unknown User'}
                     </TableCell>
                     <TableCell>
-                      <Badge className={getActionColor(activity.action_type)}>
-                        {activity.action_type}
+                      <Badge className={getActionColor(activity.action_type || activity.action)}>
+                        {activity.action_type || activity.action}
                       </Badge>
                     </TableCell>
-                    <TableCell>{activity.entity_type}</TableCell>
+                    <TableCell>{activity.entity_type || 'N/A'}</TableCell>
                     <TableCell>
                       {activity.details ? (
                         <pre className="text-xs whitespace-pre-wrap max-w-xs">

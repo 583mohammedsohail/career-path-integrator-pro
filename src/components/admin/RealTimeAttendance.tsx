@@ -37,10 +37,10 @@ const RealTimeAttendance = () => {
 
   const fetchAttendanceStats = async () => {
     try {
-      const { data, error } = await supabase.rpc('get_attendance_stats' as any);
+      const { data, error } = await supabase.rpc('get_attendance_stats');
       if (error) throw error;
       
-      if (data && data.length > 0) {
+      if (data && Array.isArray(data) && data.length > 0) {
         setStats(data[0]);
       }
     } catch (error) {
@@ -50,7 +50,7 @@ const RealTimeAttendance = () => {
 
   const fetchRecentAttendance = async () => {
     try {
-      const { data, error } = await supabase.rpc('get_recent_attendance' as any);
+      const { data, error } = await supabase.rpc('get_recent_attendance');
       if (error) throw error;
       
       setRecentAttendance(data || []);
