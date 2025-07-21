@@ -47,7 +47,7 @@ export const RealtimeApplicationProvider: React.FC<{ children: React.ReactNode }
 
       // Try to fetch campus drive applications - use correct table name
       try {
-        const { data: campusApps, error: campusError } = await supabase
+        const { data: campusApps, error: campusError } = await (supabase as any)
           .from('campus_drive_applications')
           .select('*')
           .eq('student_id', currentUser.id);
@@ -70,7 +70,7 @@ export const RealtimeApplicationProvider: React.FC<{ children: React.ReactNode }
   };
 
   // Add job application
-  const addJobApplication = async (jobId: string, resumeUrl?: string, coverLetter?: string) => {
+  const addJobApplication = async (jobId: string, resumeUrl?: string) => {
     if (!currentUser) {
       toast.error('Please login to apply');
       return;
@@ -105,7 +105,7 @@ export const RealtimeApplicationProvider: React.FC<{ children: React.ReactNode }
 
     try {
       // Use correct table name from schema
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('campus_drive_applications')
         .insert([{
           campus_drive_id: campusDriveId,

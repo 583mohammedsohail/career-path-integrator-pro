@@ -112,7 +112,7 @@ const LoginForm = () => {
     }
 
     try {
-      const { data, error } = await supabase.auth.signInWithOtp({
+      const { error } = await supabase.auth.signInWithOtp({
         phone: phoneNumber,
       });
 

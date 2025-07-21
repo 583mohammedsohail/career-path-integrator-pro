@@ -104,7 +104,7 @@ const RealTimeUserTracker = () => {
 
   const markAttendance = async (studentId: string, status: 'present' | 'absent' | 'late' | 'excused') => {
     try {
-      const { data, error } = await supabase.rpc('mark_student_attendance', {
+      const { error } = await (supabase as any).rpc('mark_student_attendance', {
         _student_id: studentId,
         _status: status
       });

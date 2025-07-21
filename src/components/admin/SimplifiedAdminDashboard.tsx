@@ -244,7 +244,7 @@ const SimplifiedAdminDashboard = () => {
           });
 
         // Create student profile
-        await supabase
+        await (supabase as any)
           .from('students')
           .insert({
             id: data.user.id,
