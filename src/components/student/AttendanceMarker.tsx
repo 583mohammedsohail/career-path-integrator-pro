@@ -20,7 +20,8 @@ const AttendanceMarker = () => {
 
     setIsMarking(true);
     try {
-      const { error } = await supabase.rpc('mark_student_attendance', {
+      // Use any to bypass TypeScript issues until types are regenerated
+      const { error } = await (supabase as any).rpc('mark_student_attendance', {
         _student_id: currentUser.id,
         _status: status
       });
