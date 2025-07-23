@@ -9,11 +9,6 @@ interface InputOTPProps {
   maxLength?: number;
 }
 
-interface OTPSlot {
-  char?: string;
-  hasFakeCaret?: boolean;
-  isActive?: boolean;
-}
 
 const InputOTP = React.forwardRef<HTMLDivElement, InputOTPProps>(
   ({ value, onChange, maxLength = 6 }, ref) => (
@@ -63,7 +58,7 @@ const InputOTPSlot = React.forwardRef<
   React.ComponentPropsWithoutRef<"div"> & { index: number }
 >(({ index, className, ...props }, ref) => {
   const inputOTPContext = React.useContext(OTPInputContext)
-  const { char, hasFakeCaret, isActive } = inputOTPContext?.slots?.[index] || {}
+  const { char, isActive } = inputOTPContext?.slots?.[index] || {}
 
   return (
     <div

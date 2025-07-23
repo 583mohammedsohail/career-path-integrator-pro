@@ -24,7 +24,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import DevelopersTeam from './pages/DevelopersTeam';
 import CampusRecruitment from './pages/CampusRecruitment';
 import CampusDriveDetails from './pages/CampusDriveDetails';
-import CollegeSearch from './pages/CollegeSearch';
+
 import { Toaster } from 'sonner';
 
 // Protected route wrapper
@@ -191,10 +191,6 @@ const router = createBrowserRouter([
   {
     path: "/campus-drive/:id",
     element: <CampusDriveDetails />,
-  },
-  {
-    path: "/college-search",
-    element: <CollegeSearch />,
   },
   {
     path: "*",

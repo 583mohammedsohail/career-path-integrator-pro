@@ -129,7 +129,7 @@ export function withReward<T extends React.ComponentType<WithRewardProps>>(
 
     return (
       <div className="relative inline-block">
-        <Component {...props} onClick={handleClick} />
+        <Component {...(props as any)} onClick={handleClick} />
         <span 
           id={id} 
           className="absolute inset-0 w-full h-full pointer-events-none" 

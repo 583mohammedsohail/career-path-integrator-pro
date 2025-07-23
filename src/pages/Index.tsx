@@ -1,47 +1,47 @@
-import React from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
-import StatCard from '../components/dashboard/StatCard';
-import PlacementChart from '../components/dashboard/PlacementChart';
-import RecentJobs from '../components/dashboard/RecentJobs';
-import StudentPerformance from '../components/dashboard/StudentPerformance';
-import DeveloperCredits from '../components/layout/DeveloperCredits';
 import { useAuth } from '../contexts/AuthContext';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+import PlacementChart from '@/components/dashboard/PlacementChart';
+import RecentJobs from '@/components/dashboard/RecentJobs';
+import DeveloperCredits from '@/components/layout/DeveloperCredits';
 import { 
-  Briefcase, 
+  ArrowRight, 
   Users, 
-  Building2, 
-  Award, 
-  Book, 
-  ArrowRight,
-  Calendar,
+  Briefcase, 
+  TrendingUp,
+  GraduationCap,
+  Building2,
+  Star,
+  CheckCircle,
+  Clock,
+  Target,
   FileText,
   Bell,
-  TrendingUp,
-  CheckCircle,
-  Clock
+  Award,
+  Book
 } from 'lucide-react';
-import { mockPlacementStats, mockJobs, mockStudents } from '../data/mockData';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { motion } from "framer-motion";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Progress } from "@/components/ui/progress";
-import { 
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious
-} from "@/components/ui/carousel";
+import { mockJobs } from '@/data/mockData';
+import { PlacementStats } from '@/types/placement';
+import { Progress } from '@/components/ui/progress';
+import { motion } from 'framer-motion';
 
-const FloatingImage = ({ src, alt, className }) => {
+// Mock statistics
+const mockStats: PlacementStats = {
+  totalStudents: 847,
+  totalApplications: 1234,
+  totalJobs: 156,
+  totalPlacements: 665,
+  placementRate: 78.5,
+  averageSalary: 650000,
+  highestSalary: 2500000
+};
+
+const FloatingImage = ({ src, alt, className }: { src: string; alt: string; className: string }) => {
   return (
     <motion.img
       src={src}
@@ -62,7 +62,7 @@ const FloatingImage = ({ src, alt, className }) => {
   );
 };
 
-const FeatureCard = ({ icon: Icon, title, description }) => {
+const FeatureCard = ({ icon: Icon, title, description }: { icon: any; title: string; description: string }) => {
   return (
     <motion.div 
       className="bg-white p-6 rounded-lg shadow-sm"
@@ -139,73 +139,6 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Testimonial Carousel */}
-        <section className="py-12 bg-gray-50">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold text-gray-900">Success Stories</h2>
-              <p className="mt-2 text-lg text-gray-600">
-                Hear from students and companies who've found success with our platform
-              </p>
-            </div>
-            
-            <Carousel className="w-full max-w-4xl mx-auto">
-              <CarouselContent>
-                <CarouselItem>
-                  <Card>
-                    <CardContent className="flex flex-col items-center p-6">
-                      <img
-                        src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150&q=80"
-                        alt="Student profile"
-                        className="w-20 h-20 rounded-full object-cover mb-4"
-                      />
-                      <p className="text-lg italic text-gray-700 text-center">
-                        "Thanks to this platform, I secured my dream job at Google. The process was seamless and I received multiple offers!"
-                      </p>
-                      <h4 className="mt-4 font-medium">Sarah Johnson</h4>
-                      <p className="text-sm text-gray-500">Computer Science Graduate, 2024</p>
-                    </CardContent>
-                  </Card>
-                </CarouselItem>
-                <CarouselItem>
-                  <Card>
-                    <CardContent className="flex flex-col items-center p-6">
-                      <img
-                        src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150&q=80"
-                        alt="Corporate profile"
-                        className="w-20 h-20 rounded-full object-cover mb-4"
-                      />
-                      <p className="text-lg italic text-gray-700 text-center">
-                        "As a hiring manager, this platform has simplified our campus recruitment efforts. We found top talent quickly and efficiently."
-                      </p>
-                      <h4 className="mt-4 font-medium">David Williams</h4>
-                      <p className="text-sm text-gray-500">HR Director, Tech Innovations Inc.</p>
-                    </CardContent>
-                  </Card>
-                </CarouselItem>
-                <CarouselItem>
-                  <Card>
-                    <CardContent className="flex flex-col items-center p-6">
-                      <img
-                        src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150&q=80"
-                        alt="Faculty profile"
-                        className="w-20 h-20 rounded-full object-cover mb-4"
-                      />
-                      <p className="text-lg italic text-gray-700 text-center">
-                        "Managing campus placements used to be a nightmare. This system has transformed our process completely!"
-                      </p>
-                      <h4 className="mt-4 font-medium">Professor Emily Chen</h4>
-                      <p className="text-sm text-gray-500">Placement Coordinator, Engineering College</p>
-                    </CardContent>
-                  </Card>
-                </CarouselItem>
-              </CarouselContent>
-              <CarouselPrevious className="left-2" />
-              <CarouselNext className="right-2" />
-            </Carousel>
-          </div>
-        </section>
-
         {/* Features Section */}
         <section className="py-16 bg-gray-50">
           <div className="container mx-auto px-4">
@@ -277,7 +210,6 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Developer Credits */}
         <DeveloperCredits />
       </Layout>
     );
@@ -305,7 +237,7 @@ const Index = () => {
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{mockPlacementStats.totalApplications}</div>
+              <div className="text-2xl font-bold">{mockStats.totalApplications.toLocaleString()}</div>
               <Progress value={75} className="mt-2" />
               <p className="text-xs text-muted-foreground mt-2">
                 +20% from last month
@@ -319,10 +251,10 @@ const Index = () => {
               <Briefcase className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{mockPlacementStats.totalJobs}</div>
+              <div className="text-2xl font-bold">{mockStats.totalJobs}</div>
               <Progress value={60} className="mt-2" />
               <p className="text-xs text-muted-foreground mt-2">
-                {mockJobs.filter(job => job.status === 'open').length} open positions
+                {mockJobs.filter(job => job.status === 'active').length} currently open
               </p>
             </CardContent>
           </Card>
@@ -333,12 +265,10 @@ const Index = () => {
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                {Math.round((mockPlacementStats.totalPlacements / mockPlacementStats.totalStudents) * 100)}%
-              </div>
-              <Progress value={72} className="mt-2" />
+              <div className="text-2xl font-bold">{mockStats.placementRate}%</div>
+              <Progress value={mockStats.placementRate} className="mt-2" />
               <p className="text-xs text-muted-foreground mt-2">
-                {mockPlacementStats.totalPlacements} students placed
+                {mockStats.totalPlacements} students placed
               </p>
             </CardContent>
           </Card>
@@ -349,7 +279,7 @@ const Index = () => {
               <Award className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">₹{mockPlacementStats.averageSalary}K</div>
+              <div className="text-2xl font-bold">₹{(mockStats.averageSalary / 100000).toFixed(1)}L</div>
               <Progress value={85} className="mt-2" />
               <p className="text-xs text-muted-foreground mt-2">
                 +15% from last year
@@ -365,7 +295,6 @@ const Index = () => {
             <Card>
               <CardHeader>
                 <CardTitle>Placement Trends</CardTitle>
-                <CardDescription>Monthly placement statistics and trends</CardDescription>
               </CardHeader>
               <CardContent>
                 <PlacementChart />
@@ -375,10 +304,9 @@ const Index = () => {
             <Card>
               <CardHeader>
                 <CardTitle>Recent Job Postings</CardTitle>
-                <CardDescription>Latest opportunities from top companies</CardDescription>
               </CardHeader>
               <CardContent>
-                <RecentJobs jobs={mockJobs} />
+                <RecentJobs />
               </CardContent>
             </Card>
           </div>
@@ -388,7 +316,6 @@ const Index = () => {
             <Card>
               <CardHeader>
                 <CardTitle>Quick Actions</CardTitle>
-                <CardDescription>Common tasks and shortcuts</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <Button className="w-full justify-start" variant="outline" onClick={() => navigate('/jobs')}>
@@ -413,7 +340,6 @@ const Index = () => {
             <Card>
               <CardHeader>
                 <CardTitle>Recent Activity</CardTitle>
-                <CardDescription>Latest updates and notifications</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 {[
@@ -439,42 +365,6 @@ const Index = () => {
                       <p className="text-sm font-medium">{activity.text}</p>
                       <p className="text-xs text-muted-foreground">{activity.time}</p>
                     </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Upcoming Events</CardTitle>
-                <CardDescription>Important dates and deadlines</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {[
-                  {
-                    date: "June 15, 2024",
-                    event: "TCS Campus Drive",
-                    type: "Placement"
-                  },
-                  {
-                    date: "June 20, 2024",
-                    event: "Infosys Interview Preparation",
-                    type: "Workshop"
-                  },
-                  {
-                    date: "June 25, 2024",
-                    event: "Resume Submission Deadline",
-                    type: "Deadline"
-                  }
-                ].map((event, index) => (
-                  <div key={index} className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium">{event.event}</p>
-                      <p className="text-xs text-muted-foreground">{event.date}</p>
-                    </div>
-                    <span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-800">
-                      {event.type}
-                    </span>
                   </div>
                 ))}
               </CardContent>
