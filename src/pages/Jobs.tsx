@@ -1,12 +1,12 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Layout from '../components/layout/Layout';
 import JobCard from '../components/jobs/JobCard';
 import PostJobModal from '../components/jobs/PostJobModal';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Search, Filter, Plus, Briefcase } from 'lucide-react';
 import { mockJobs } from '@/data/mockData';
 import { useAuth } from '@/contexts/AuthContext';
@@ -14,7 +14,7 @@ import { Job } from '@/types';
 
 const Jobs = () => {
   const { currentUser } = useAuth();
-  const [jobs] = useState<Job[]>(mockJobs);
+  const [jobs, setJobs] = useState<Job[]>(mockJobs);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [filterLocation, setFilterLocation] = useState('all');

@@ -42,7 +42,7 @@ const CompanyProfile = () => {
                   <div className="flex items-center space-x-3">
                     <Avatar>
                       <AvatarImage src={c.logo_url} />
-                      <AvatarFallback>{(c.company_name || 'C').charAt(0)}</AvatarFallback>
+                      <AvatarFallback>{c.company_name.charAt(0)}</AvatarFallback>
                     </Avatar>
                     <div>
                       <h4 className="font-medium">{c.company_name}</h4>
@@ -72,10 +72,10 @@ const CompanyProfile = () => {
           <div className="flex items-center gap-4 mb-6">
             <Avatar className="h-16 w-16">
               <AvatarImage src={company.logo_url} alt={company.company_name} />
-              <AvatarFallback>{(company.company_name || 'C').charAt(0)}</AvatarFallback>
+              <AvatarFallback>{company.company_name.charAt(0)}</AvatarFallback>
             </Avatar>
             <div>
-              <h1 className="text-2xl font-bold">{company.company_name || 'Company Name'}</h1>
+              <h1 className="text-2xl font-bold">{company.company_name}</h1>
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <MapPin className="h-4 w-4" />
                 <span>{company.location}</span>
