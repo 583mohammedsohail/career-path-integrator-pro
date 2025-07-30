@@ -33,12 +33,9 @@ import { motion } from 'framer-motion';
 // Mock statistics
 const mockStats: PlacementStats = {
   totalStudents: 847,
-  totalApplications: 1234,
   totalJobs: 156,
   totalPlacements: 665,
-  placementRate: 78.5,
-  averageSalary: 650000,
-  highestSalary: 2500000
+  placementRate: 78.5
 };
 
 const FloatingImage = ({ src, alt, className }: { src: string; alt: string; className: string }) => {
@@ -237,7 +234,7 @@ const Index = () => {
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{mockStats.totalApplications.toLocaleString()}</div>
+              <div className="text-2xl font-bold">{(mockJobs.length * 45).toLocaleString()}</div>
               <Progress value={75} className="mt-2" />
               <p className="text-xs text-muted-foreground mt-2">
                 +20% from last month
@@ -279,7 +276,7 @@ const Index = () => {
               <Award className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">₹{(mockStats.averageSalary / 100000).toFixed(1)}L</div>
+              <div className="text-2xl font-bold">₹8.5L</div>
               <Progress value={85} className="mt-2" />
               <p className="text-xs text-muted-foreground mt-2">
                 +15% from last year

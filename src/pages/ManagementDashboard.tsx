@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Layout from '../components/layout/Layout';
 import { useAuth } from '../contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
@@ -7,8 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { 
-  Briefcase, Users, Building2, Award, BarChart2, 
-  FileText, TrendingUp, Settings, Filter 
+  Users, Building2, Award, BarChart2, 
+  FileText, TrendingUp, Filter 
 } from 'lucide-react';
 import DashboardStats from '@/components/admin/DashboardStats';
 import PlacementChart from '@/components/dashboard/PlacementChart';
