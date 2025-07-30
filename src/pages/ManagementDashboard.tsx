@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Layout from '../components/layout/Layout';
 import { useAuth } from '../contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
@@ -7,12 +7,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { 
-  Briefcase, Users, Building2, Award, BarChart2, 
-  FileText, TrendingUp, Settings, Filter 
+  Building2, BarChart2, 
+  FileText, TrendingUp, Filter 
 } from 'lucide-react';
 import DashboardStats from '@/components/admin/DashboardStats';
 import PlacementChart from '@/components/dashboard/PlacementChart';
-import { mockPlacementStats } from '@/data/mockData';
+import PlacementStatsCard from '@/components/dashboard/PlacementStatsCard';
 
 const ManagementDashboard = () => {
   const { currentUser, isLoading } = useAuth();
@@ -77,48 +77,7 @@ const ManagementDashboard = () => {
           </TabsList>
           
           <TabsContent value="overview" className="space-y-4">
-            {/* Key Performance Indicators */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium">Total Students</CardTitle>
-                  <Users className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{mockPlacementStats.totalStudents}</div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium">Placement Rate</CardTitle>
-                  <Award className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{mockPlacementStats.placementRate}%</div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium">Average Package</CardTitle>
-                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">₹{mockPlacementStats.averageSalary}K</div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium">Highest Package</CardTitle>
-                  <Award className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">₹{mockPlacementStats.highestSalary}K</div>
-                </CardContent>
-              </Card>
-            </div>
+            <PlacementStatsCard />
 
             <Card>
               <CardHeader>

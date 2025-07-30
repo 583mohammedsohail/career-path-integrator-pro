@@ -17,6 +17,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
+import PlacementStatsCard from '@/components/dashboard/PlacementStatsCard';
 
 // Use the User interface from types instead of defining a duplicate
 // Profile form state interface
@@ -463,7 +464,11 @@ const Profile = () => {
           <DeveloperCredits />
         </div>
       </div>
-      
+      {['student', 'admin', 'management', 'superadmin'].includes(currentUser.role) && (
+        <div className="mb-6">
+          <PlacementStatsCard />
+        </div>
+      )}
       {/* Edit Profile Dialog */}
       <Dialog open={isEditProfileOpen} onOpenChange={setIsEditProfileOpen}>
         <DialogContent className="sm:max-w-[425px]">

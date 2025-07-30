@@ -135,6 +135,7 @@ export interface Student {
   email: string;
   profile_pic?: string;
   avatar_url?: string;
+  avatar?: string;
   university?: string;
   degree?: string;
   graduation_year?: string;
@@ -163,7 +164,7 @@ export interface SystemActivity {
   entity_type: string;
   entity_id?: string;
   user_id?: string;
-  details: any;
+  details: Record<string, unknown>;
   created_at: string;
 }
 

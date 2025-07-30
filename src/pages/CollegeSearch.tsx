@@ -398,7 +398,25 @@ export default function CollegeSearch() {
                           }
                         }}
                       >
-                        <h3 className="font-medium">{college.name}</h3>
+                        <div className="flex gap-2 mb-2">
+  {(college.photos && college.photos.length > 0
+    ? college.photos.slice(0, 3)
+    : [null]
+  ).map((photo, idx) => (
+    <img
+      key={idx}
+      src={(() => {
+        if (!photo) return 'https://img.icons8.com/ios-filled/100/university.png';
+        if (photo.startsWith('http')) return photo;
+        return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photo}&key=${GOOGLE_MAPS_API_KEY}`;
+      })()}
+      alt={`${college.name} image ${idx + 1}`}
+      className="h-16 w-20 object-cover rounded-md bg-gray-100"
+      loading="lazy"
+    />
+  ))}
+</div>
+<h3 className="font-medium">{college.name}</h3>
                         <p className="text-sm text-gray-500">{college.formatted_address || college.address}</p>
                         {college.rating && (
                           <div className="mt-1 flex items-center">

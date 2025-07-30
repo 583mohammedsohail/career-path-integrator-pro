@@ -1044,9 +1044,9 @@ export const mockNotifications: Notification[] = [
 
 // Generate mock placement stats
 export const mockPlacementStats: PlacementStats = {
-  totalStudents: 120,
-  placedStudents: 88,
-  placementPercentage: 73.33,
-  averagePackage: '₹8.5 LPA',
-  highestPackage: '₹24 LPA'
+  totalStudents: 345,
+  placedStudents: 200,
+  placementPercentage: 45,
+  averagePackage: '7 LPA',
+  highestPackage: '1 Cr'
 };

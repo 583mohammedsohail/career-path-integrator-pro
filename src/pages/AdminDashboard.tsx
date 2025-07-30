@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Users, FileText, Activity, BarChart2 } from 'lucide-react';
 import ActivityLog from '@/components/admin/ActivityLog';
 import DashboardStats from '@/components/admin/DashboardStats';
+import PlacementStatsCard from '@/components/dashboard/PlacementStatsCard';
 
 const AdminDashboard = () => {
   const { currentUser, isLoading } = useAuth();
@@ -63,6 +64,7 @@ const AdminDashboard = () => {
           </TabsList>
           
           <TabsContent value="dashboard" className="space-y-4">
+            <PlacementStatsCard />
             <DashboardStats />
           </TabsContent>
           

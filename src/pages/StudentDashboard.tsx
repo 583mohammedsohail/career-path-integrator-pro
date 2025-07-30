@@ -1,25 +1,24 @@
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+
 import { 
   GraduationCap, 
   Briefcase, 
   Calendar, 
   TrendingUp, 
   FileText, 
-  Bell,
-  MapPin,
-  Clock
+  Bell
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+
 import AttendanceMarker from '@/components/student/AttendanceMarker';
+import PlacementStatsCard from '@/components/dashboard/PlacementStatsCard';
 
 interface DashboardStats {
   applicationsCount: number;
@@ -33,8 +32,8 @@ interface RecentActivity {
   type: 'application' | 'campus_drive' | 'notification';
   title: string;
   description: string;
-  date: string;
-  status?: string;
+  date: string | null;
+  status?: string | null;
 }
 
 const StudentDashboard = () => {
@@ -56,6 +55,7 @@ const StudentDashboard = () => {
   }, [currentUser]);
 
   const fetchDashboardData = async () => {
+    if (!currentUser) return;
     try {
       // Fetch student applications
       const { count: applicationsCount } = await supabase
@@ -73,14 +73,14 @@ const StudentDashboard = () => {
       const { data: studentData } = await supabase
         .from('students')
         .select('cgpa')
-        .eq('id', currentUser?.id)
+        .eq('id', currentUser.id)
         .single();
 
       setStats({
         applicationsCount: applicationsCount || 0,
         upcomingDrives: upcomingDrives || 0,
         placementRate: 75, // Mock data
-        cgpa: studentData?.cgpa || 0
+        cgpa: Number(studentData?.cgpa) || 0
       });
 
       // Fetch recent activity
@@ -92,11 +92,11 @@ const StudentDashboard = () => {
           status,
           jobs (title, company_id)
         `)
-        .eq('student_id', currentUser?.id)
+        .eq('student_id', currentUser.id)
         .order('applied_at', { ascending: false })
         .limit(5);
 
-      const activity: RecentActivity[] = applications?.map(app => ({
+      const activity: RecentActivity[] = applications?.map((app: any) => ({
         id: app.id,
         type: 'application' as const,
         title: `Applied to ${app.jobs?.title || 'Job'}`,
@@ -113,6 +113,20 @@ const StudentDashboard = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <Layout>
+        <div className="container mx-auto px-4 py-8">
+          <div className="animate-pulse">
+            <div className="h-12 bg-gray-200 rounded-md w-3/4 mb-6"></div>
+            <div className="h-64 bg-gray-200 rounded-md mb-6"></div>
+            <div className="h-64 bg-gray-200 rounded-md"></div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
   if (!currentUser || currentUser.role !== 'student') {
     navigate('/');
     return null;
@@ -128,6 +142,10 @@ const StudentDashboard = () => {
           <p className="text-gray-600">
             Track your placement progress and stay updated with opportunities.
           </p>
+        </div>
+
+        <div className="mb-8">
+          <PlacementStatsCard />
         </div>
 
         {/* Stats Overview */}
@@ -221,7 +239,7 @@ const StudentDashboard = () => {
                           <p className="text-sm text-muted-foreground">{activity.description}</p>
                           <div className="flex items-center gap-2 mt-2">
                             <span className="text-xs text-muted-foreground">
-                              {new Date(activity.date).toLocaleDateString()}
+                              {activity.date ? new Date(activity.date).toLocaleDateString() : ''}
                             </span>
                             {activity.status && (
                               <Badge variant="outline" className="text-xs">

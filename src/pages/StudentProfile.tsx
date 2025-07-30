@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { GraduationCap, Mail, Phone, MapPin, Download, Building2, Code, BookOpen } from 'lucide-react';
+import PlacementStatsCard from '@/components/dashboard/PlacementStatsCard';
 
 const StudentProfile = () => {
   const { id } = useParams();
@@ -109,6 +110,10 @@ const StudentProfile = () => {
             </div>
           </CardContent>
         </Card>
+
+        <div className="my-6">
+          <PlacementStatsCard />
+        </div>
 
         {/* Main Content */}
         <Tabs defaultValue="about" className="space-y-4">

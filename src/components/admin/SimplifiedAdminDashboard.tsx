@@ -14,6 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import SimpleDataPopulator from './SimpleDataPopulator';
 import RealTimeAttendance from './RealTimeAttendance';
+import PlacementStatsCard from '@/components/dashboard/PlacementStatsCard';
 
 interface ActiveUser {
   id: string;
@@ -361,7 +362,7 @@ const SimplifiedAdminDashboard = () => {
         </CardContent>
       </Card>
 
-      <Tabs defaultValue="attendance" className="space-y-4">
+      <Tabs defaultValue="dashboard" className="space-y-4">
         <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="attendance">Live Attendance</TabsTrigger>
           <TabsTrigger value="overview">Overview</TabsTrigger>
@@ -377,6 +378,7 @@ const SimplifiedAdminDashboard = () => {
         </TabsContent>
 
         <TabsContent value="overview" className="space-y-4">
+          <PlacementStatsCard />
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -720,6 +722,11 @@ const SimplifiedAdminDashboard = () => {
               </Button>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="dashboard" className="space-y-4">
+          <PlacementStatsCard />
+          <SimpleDataPopulator />
         </TabsContent>
 
         <TabsContent value="database" className="space-y-4">

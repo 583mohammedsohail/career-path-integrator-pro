@@ -13,10 +13,16 @@ export const UserSessionProvider: React.FC<{ children: React.ReactNode }> = ({ c
     // Start session tracking when user is authenticated
     const startSession = async () => {
       try {
-        // Try to call the function to update user activity
-        const { error } = await (supabase as any).rpc('update_user_activity');
-        if (error) {
-          console.log('Session tracking not yet implemented:', error.message);
+        // Only call the function if the user is a real Supabase user (UUID v4)
+        const uuidV4Regex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+        if (currentUser && uuidV4Regex.test(currentUser.id)) {
+          const { error } = await (supabase as any).rpc('update_user_activity');
+          if (error) {
+            console.log('Session tracking not yet implemented:', error.message);
+          }
+        } else {
+          // Skip session tracking for mock/demo users
+          // console.log('Skipping Supabase session tracking for mock/demo user');
         }
       } catch (error) {
         console.log('Session tracking will be implemented later');

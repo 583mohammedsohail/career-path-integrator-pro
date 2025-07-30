@@ -143,8 +143,11 @@ const CampusRecruitment = () => {
                 <div className="flex items-start gap-3">
                   <div className="flex items-center gap-2 mb-1">
                     <Avatar className="h-6 w-6">
-                      <AvatarImage src={drive.company?.logo} alt={drive.company?.name} />
-                      <AvatarFallback>{drive.company?.name?.charAt(0)}</AvatarFallback>
+                      <AvatarImage
+                        src={drive.company_logo || drive.company?.avatar_url || drive.company?.logo}
+                        alt={drive.company_name || drive.company?.name || 'Company'}
+                      />
+                      <AvatarFallback>{(drive.company_name || drive.company?.name || 'C').charAt(0)}</AvatarFallback>
                     </Avatar>
                     <Link 
                       to={`/companies/${drive.company?.id}`}
