@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import Layout from '../components/layout/Layout';
 import JobCard from '../components/jobs/JobCard';
@@ -20,19 +19,18 @@ const Jobs = () => {
   const [filterLocation, setFilterLocation] = useState('all');
   const [isPostJobModalOpen, setIsPostJobModalOpen] = useState(false);
 
-  // Filter jobs based on search and filters
+  // Ensure job.type always exists for filtering
   const filteredJobs = jobs.filter(job => {
+    const jobType = job.type || 'full-time';
     const matchesSearch = job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          job.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesType = filterType === 'all' || job.type === filterType;
-    const matchesLocation = filterLocation === 'all' || job.location?.toLowerCase().includes(filterLocation.toLowerCase());
+    const matchesType = filterType === 'all' || jobType === filterType;
+    const matchesLocation = filterLocation === 'all' || (job.location?.toLowerCase().includes(filterLocation.toLowerCase()));
     return matchesSearch && matchesType && matchesLocation;
   });
 
   const handleJobPosted = () => {
     // Refresh the jobs list - in a real app, this would fetch from the database
-    console.log('Job posted successfully');
-    // For now, we'll just close the modal
     setIsPostJobModalOpen(false);
   };
 
@@ -46,7 +44,6 @@ const Jobs = () => {
             <h1 className="text-3xl font-bold mb-2">Job Opportunities</h1>
             <p className="text-gray-600">Discover your next career move</p>
           </div>
-          
           {canPostJobs && (
             <Button onClick={() => setIsPostJobModalOpen(true)} className="flex items-center gap-2">
               <Plus className="h-4 w-4" />
@@ -54,7 +51,6 @@ const Jobs = () => {
             </Button>
           )}
         </div>
-
         {/* Search and Filter Controls */}
         <Card className="mb-6">
           <CardContent className="p-6">
@@ -68,7 +64,6 @@ const Jobs = () => {
                   className="pl-10"
                 />
               </div>
-              
               <Select value={filterType} onValueChange={setFilterType}>
                 <SelectTrigger className="w-full md:w-48">
                   <Filter className="h-4 w-4 mr-2" />
@@ -82,7 +77,6 @@ const Jobs = () => {
                   <SelectItem value="contract">Contract</SelectItem>
                 </SelectContent>
               </Select>
-              
               <Select value={filterLocation} onValueChange={setFilterLocation}>
                 <SelectTrigger className="w-full md:w-48">
                   <SelectValue placeholder="Location" />
@@ -99,7 +93,6 @@ const Jobs = () => {
             </div>
           </CardContent>
         </Card>
-
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <Card>
@@ -124,13 +117,12 @@ const Jobs = () => {
             <CardContent className="p-4 flex items-center">
               <Briefcase className="h-8 w-8 text-purple-600 mr-3" />
               <div>
-                <p className="text-2xl font-bold">{filteredJobs.filter(job => job.type === 'internship').length}</p>
+                <p className="text-2xl font-bold">{filteredJobs.filter(job => (job.type || 'full-time') === 'internship').length}</p>
                 <p className="text-sm text-gray-600">Internships</p>
               </div>
             </CardContent>
           </Card>
         </div>
-
         {/* Jobs Grid */}
         {filteredJobs.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -147,7 +139,6 @@ const Jobs = () => {
             <p className="text-sm text-gray-500">Try adjusting your search terms or filters.</p>
           </div>
         )}
-
         {/* Post Job Modal */}
         <PostJobModal
           isOpen={isPostJobModalOpen}

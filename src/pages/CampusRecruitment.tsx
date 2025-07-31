@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Layout from '../components/layout/Layout';
 import PostCampusDriveModal from '../components/campus/PostCampusDriveModal';
+import CampusDriveApplicationModal from '../components/campus/CampusDriveApplicationModal';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +15,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { CampusDrive } from '@/types';
 
 const CampusRecruitment = () => {
+  const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
+  const [selectedDrive, setSelectedDrive] = useState<CampusDrive | null>(null);
   const { currentUser } = useAuth();
   const [drives] = useState<CampusDrive[]>(mockCampusDrives);
   const [searchTerm, setSearchTerm] = useState('');
@@ -224,8 +227,8 @@ const CampusRecruitment = () => {
                         </Link>
                       </Button>
                       <Button size="sm" onClick={() => {
-                        // Logic to handle application
-                        alert(`Application for ${drive.title} will be processed`);
+                        setSelectedDrive(drive);
+                        setIsApplyModalOpen(true);
                       }}>
                         Apply Now
                       </Button>
@@ -253,6 +256,13 @@ const CampusRecruitment = () => {
         isOpen={isPostDriveModalOpen}
         onClose={() => setIsPostDriveModalOpen(false)}
         onDrivePosted={handleDrivePosted}
+      />
+      {/* Campus Drive Application Modal */}
+      <CampusDriveApplicationModal
+        isOpen={isApplyModalOpen}
+        onClose={() => setIsApplyModalOpen(false)}
+        drive={selectedDrive}
+        companyName={selectedDrive?.company?.name || selectedDrive?.company_name}
       />
     </Layout>
   );

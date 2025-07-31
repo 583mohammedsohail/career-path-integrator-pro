@@ -133,6 +133,7 @@ const CompanyDashboard = () => {
             <TabsTrigger value="postings">Job Postings</TabsTrigger>
             <TabsTrigger value="applications">Applications</TabsTrigger>
             <TabsTrigger value="post">Post New Job</TabsTrigger>
+            <TabsTrigger value="campus">Campus Recruitment</TabsTrigger>
           </TabsList>
           
           {/* Job Postings Tab */}
@@ -231,7 +232,7 @@ const CompanyDashboard = () => {
                                 <div className="flex items-center gap-2">
                                   <Avatar className="h-8 w-8">
                                     <AvatarImage src={application.student.avatar} />
-                                    <AvatarFallback>{application.student.name.charAt(0)}</AvatarFallback>
+                                    <AvatarFallback>{application.student?.name?.charAt(0) || 'U'}</AvatarFallback>
                                   </Avatar>
                                   <div>
                                     <p className="font-medium">{application.student.name}</p>
@@ -355,6 +356,51 @@ const CompanyDashboard = () => {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Campus Recruitment Tab */}
+        <TabsContent value="campus">
+          <Card>
+            <CardHeader>
+              <CardTitle>Post a Campus Recruitment Drive</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form 
+                className="space-y-4"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  toast.success('Campus recruitment drive posted successfully!');
+                  setActiveTab('postings');
+                }}
+              >
+                <div className="space-y-2">
+                  <label className="text-sm font-medium" htmlFor="campus-title">Drive Title</label>
+                  <Input id="campus-title" placeholder="e.g. 2025 Graduate Drive" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium" htmlFor="campus-description">Description</label>
+                  <Textarea id="campus-description" rows={4} placeholder="Describe the drive, target branches, etc." />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium" htmlFor="campus-date">Drive Date</label>
+                    <Input type="date" id="campus-date" min={new Date().toISOString().split('T')[0]} />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium" htmlFor="campus-location">Location</label>
+                    <Input id="campus-location" placeholder="e.g. College Auditorium" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium" htmlFor="campus-requirements">Requirements (one per line)</label>
+                  <Textarea id="campus-requirements" rows={4} placeholder="e.g. CS/IT branches, 60% minimum, etc." />
+                </div>
+                <div className="pt-4 flex justify-end">
+                  <Button type="submit">Post Campus Drive</Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        </TabsContent>
         
         {/* Dialog for applicant details */}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -373,7 +419,7 @@ const CompanyDashboard = () => {
                     <div className="flex flex-col items-center text-center">
                       <Avatar className="h-20 w-20">
                         <AvatarImage src={selectedApplicant.avatar} />
-                        <AvatarFallback>{selectedApplicant.name.charAt(0)}</AvatarFallback>
+                        <AvatarFallback>{selectedApplicant?.name?.charAt(0) || 'U'}</AvatarFallback>
                       </Avatar>
                       <h3 className="font-semibold mt-4">{selectedApplicant.name}</h3>
                       <p className="text-sm text-muted-foreground">{selectedApplicant.department}</p>

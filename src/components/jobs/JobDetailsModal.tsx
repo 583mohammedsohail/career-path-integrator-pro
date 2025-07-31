@@ -122,7 +122,7 @@ const JobDetailsModal: React.FC<JobDetailsModalProps> = ({
                           <Avatar>
                             <AvatarImage src={application.student.avatar_url} />
                             <AvatarFallback>
-                              {application.student.name.charAt(0)}
+                              {application.student?.name?.charAt(0) || 'U'}
                             </AvatarFallback>
                           </Avatar>
                           <div>

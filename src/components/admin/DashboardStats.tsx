@@ -4,14 +4,32 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, Briefcase, FileText, TrendingUp } from 'lucide-react';
 
 const DashboardStats = () => {
-  // Hardcoded demo stats
-  const stats = {
-    totalApplications: '33,000',
-    totalJobs: '10,000',
-    placementRate: '57%',
-    averageSalary: '7 LPA',
-    highestPackage: '1 Cr'
-  };
+  // Real-time stats using mockPlacementStats
+  const [stats, setStats] = useState({
+    totalApplications: 0,
+    totalJobs: 0,
+    placementRate: '0%',
+    averageSalary: '0 LPA',
+    highestPackage: '0'
+  });
+
+  useEffect(() => {
+    function fetchStats() {
+      // Import dynamically to always get latest mock data
+      import('@/data/mockData').then(({ mockPlacementStats, mockJobs }) => {
+        setStats({
+          totalApplications: mockJobs.length,
+          totalJobs: mockJobs.filter(j => j.status === 'active').length,
+          placementRate: mockPlacementStats.placementPercentage + '%',
+          averageSalary: mockPlacementStats.averagePackage,
+          highestPackage: mockPlacementStats.highestPackage
+        });
+      });
+    }
+    fetchStats();
+    const interval = setInterval(fetchStats, 5000); // Update every 5 seconds
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">

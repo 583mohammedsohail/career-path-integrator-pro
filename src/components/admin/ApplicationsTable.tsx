@@ -92,7 +92,7 @@ const ApplicationsTable: React.FC<ApplicationsTableProps> = ({
               <div className="flex items-center gap-2">
                 <Avatar className="h-8 w-8">
                   <AvatarImage src={application.student.avatar} alt={application.student.name} />
-                  <AvatarFallback>{application.student.name.charAt(0)}</AvatarFallback>
+                  <AvatarFallback>{application.student?.name?.charAt(0) || 'U'}</AvatarFallback>
                 </Avatar>
                 <div>
                   <p className="font-medium">{application.student.name}</p>
@@ -105,7 +105,7 @@ const ApplicationsTable: React.FC<ApplicationsTableProps> = ({
               <div className="flex items-center gap-2">
                 <Avatar className="h-6 w-6">
                   <AvatarImage src={application.job.company.logo} alt={application.job.company.name} />
-                  <AvatarFallback>{application.job.company.name.charAt(0)}</AvatarFallback>
+                  <AvatarFallback>{application.job.company?.name?.charAt(0) || 'U'}</AvatarFallback>
                 </Avatar>
                 <span>{application.job.company.name}</span>
               </div>

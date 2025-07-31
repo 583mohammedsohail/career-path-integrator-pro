@@ -639,6 +639,50 @@ export const mockSuperAdmin: SuperAdmin = {
 
 // Generate mock jobs
 export const mockJobs: Job[] = [
+  // Internships
+  {
+    id: '101',
+    title: 'Software Engineering Intern',
+    company_id: '1',
+    description: 'Work with our engineering team to build new features and fix bugs.',
+    requirements: ['Currently pursuing B.Tech/BE', 'Good knowledge of JavaScript/React'],
+    location: 'Bangalore, Karnataka',
+    salary: '₹20,000/month',
+    positions: 3,
+    deadline: '2025-08-31',
+    status: 'active',
+    created_at: '2025-07-01',
+    type: 'internship',
+  },
+  {
+    id: '102',
+    title: 'Data Science Intern',
+    company_id: '3',
+    description: 'Assist in data analysis and model building for client projects.',
+    requirements: ['Python', 'Pandas', 'Interest in ML/AI'],
+    location: 'Mumbai, Maharashtra',
+    salary: '₹18,000/month',
+    positions: 2,
+    deadline: '2025-08-20',
+    status: 'active',
+    created_at: '2025-07-01',
+    type: 'internship',
+  },
+  {
+    id: '103',
+    title: 'Marketing Intern',
+    company_id: '6',
+    description: 'Support the marketing team in running digital campaigns.',
+    requirements: ['Good communication', 'Social media skills'],
+    location: 'Hyderabad, Telangana',
+    salary: '₹15,000/month',
+    positions: 2,
+    deadline: '2025-08-25',
+    status: 'active',
+    created_at: '2025-07-01',
+    type: 'internship',
+  },
+
   {
     id: '1',
     title: 'Software Engineer',
@@ -1028,7 +1072,67 @@ export const mockJobs: Job[] = [
     deadline: '2025-12-31',
     status: 'active',
     created_at: '2024-05-01'
-  }
+  },
+  // Contract Job
+  {
+    id: '201',
+    title: 'UI/UX Designer (Contract)',
+    company_id: '17',
+    description: 'Design user interfaces for web/mobile apps on a 6-month contract basis.',
+    requirements: ['Figma/Sketch', 'Portfolio required'],
+    location: 'Bangalore, Karnataka',
+    salary: '₹60,000/month',
+    positions: 1,
+    deadline: '2025-09-10',
+    status: 'active',
+    created_at: '2025-07-31',
+    type: 'contract',
+  },
+  // Part Time Job
+  {
+    id: '202',
+    title: 'Content Writer (Part Time)',
+    company_id: '19',
+    description: 'Write and edit blog posts for our e-commerce platform. 20 hours/week.',
+    requirements: ['Excellent English', 'Writing samples'],
+    location: 'Remote',
+    salary: '₹25,000/month',
+    positions: 2,
+    deadline: '2025-09-15',
+    status: 'active',
+    created_at: '2025-07-31',
+    type: 'part-time',
+  },
+  // Part Time Job
+  {
+    id: '203',
+    title: 'Customer Support (Part Time)',
+    company_id: '25',
+    description: 'Assist customers via chat/email in the evenings and weekends.',
+    requirements: ['Good communication', 'Basic computer skills'],
+    location: 'Mumbai, Maharashtra',
+    salary: '₹18,000/month',
+    positions: 3,
+    deadline: '2025-09-20',
+    status: 'active',
+    created_at: '2025-07-31',
+    type: 'part-time',
+  },
+  // Contract Job
+  {
+    id: '204',
+    title: 'QA Tester (Contract)',
+    company_id: '21',
+    description: 'Manual and automated testing for our SaaS product. 3-month contract.',
+    requirements: ['Testing experience', 'Attention to detail'],
+    location: 'Bangalore, Karnataka',
+    salary: '₹40,000/month',
+    positions: 2,
+    deadline: '2025-09-05',
+    status: 'active',
+    created_at: '2025-07-31',
+    type: 'contract',
+  },
 ];
 
 // Generate mock notifications
@@ -1044,9 +1148,9 @@ export const mockNotifications: Notification[] = [
 
 // Generate mock placement stats
 export const mockPlacementStats: PlacementStats = {
-  totalStudents: 345,
-  placedStudents: 200,
-  placementPercentage: 45,
-  averagePackage: '7 LPA',
-  highestPackage: '1 Cr'
+  totalStudents: 400,
+  placedStudents: 280,
+  placementPercentage: 70,
+  averagePackage: '8.5 LPA',
+  highestPackage: '48 LPA'
 };

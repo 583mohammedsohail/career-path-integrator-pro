@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
@@ -6,19 +5,32 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Job } from '@/types';
 import { MapPin, Calendar, Users } from 'lucide-react';
+import { mockCompanies } from '@/data/mockData';
 
 interface JobCardProps {
   job: Job;
 }
 
 const JobCard: React.FC<JobCardProps> = ({ job }) => {
+  // Find the company for this job
+  const company = mockCompanies.find(c => c.id === job.company_id);
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardContent className="p-6">
         <div className="flex items-start justify-between mb-4">
-          <div>
-            <h3 className="text-lg font-semibold mb-1">{job.title}</h3>
-            <p className="text-sm text-muted-foreground">Company ID: {job.company_id}</p>
+          <div className="flex items-center gap-3">
+            {company && company.logo_url && (
+              <img
+                src={company.logo_url}
+                alt={company.company_name}
+                className="h-10 w-10 rounded bg-white border object-contain"
+                style={{ maxWidth: 40, maxHeight: 40 }}
+              />
+            )}
+            <div>
+              <h3 className="text-lg font-semibold mb-1">{job.title}</h3>
+              <p className="text-sm text-muted-foreground">{company ? company.company_name : `Company ID: ${job.company_id}`}</p>
+            </div>
           </div>
           <Badge 
             variant="outline" 
