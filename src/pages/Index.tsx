@@ -22,7 +22,7 @@ import {
   CheckCircle,
   Clock
 } from 'lucide-react';
-import { mockPlacementStats, mockJobs, mockStudents } from '../data/mockData';
+import { mockPlacementStats, mockJobs, mockStudents, mockCompanies } from '../data/mockData';
 import {
   Card,
   CardContent,
@@ -82,8 +82,21 @@ const FeatureCard = ({ icon: Icon, title, description }) => {
     </motion.div>
   );
 };
-
 const Index = () => {
+  const affiliatedColleges: { name: string; logo: string }[] = [
+  { name: 'Ellenki College', logo: '/college-logos/ellenki.png' },
+  { name: 'Bhilai Institute of Technology Durg', logo: '/college-logos/bit-durg.png' },
+  { name: 'IIT Bombay', logo: '/college-logos/iit-bombay.png' },
+  { name: 'IIT Delhi', logo: '/college-logos/iit-delhi.png' },
+  { name: 'VIT', logo: '/college-logos/vit.png' },
+  { name: 'BITS Pilani', logo: '/college-logos/bits-pilani.png' },
+  { name: 'SRM University', logo: '/college-logos/srm.png' },
+  { name: 'Manipal University', logo: '/college-logos/manipal.png' },
+  { name: 'Amity University', logo: '/college-logos/amity.png' },
+  { name: 'Christ University', logo: '/college-logos/christ.png' },
+  { name: 'Shiv Nadar University', logo: '/college-logos/shiv-nadar.png' },
+  { name: 'Lovely Professional University', logo: '/college-logos/lpu.png' },
+];
   const { currentUser } = useAuth();
   const navigate = useNavigate();
   
@@ -139,11 +152,73 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Testimonial Carousel */}
+        {/* Affiliated Colleges Animated Train */}
+<section className="py-8 bg-white">
+  <div className="container mx-auto px-4">
+    <div className="text-center mb-6">
+      <h3 className="text-2xl md:text-3xl font-extrabold text-gray-900 mb-4 tracking-wide uppercase">
+          Affiliated Colleges/University
+        </h3>
+    </div>
+    <div className="w-full overflow-x-hidden py-2">
+      <motion.div
+        className="flex gap-8 min-w-full px-2"
+        style={{ display: 'flex', alignItems: 'center' }}
+        animate={{ x: [0, -1200] }}
+        transition={{ repeat: Infinity, duration: 28, ease: 'linear' }}
+      >
+        {(affiliatedColleges.concat(affiliatedColleges) as { name: string; logo: string }[]).map((college, idx) => (
+          <div
+            key={college.name + '-' + idx}
+            className="flex flex-col items-center justify-center h-20 w-36 mx-2 bg-gray-50 rounded shadow"
+          >
+            <img
+              src={college.logo}
+              alt={college.name}
+              className="h-14 w-auto object-contain mb-1"
+              style={{ maxWidth: 110 }}
+              onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+            />
+            <span className="text-xs text-gray-700 font-semibold text-center truncate w-full" title={college.name}>{college.name}</span>
+          </div>
+        ))}
+      </motion.div>
+    </div>
+  </div>
+</section>
+
+{/* Testimonial Carousel */}
         <section className="py-12 bg-gray-50">
           <div className="container mx-auto px-4">
             <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold text-gray-900">Success Stories</h2>
+              <div className="flex flex-col items-center mb-8">
+  <h3 className="text-2xl md:text-3xl font-extrabold text-gray-900 mb-6 tracking-wide uppercase">Trusted by Companies</h3>
+<div className="w-full overflow-x-hidden py-2">
+  <motion.div
+    className="flex gap-8 min-w-full px-2"
+    style={{ display: 'flex', alignItems: 'center' }}
+    animate={{ x: [0, -1000] }}
+    transition={{ repeat: Infinity, duration: 30, ease: 'linear' }}
+    onAnimationComplete={() => {}}
+  >
+    {[...mockCompanies, ...mockCompanies].map((company, idx) => (
+      <div
+        key={company.id + '-' + idx}
+        className="flex items-center justify-center h-20 w-32 mx-2 bg-white rounded shadow"
+      >
+        <img
+          src={company.logo_url}
+          alt={company.company_name}
+          className="h-16 w-auto object-contain"
+          style={{ maxWidth: 100 }}
+          onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+        />
+      </div>
+    ))}
+  </motion.div>
+</div>
+</div>
+<h2 className="text-3xl font-bold text-gray-900">Success Stories</h2>
               <p className="mt-2 text-lg text-gray-600">
                 Hear from students and companies who've found success with our platform
               </p>
@@ -155,15 +230,15 @@ const Index = () => {
                   <Card>
                     <CardContent className="flex flex-col items-center p-6">
                       <img
-                        src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150&q=80"
-                        alt="Student profile"
-                        className="w-20 h-20 rounded-full object-cover mb-4"
-                      />
+                          src="/review-avatars/ankit-sharma.jpg"
+                          alt="Ankit Sharma profile photo"
+                          className="w-20 h-20 rounded-full object-cover mb-4"
+                        />
                       <p className="text-lg italic text-gray-700 text-center">
-                        "Thanks to this platform, I secured my dream job at Google. The process was seamless and I received multiple offers!"
+                        "I got placed at Infosys through my college's first ever virtual drive. The process was transparent and stress-free!"
                       </p>
-                      <h4 className="mt-4 font-medium">Sarah Johnson</h4>
-                      <p className="text-sm text-gray-500">Computer Science Graduate, 2024</p>
+                      <h4 className="mt-4 font-medium">Ankit Sharma</h4>
+                      <p className="text-sm text-gray-500">B.Tech, VIT Vellore, 2024</p>
                     </CardContent>
                   </Card>
                 </CarouselItem>
@@ -171,15 +246,15 @@ const Index = () => {
                   <Card>
                     <CardContent className="flex flex-col items-center p-6">
                       <img
-                        src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150&q=80"
-                        alt="Corporate profile"
-                        className="w-20 h-20 rounded-full object-cover mb-4"
-                      />
+                          src="/review-avatars/priya-iyer.jpg"
+                          alt="Priya Iyer profile photo"
+                          className="w-20 h-20 rounded-full object-cover mb-4"
+                        />
                       <p className="text-lg italic text-gray-700 text-center">
-                        "As a hiring manager, this platform has simplified our campus recruitment efforts. We found top talent quickly and efficiently."
+                        "The analytics dashboard helped our placement cell track every student's progress. We improved our placement rate by 30%!"
                       </p>
-                      <h4 className="mt-4 font-medium">David Williams</h4>
-                      <p className="text-sm text-gray-500">HR Director, Tech Innovations Inc.</p>
+                      <h4 className="mt-4 font-medium">Priya Iyer</h4>
+                      <p className="text-sm text-gray-500">Placement Officer, SRM University</p>
                     </CardContent>
                   </Card>
                 </CarouselItem>
@@ -187,13 +262,49 @@ const Index = () => {
                   <Card>
                     <CardContent className="flex flex-col items-center p-6">
                       <img
-                        src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150&q=80"
-                        alt="Faculty profile"
-                        className="w-20 h-20 rounded-full object-cover mb-4"
-                      />
+                          src="/review-avatars/rahul-verma.jpg"
+                          alt="Rahul Verma profile photo"
+                          className="w-20 h-20 rounded-full object-cover mb-4"
+                        />
                       <p className="text-lg italic text-gray-700 text-center">
-                        "Managing campus placements used to be a nightmare. This system has transformed our process completely!"
+                        "Secured a core job at Tata Steel. The interview resources and notifications were a game changer!"
                       </p>
+                      <h4 className="mt-4 font-medium">Rahul Verma</h4>
+                      <p className="text-sm text-gray-500">B.Tech, IIT Bombay, 2023</p>
+                    </CardContent>
+                  </Card>
+                </CarouselItem>
+                <CarouselItem>
+                  <Card>
+                    <CardContent className="flex flex-col items-center p-6">
+                      <img
+                          src="/review-avatars/sneha-patil.jpg"
+                          alt="Sneha Patil profile photo"
+                          className="w-20 h-20 rounded-full object-cover mb-4"
+                          onError={e => { (e.target as HTMLImageElement).src = '/placeholder.svg'; (e.target as HTMLImageElement).alt = 'Sneha Patil profile photo'}}
+                        />
+                      <p className="text-lg italic text-gray-700 text-center">
+                        "I got placed at Infosys through my college's first ever virtual drive. The process was transparent and stress-free!"
+                      </p>
+                      <h4 className="mt-4 font-medium">Sneha Patil</h4>
+                      <p className="text-sm text-gray-500">B.Tech, VIT Vellore, 2024</p>
+                    </CardContent>
+                  </Card>
+                </CarouselItem>
+                <CarouselItem>
+                  <Card>
+                    <CardContent className="flex flex-col items-center p-6">
+                      <img
+                          src="/review-avatars/aishwarya-menon.jpg"
+                          alt="Aishwarya Menon profile photo"
+                          className="w-20 h-20 rounded-full object-cover mb-4"
+                          onError={e => { (e.target as HTMLImageElement).src = '/placeholder.svg'; (e.target as HTMLImageElement).alt = 'Aishwarya Menon profile photo'}}
+                        />
+                      <p className="text-lg italic text-gray-700 text-center">
+                        "Secured a core job at Tata Steel. The interview resources and notifications were a game changer!"
+                      </p>
+                      <h4 className="mt-4 font-medium">Aishwarya Menon</h4>
+                      <p className="text-sm text-gray-500">B.Tech, IIT Bombay, 2023</p>
                       <h4 className="mt-4 font-medium">Professor Emily Chen</h4>
                       <p className="text-sm text-gray-500">Placement Coordinator, Engineering College</p>
                     </CardContent>
