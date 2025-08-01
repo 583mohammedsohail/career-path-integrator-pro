@@ -131,6 +131,7 @@ export interface Company {
   tech_stack?: string[];
   company_type?: string;
   key_products?: string[];
+  postedJobs?: Job[];
 }
 
 export interface Student {
@@ -150,6 +151,7 @@ export interface Student {
   course?: string;
   year?: number;
   cgpa?: number;
+  resumeUrl?: string;
 }
 
 export interface Application {
