@@ -1156,5 +1156,5 @@ export const mockPlacementStats: PlacementStats = {
   totalApplications: 33000,
   totalJobs: 10000,
   totalPlacements: 280,
-  averageSalary: '70'
+  averageSalary: '7'
 };

@@ -3,8 +3,6 @@ import React, { useEffect } from 'react';
 import { createBrowserRouter, RouterProvider, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ApplicationProvider } from './contexts/ApplicationContext';
-import { RealtimeApplicationProvider } from './contexts/RealtimeApplicationContext';
-import { UserSessionProvider } from './contexts/UserSessionContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import Index from '@/pages/Index';
 import Login from '@/pages/Login';
@@ -26,7 +24,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import DevelopersTeam from './pages/DevelopersTeam';
 import CampusRecruitment from './pages/CampusRecruitment';
 import CampusDriveDetails from './pages/CampusDriveDetails';
-
+import CollegeSearch from './pages/CollegeSearch';
 import { Toaster } from 'sonner';
 
 // Protected route wrapper
@@ -195,6 +193,10 @@ const router = createBrowserRouter([
     element: <CampusDriveDetails />,
   },
   {
+    path: "/college-search",
+    element: <CollegeSearch />,
+  },
+  {
     path: "*",
     element: <NotFound />,
   },
@@ -205,14 +207,10 @@ const App: React.FC = () => {
     <React.StrictMode>
       <ErrorBoundary>
         <AuthProvider>
-          <UserSessionProvider>
-            <RealtimeApplicationProvider>
-              <ApplicationProvider>
-                <Toaster position="top-center" richColors closeButton />
-                <RouterProvider router={router} />
-              </ApplicationProvider>
-            </RealtimeApplicationProvider>
-          </UserSessionProvider>
+          <ApplicationProvider>
+            <Toaster position="top-center" richColors closeButton />
+            <RouterProvider router={router} />
+          </ApplicationProvider>
         </AuthProvider>
       </ErrorBoundary>
     </React.StrictMode>
