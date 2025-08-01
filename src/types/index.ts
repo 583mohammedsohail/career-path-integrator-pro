@@ -54,6 +54,10 @@ export interface PlacementStats {
   placementPercentage: number;
   averagePackage: string;
   highestPackage: string;
+  totalApplications: number;
+  totalJobs: number;
+  totalPlacements: number;
+  averageSalary: string;
 }
 
 export interface Notification {

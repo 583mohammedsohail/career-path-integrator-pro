@@ -1152,5 +1152,9 @@ export const mockPlacementStats: PlacementStats = {
   placedStudents: 280,
   placementPercentage: 70,
   averagePackage: '8.5 LPA',
-  highestPackage: '48 LPA'
+  highestPackage: '48 LPA',
+  totalApplications: 33000,
+  totalJobs: 10000,
+  totalPlacements: 280,
+  averageSalary: '7'
 };
