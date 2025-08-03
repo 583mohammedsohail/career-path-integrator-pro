@@ -33,7 +33,7 @@ const DevelopersTeam = () => {
     {
       name: "Sana Parveen",
       role: "Associate Support Role in Development",
-      image: "https://res.cloudinary.com/dbt3gghme/image/upload/v1747058047/Sana_Parveen_mgl1sr.jpg",
+      image: "https://res.cloudinary.com/dbt3gghme/image/upload/v1754212651/IMG_4212_ewe7xd.jpg",
       bio: "Developer focused on frontend components and user experience of the application.",
       linkedin: "https://www.linkedin.com/in/sana-parveen-93b29b294/",
       github: "https://github.com/sana-parveen",
