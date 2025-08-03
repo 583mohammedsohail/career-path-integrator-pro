@@ -35,6 +35,12 @@ const DeveloperCredits: React.FC = () => {
           rel="noopener noreferrer"
           className="flex items-center gap-1 text-primary hover:underline text-lg"
         >
+          <img 
+            src="https://res.cloudinary.com/dbt3gghme/image/upload/v1754212651/IMG_4212_ewe7xd.jpg"
+            alt="Sana Parveen"
+            className="w-8 h-8 rounded-full object-cover mr-2 border"
+            style={{ display: 'inline-block' }}
+          />
           Sana Parveen
           <ExternalLink size={16} />
         </a>
